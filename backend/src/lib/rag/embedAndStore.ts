@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { DocumentChunk } from "../../models/DocumentChunk.model";
+import type { DocumentChunk as StructuredChunk } from "../../services/schweserChunker";
 
 // Dynamically import transformers if OpenAI isn't used
 let pipeline: any;
@@ -10,7 +11,7 @@ export const embedAndStore = async ({
   courseId,
   filename,
 }: {
-  chunks: string[];
+  chunks: string[] | StructuredChunk[];
   documentId: string;
   courseId: string;
   filename: string;
@@ -28,19 +29,39 @@ export const embedAndStore = async ({
     }
   }
 
-  for (let index = 0; index < chunks.length; index += 100) {
-    const batch = chunks.slice(index, index + 100);
+  const normalizedChunks = chunks.map((chunk, index) =>
+    typeof chunk === "string"
+      ? {
+          content: chunk,
+          metadata: {
+            courseId,
+            filename,
+            page: 1,
+            reading: "unknown",
+            module: "unknown",
+            los: "unknown",
+            topic: "General Content",
+            section: "content" as const,
+            chunkIndex: index,
+          },
+        }
+      : chunk,
+  );
+
+  for (let index = 0; index < normalizedChunks.length; index += 100) {
+    const batch = normalizedChunks.slice(index, index + 100);
+    const texts = batch.map((chunk) => chunk.content);
     
     let embeddings: number[][] = [];
     
     if (openai) {
       const embeddingResponse = await openai.embeddings.create({
         model: "text-embedding-3-small",
-        input: batch,
+        input: texts,
       });
       embeddings = embeddingResponse.data.map((d: any) => d.embedding);
     } else {
-      for (const text of batch) {
+      for (const text of texts) {
         const output = await pipeline(text, { pooling: "mean", normalize: true });
         let embeddingArray = Array.from(output.data) as number[];
         // Zero-pad to 1536 dimensions so it matches the existing MongoDB Atlas Vector Search index requirements
@@ -53,12 +74,14 @@ export const embedAndStore = async ({
       }
     }
 
-    const docs = batch.map((text, batchIndex) => ({
+    const docs = batch.map((chunk, batchIndex) => ({
+      _id: chunk._id,
       documentId,
       courseId,
-      filename,
-      chunkIndex: index + batchIndex,
-      text,
+      filename: chunk.metadata.filename || filename,
+      chunkIndex: chunk.metadata.chunkIndex ?? index + batchIndex,
+      content: chunk.content,
+      metadata: chunk.metadata,
       embedding: embeddings[batchIndex] ?? [],
     }));
 

@@ -60,24 +60,34 @@ To enable the AI Study Assistant, you **must** configure a Vector Search Index i
 3. Click **Create Search Index** and choose the **JSON Editor**.
 4. Select your database (`capitallab`) and collection (`documentchunks`).
 5. Set the index name exactly to: `document_chunks_vector_index`
-6. Paste the following JSON mapping:
+6. Paste the following Atlas Search index definition:
 
 ```json
 {
-  "fields": [
-    {
-      "type": "vector",
-      "path": "embedding",
-      "numDimensions": 1536,
-      "similarity": "cosine"
-    },
-    {
-      "type": "filter",
-      "path": "courseId"
+  "mappings": {
+    "dynamic": false,
+    "fields": {
+      "embedding": {
+        "type": "knnVector",
+        "dimensions": 1536,
+        "similarity": "cosine"
+      },
+      "courseId": {
+        "type": "objectId"
+      },
+      "content": {
+        "type": "string"
+      }
     }
-  ]
+  }
 }
 ```
+
+Why these fields are required:
+
+- `embedding`: semantic vector similarity search
+- `courseId`: course-level filtering
+- `content`: keyword/full-text matching for hybrid retrieval
 
 Once the index finishes building, the RAG pipeline is ready! Upload documents via the Admin Dashboard, click "Process for AI", and then test the Chatbot in the Student Dashboard.
 

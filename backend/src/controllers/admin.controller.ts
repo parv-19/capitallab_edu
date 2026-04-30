@@ -14,6 +14,11 @@ import { asyncHandler } from "../utils/asyncHandler";
 import { chunkText } from "../lib/rag/chunkText";
 import { embedAndStore } from "../lib/rag/embedAndStore";
 import { parseDocument } from "../lib/rag/parseDocument";
+import {
+  createParentChildPairs,
+  type DocumentChunk as SchweserDocumentChunk,
+} from "../services/schweserChunker";
+import { processUploadedPDF } from "../services/documentProcessor";
 
 // ─── Stats ─────────────────────────────────────────────────────────
 export const getStats = asyncHandler(async (_req: Request, res: Response) => {
@@ -163,16 +168,25 @@ export const processDocument = asyncHandler(async (req: Request, res: Response) 
     // Delete old chunks first (re-processing scenario)
     await DocumentChunk.deleteMany({ documentId: document._id });
 
-    const { text } = await parseDocument(
-      document.filePath,
-      document.fileType as "pdf" | "docx" | "txt",
-    );
+    let chunks: string[] | SchweserDocumentChunk[] = [];
 
-    if (!text || text.trim().length === 0) {
-      throw new Error("Document appears to be empty or unreadable.");
+    if (document.fileType === "pdf") {
+      const processedChunks = await processUploadedPDF(document.filePath, String(document.courseId));
+      const { parents, children } = createParentChildPairs(processedChunks);
+      chunks = [...parents, ...children];
+    } else {
+      const { text } = await parseDocument(
+        document.filePath,
+        document.fileType as "pdf" | "docx" | "txt",
+      );
+
+      if (!text || text.trim().length === 0) {
+        throw new Error("Document appears to be empty or unreadable.");
+      }
+
+      chunks = await chunkText(text);
     }
 
-    const chunks = await chunkText(text);
     const result = await embedAndStore({
       chunks,
       documentId: String(document._id),
