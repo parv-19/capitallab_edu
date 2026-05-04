@@ -9,6 +9,7 @@ import adminRoutes from "./routes/admin.routes";
 import authRoutes from "./routes/auth.routes";
 import courseRoutes from "./routes/course.routes";
 import leadRoutes from "./routes/lead.routes";
+import ragRoutes from "./routes/rag.routes";
 import studentRoutes from "./routes/student.routes";
 import testimonialRoutes from "./routes/testimonial.routes";
 
@@ -35,6 +36,7 @@ app.use("/api/leads", leadRoutes);
 app.use("/api/testimonials", testimonialRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/student", studentRoutes);
+app.use("/api/rag", ragRoutes);
 
 app.use((error: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error(error);
@@ -45,7 +47,11 @@ app.use((error: Error, _req: express.Request, res: express.Response, _next: expr
 
 const bootstrap = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI ?? "mongodb://127.0.0.1:27017/capitallab");
+    await mongoose.connect(
+      process.env.MONGODB_URI ??
+        process.env.MONGO_URI ??
+        "mongodb://127.0.0.1:27017/capitallab",
+    );
     app.listen(port, () => {
       console.log(`Backend listening on http://localhost:${port}`);
     });

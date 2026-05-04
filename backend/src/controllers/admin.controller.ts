@@ -1,5 +1,3 @@
-import path from "path";
-import fs from "fs";
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
 
@@ -11,14 +9,12 @@ import { Lesson } from "../models/Lesson.model";
 import { Testimonial } from "../models/Testimonial.model";
 import { User } from "../models/User.model";
 import { asyncHandler } from "../utils/asyncHandler";
-import { chunkText } from "../lib/rag/chunkText";
-import { embedAndStore } from "../lib/rag/embedAndStore";
-import { parseDocument } from "../lib/rag/parseDocument";
 import {
-  createParentChildPairs,
-  type DocumentChunk as SchweserDocumentChunk,
-} from "../services/schweserChunker";
-import { processUploadedPDF } from "../services/documentProcessor";
+  createCourseDocumentRecord,
+  deleteCourseDocumentById,
+  processCourseDocumentById,
+  serializeDocument,
+} from "../services/ragIngestion.service";
 
 // ─── Stats ─────────────────────────────────────────────────────────
 export const getStats = asyncHandler(async (_req: Request, res: Response) => {
@@ -110,102 +106,45 @@ export const reorderLessons = asyncHandler(async (req: Request, res: Response) =
 
 // ─── Documents ──────────────────────────────────────────────────────
 export const getCourseDocuments = asyncHandler(async (req: Request, res: Response) => {
-  const documents = await CourseDocument.find({ courseId: req.params.courseId }).sort({ uploadedAt: -1 });
-  res.json({ documents });
+  const courseId = String(req.params.courseId ?? "");
+  const documents = await CourseDocument.find({ courseId }).sort({ uploadedAt: -1 });
+  res.json({ documents: documents.map(serializeDocument) });
 });
 
 export const uploadCourseDocument = asyncHandler(async (req: Request, res: Response) => {
   const file = req.file;
   if (!file) return res.status(400).json({ message: "No file uploaded" });
 
-  // Derive a clean file type
-  const extMap: Record<string, string> = {
-    ".pdf": "pdf",
-    ".docx": "docx",
-    ".txt": "txt",
-  };
-  const ext = path.extname(file.originalname).toLowerCase();
-  const fileType = extMap[ext] ?? ext.replace(".", "");
-
-  const document = await CourseDocument.create({
-    courseId: req.params.courseId,
-    name: file.originalname,
-    filePath: file.path,
-    fileType,
-    size: file.size,
-    processedForAI: false,
-    chunksCount: 0,
+  const document = await createCourseDocumentRecord({
+    courseId: String(req.params.courseId ?? ""),
+    file,
+    title: String(req.body.title ?? ""),
+    subject: String(req.body.subject ?? ""),
+    chapterName: String(req.body.chapterName ?? ""),
+    uploadedBy: (req as any).user?.userId,
   });
 
-  res.status(201).json({ document });
+  res.status(201).json({ document: serializeDocument(document) });
 });
 
 export const deleteDocument = asyncHandler(async (req: Request, res: Response) => {
-  const document = await CourseDocument.findOneAndDelete({
-    _id: req.params.id,
-    courseId: req.params.courseId,
-  });
+  const document = await deleteCourseDocumentById(
+    String(req.params.id ?? ""),
+    String(req.params.courseId ?? ""),
+  );
   if (!document) return res.status(404).json({ message: "Document not found" });
-
-  // Delete chunks and physical file
-  await DocumentChunk.deleteMany({ documentId: document._id });
-  try { fs.unlinkSync(document.filePath); } catch { /* file may not exist on disk */ }
 
   res.json({ message: "Document deleted" });
 });
 
 // ─── RAG: Process Document ──────────────────────────────────────────
 export const processDocument = asyncHandler(async (req: Request, res: Response) => {
-  const document = await CourseDocument.findById(req.params.id);
-  if (!document) return res.status(404).json({ message: "Document not found" });
-
-  // Reset status to processing
-  document.processedForAI = false;
-  document.processingError = undefined;
-  await document.save();
-
-  try {
-    // Delete old chunks first (re-processing scenario)
-    await DocumentChunk.deleteMany({ documentId: document._id });
-
-    let chunks: string[] | SchweserDocumentChunk[] = [];
-
-    if (document.fileType === "pdf") {
-      const processedChunks = await processUploadedPDF(document.filePath, String(document.courseId));
-      const { parents, children } = createParentChildPairs(processedChunks);
-      chunks = [...parents, ...children];
-    } else {
-      const { text } = await parseDocument(
-        document.filePath,
-        document.fileType as "pdf" | "docx" | "txt",
-      );
-
-      if (!text || text.trim().length === 0) {
-        throw new Error("Document appears to be empty or unreadable.");
-      }
-
-      chunks = await chunkText(text);
-    }
-
-    const result = await embedAndStore({
-      chunks,
-      documentId: String(document._id),
-      courseId: String(document.courseId),
-      filename: document.name,
-    });
-
-    document.processedForAI = true;
-    document.chunksCount = result.chunksStored;
-    document.processedAt = new Date();
-    await document.save();
-
-    res.json({ success: true, chunksStored: result.chunksStored });
-  } catch (error) {
-    document.processingError =
-      error instanceof Error ? error.message : "Unknown processing error";
-    await document.save();
-    throw error;
-  }
+  const result = await processCourseDocumentById(String(req.params.id ?? ""));
+  res.json({
+    success: true,
+    document: serializeDocument(result.document),
+    chunksStored: result.chunksStored,
+  });
 });
 
 // ─── Leads ──────────────────────────────────────────────────────────

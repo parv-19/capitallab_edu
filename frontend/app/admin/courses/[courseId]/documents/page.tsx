@@ -1,141 +1,316 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Upload, Trash2, Zap, FileText, AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  AlertCircle,
+  CheckCircle,
+  FileText,
+  Loader2,
+  RefreshCcw,
+  Trash2,
+  Upload,
+  Zap,
+} from "lucide-react";
 import { toast } from "sonner";
+
 import api from "@/lib/axios";
 
-interface DocFile { _id: string; name: string; fileType: string; size: number; processedForAI: boolean; chunksCount: number; processingError?: string; uploadedAt: string; }
+interface DocumentRow {
+  _id: string;
+  title: string;
+  originalFileName: string;
+  fileType: string;
+  size: number;
+  subject?: string;
+  chapterName?: string;
+  status: "uploaded" | "processing" | "indexed" | "failed";
+  totalChunks: number;
+  processedForAI: boolean;
+  chunksCount: number;
+  processingError?: string;
+  uploadedAt: string;
+}
 
-const formatSize = (bytes: number) => bytes < 1024 * 1024 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+const formatSize = (bytes: number) =>
+  bytes < 1024 * 1024
+    ? `${(bytes / 1024).toFixed(1)} KB`
+    : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+
+const emptyUploadForm = {
+  title: "",
+  subject: "Mathematics",
+  chapterName: "",
+};
 
 export default function DocumentsPage({ params }: { params: { courseId: string } }) {
-  const [docs, setDocs] = useState<DocFile[]>([]);
+  const [documents, setDocuments] = useState<DocumentRow[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [processing, setProcessing] = useState<Set<string>>(new Set());
+  const [busyIds, setBusyIds] = useState<Set<string>>(new Set());
   const [draggingOver, setDraggingOver] = useState(false);
+  const [form, setForm] = useState(emptyUploadForm);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const loadDocuments = async () => {
+    try {
+      const response = await api.get(`/admin/courses/${params.courseId}/documents`);
+      setDocuments(response.data?.documents ?? []);
+    } catch {
+      toast.error("Failed to load documents.");
+    }
+  };
+
   useEffect(() => {
-    api.get(`/admin/courses/${params.courseId}/documents`).then(r => { if (r.data?.documents) setDocs(r.data.documents); }).catch(() => {});
+    void loadDocuments();
   }, [params.courseId]);
 
   const uploadFile = async (file: File) => {
-    if (file.size > 20 * 1024 * 1024) { toast.error("File must be smaller than 20 MB."); return; }
-    const allowed = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"];
-    if (!allowed.includes(file.type)) { toast.error("Only PDF, DOCX, and TXT files are allowed."); return; }
+    if (!form.subject.trim()) {
+      toast.error("Subject is required.");
+      return;
+    }
+
     setUploading(true);
-    const fd = new FormData();
-    fd.append("file", file);
+    const payload = new FormData();
+    payload.append("file", file);
+    payload.append("title", form.title.trim());
+    payload.append("subject", form.subject.trim());
+    payload.append("chapterName", form.chapterName.trim());
+
     try {
-      const r = await api.post(`/admin/courses/${params.courseId}/documents/upload`, fd, { headers: { "Content-Type": "multipart/form-data" } });
-      setDocs(prev => [r.data.document, ...prev]);
+      const response = await api.post(
+        `/admin/courses/${params.courseId}/documents/upload`,
+        payload,
+        { headers: { "Content-Type": "multipart/form-data" } },
+      );
+      setDocuments((current) => [response.data.document, ...current]);
       toast.success(`${file.name} uploaded.`);
-    } catch { toast.error("Upload failed."); }
-    setUploading(false);
+      setForm((current) => ({ ...current, title: "", chapterName: "" }));
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Upload failed.");
+    } finally {
+      setUploading(false);
+    }
   };
 
-  const handleDrop = async (e: React.DragEvent) => {
-    e.preventDefault(); setDraggingOver(false);
-    const file = e.dataTransfer.files[0];
-    if (file) await uploadFile(file);
-  };
-
-  const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) { await uploadFile(file); e.target.value = ""; }
-  };
-
-  const processDoc = async (id: string) => {
-    setProcessing(prev => new Set([...prev, id]));
+  const processDocument = async (id: string, mode: "process" | "reindex") => {
+    setBusyIds((current) => new Set(current).add(id));
     try {
-      const r = await api.post(`/admin/documents/${id}/process`);
-      setDocs(prev => prev.map(d => d._id === id ? { ...d, processedForAI: true, chunksCount: r.data.chunksStored } : d));
-      toast.success(`Processed — ${r.data.chunksStored} chunks stored.`);
-    } catch { toast.error("Processing failed."); setDocs(prev => prev.map(d => d._id === id ? { ...d, processingError: "Processing failed." } : d)); }
-    setProcessing(prev => { const n = new Set(prev); n.delete(id); return n; });
+      const endpoint =
+        mode === "reindex"
+          ? `/admin/documents/${id}/reindex`
+          : `/admin/documents/${id}/process`;
+      const response = await api.post(endpoint);
+      const updatedDocument = response.data?.document as DocumentRow | undefined;
+
+      setDocuments((current) =>
+        current.map((document) =>
+          document._id === id
+            ? updatedDocument ?? document
+            : document,
+        ),
+      );
+
+      toast.success(
+        `${mode === "reindex" ? "Re-indexed" : "Processed"} with ${response.data?.chunksStored ?? 0} chunks.`,
+      );
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Processing failed.");
+    } finally {
+      setBusyIds((current) => {
+        const next = new Set(current);
+        next.delete(id);
+        return next;
+      });
+    }
   };
 
-  const deleteDoc = async (id: string) => {
+  const deleteDocument = async (id: string) => {
     try {
       await api.delete(`/admin/courses/${params.courseId}/documents/${id}`);
-      setDocs(prev => prev.filter(d => d._id !== id));
+      setDocuments((current) => current.filter((document) => document._id !== id));
       toast.success("Document deleted.");
-    } catch { toast.error("Delete failed."); }
+    } catch {
+      toast.error("Delete failed.");
+    }
   };
 
-  const getAIStatus = (doc: DocFile) => {
-    if (processing.has(doc._id)) return { label: "Processing...", color: "bg-blue-100 text-blue-700", icon: Loader2 };
-    if (doc.processingError) return { label: "Error", color: "bg-red-100 text-red-700", icon: AlertCircle };
-    if (doc.processedForAI) return { label: `Ready (${doc.chunksCount} chunks)`, color: "bg-green-100 text-green-700", icon: CheckCircle };
-    return { label: "Pending", color: "bg-gray-100 text-gray-500", icon: FileText };
+  const getStatusChip = (document: DocumentRow) => {
+    if (busyIds.has(document._id) || document.status === "processing") {
+      return { label: "processing", className: "bg-blue-100 text-blue-700", icon: Loader2 };
+    }
+    if (document.status === "failed") {
+      return { label: "failed", className: "bg-red-100 text-red-700", icon: AlertCircle };
+    }
+    if (document.status === "indexed") {
+      return { label: "indexed", className: "bg-green-100 text-green-700", icon: CheckCircle };
+    }
+    return { label: "uploaded", className: "bg-gray-100 text-gray-600", icon: FileText };
+  };
+
+  const onDrop = async (event: React.DragEvent) => {
+    event.preventDefault();
+    setDraggingOver(false);
+    const file = event.dataTransfer.files[0];
+    if (file) {
+      await uploadFile(file);
+    }
   };
 
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-bold text-brand-navy">Document Manager</h1>
+      <div>
+        <h1 className="text-2xl font-bold text-brand-navy">Course Documents</h1>
+        <p className="mt-1 text-sm text-gray-500">
+          Upload syllabus materials, assign a subject and chapter, then process them for the tutor.
+        </p>
+      </div>
 
-      {/* Upload Zone */}
+      <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-soft">
+        <div className="grid gap-4 md:grid-cols-3">
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Title
+            </label>
+            <input
+              value={form.title}
+              onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
+              placeholder="Chapter 6 - Triangles"
+              className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/20"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Subject
+            </label>
+            <input
+              value={form.subject}
+              onChange={(event) => setForm((current) => ({ ...current, subject: event.target.value }))}
+              placeholder="Mathematics"
+              className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/20"
+            />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Chapter Name
+            </label>
+            <input
+              value={form.chapterName}
+              onChange={(event) => setForm((current) => ({ ...current, chapterName: event.target.value }))}
+              placeholder="Triangles"
+              className="w-full rounded-xl border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/20"
+            />
+          </div>
+        </div>
+      </div>
+
       <div
-        onDragOver={e => { e.preventDefault(); setDraggingOver(true); }}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setDraggingOver(true);
+        }}
         onDragLeave={() => setDraggingOver(false)}
-        onDrop={handleDrop}
-        className={`border-2 border-dashed rounded-2xl p-10 text-center transition-colors cursor-pointer ${draggingOver ? "border-brand-gold bg-brand-gold/5" : "border-gray-200 bg-white hover:border-brand-navy/30"}`}
+        onDrop={onDrop}
         onClick={() => fileRef.current?.click()}
+        className={`cursor-pointer rounded-2xl border-2 border-dashed p-10 text-center transition-colors ${
+          draggingOver
+            ? "border-brand-gold bg-brand-gold/5"
+            : "border-gray-200 bg-white hover:border-brand-navy/30"
+        }`}
       >
-        <input ref={fileRef} type="file" accept=".pdf,.docx,.txt" className="hidden" onChange={handleFileInput} />
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".pdf,.docx,.txt"
+          className="hidden"
+          onChange={async (event) => {
+            const file = event.target.files?.[0];
+            if (file) {
+              await uploadFile(file);
+              event.target.value = "";
+            }
+          }}
+        />
         {uploading ? (
           <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-10 h-10 text-brand-navy animate-spin" />
-            <p className="text-brand-navy font-medium">Uploading...</p>
+            <Loader2 className="h-10 w-10 animate-spin text-brand-navy" />
+            <p className="font-medium text-brand-navy">Uploading document...</p>
           </div>
         ) : (
           <>
-            <Upload className={`w-10 h-10 mx-auto mb-3 ${draggingOver ? "text-brand-gold" : "text-gray-300"}`} />
-            <p className="font-semibold text-gray-600 mb-1">Drop file here or click to upload</p>
-            <p className="text-sm text-gray-400">PDF, DOCX, or TXT — max 20 MB</p>
+            <Upload
+              className={`mx-auto mb-3 h-10 w-10 ${draggingOver ? "text-brand-gold" : "text-gray-300"}`}
+            />
+            <p className="mb-1 font-semibold text-gray-700">Drop file here or click to upload</p>
+            <p className="text-sm text-gray-400">PDF, DOCX, or TXT. Metadata above will be saved with the file.</p>
           </>
         )}
       </div>
 
-      {/* Documents List */}
-      {docs.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wide grid grid-cols-12 gap-4">
-            <span className="col-span-4">Filename</span>
-            <span className="col-span-2">Type</span>
-            <span className="col-span-2">Size</span>
-            <span className="col-span-2">AI Status</span>
+      {documents.length > 0 ? (
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-soft">
+          <div className="grid grid-cols-12 gap-4 border-b border-gray-100 px-6 py-4 text-xs font-semibold uppercase tracking-wide text-gray-400">
+            <span className="col-span-3">Document</span>
+            <span className="col-span-2">Subject</span>
+            <span className="col-span-2">Chapter</span>
+            <span className="col-span-2">Status</span>
+            <span className="col-span-1">Chunks</span>
             <span className="col-span-2">Actions</span>
           </div>
           <div className="divide-y divide-gray-50">
-            {docs.map(doc => {
-              const ai = getAIStatus(doc);
-              const AiIcon = ai.icon;
-              const isProcessing = processing.has(doc._id);
+            {documents.map((document) => {
+              const status = getStatusChip(document);
+              const StatusIcon = status.icon;
+
               return (
-                <div key={doc._id} className="px-6 py-4 grid grid-cols-12 gap-4 items-center hover:bg-gray-50 transition-colors">
-                  <div className="col-span-4 flex items-center gap-2 min-w-0">
-                    <FileText className="w-4 h-4 text-brand-navy shrink-0" />
-                    <span className="text-sm font-medium text-brand-navy truncate">{doc.name}</span>
+                <div
+                  key={document._id}
+                  className="grid grid-cols-12 items-center gap-4 px-6 py-4 transition-colors hover:bg-gray-50"
+                >
+                  <div className="col-span-3 min-w-0">
+                    <div className="truncate text-sm font-semibold text-brand-navy">{document.title}</div>
+                    <div className="truncate text-xs text-gray-400">{document.originalFileName}</div>
                   </div>
-                  <div className="col-span-2 text-xs text-gray-400 uppercase">{doc.fileType}</div>
-                  <div className="col-span-2 text-sm text-gray-500">{formatSize(doc.size)}</div>
+                  <div className="col-span-2 text-sm text-gray-600">{document.subject || "-"}</div>
+                  <div className="col-span-2 text-sm text-gray-600">{document.chapterName || "-"}</div>
                   <div className="col-span-2">
-                    <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold w-fit ${ai.color}`}>
-                      <AiIcon className={`w-3.5 h-3.5 ${isProcessing ? "animate-spin" : ""}`} />
-                      {ai.label}
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${status.className}`}
+                    >
+                      <StatusIcon className={`h-3.5 w-3.5 ${busyIds.has(document._id) ? "animate-spin" : ""}`} />
+                      {status.label}
                     </span>
+                    {document.processingError ? (
+                      <p className="mt-1 text-xs text-red-500">{document.processingError}</p>
+                    ) : null}
+                  </div>
+                  <div className="col-span-1 text-sm text-gray-500">
+                    {document.totalChunks || document.chunksCount || 0}
                   </div>
                   <div className="col-span-2 flex items-center gap-2">
-                    {!doc.processedForAI && (
-                      <button onClick={() => processDoc(doc._id)} disabled={isProcessing}
-                        className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-brand-gold/10 text-brand-gold text-xs font-medium hover:bg-brand-gold/20 transition-colors disabled:opacity-60">
-                        <Zap className="w-3.5 h-3.5" /> Process
+                    {document.status === "indexed" ? (
+                      <button
+                        onClick={() => void processDocument(document._id, "reindex")}
+                        disabled={busyIds.has(document._id)}
+                        className="inline-flex items-center gap-1 rounded-lg bg-brand-gold/10 px-3 py-1.5 text-xs font-medium text-brand-gold transition-colors hover:bg-brand-gold/20 disabled:opacity-60"
+                      >
+                        <RefreshCcw className="h-3.5 w-3.5" />
+                        Re-index
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => void processDocument(document._id, "process")}
+                        disabled={busyIds.has(document._id)}
+                        className="inline-flex items-center gap-1 rounded-lg bg-brand-gold/10 px-3 py-1.5 text-xs font-medium text-brand-gold transition-colors hover:bg-brand-gold/20 disabled:opacity-60"
+                      >
+                        <Zap className="h-3.5 w-3.5" />
+                        Process
                       </button>
                     )}
-                    <button onClick={() => deleteDoc(doc._id)} className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors">
-                      <Trash2 className="w-4 h-4" />
+                    <button
+                      onClick={() => void deleteDocument(document._id)}
+                      className="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </div>
@@ -143,11 +318,13 @@ export default function DocumentsPage({ params }: { params: { courseId: string }
             })}
           </div>
         </div>
+      ) : (
+        <div className="py-8 text-center text-sm text-gray-400">No documents uploaded yet.</div>
       )}
 
-      {docs.length === 0 && !uploading && (
-        <div className="text-center py-8 text-gray-400 text-sm">No documents uploaded yet.</div>
-      )}
+      <div className="rounded-2xl border border-brand-gold/20 bg-brand-gold/5 px-5 py-4 text-sm text-gray-600">
+        Only indexed documents are used by the syllabus tutor. If a file changes, re-index it so the chatbot uses the latest content.
+      </div>
     </div>
   );
 }

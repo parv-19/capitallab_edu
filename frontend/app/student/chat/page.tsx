@@ -1,184 +1,336 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Send, Plus, MessageSquare, Loader2, BookOpen } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { BookOpen, Loader2, Search, Send } from "lucide-react";
 import { toast } from "sonner";
-import { useAuth } from "@/contexts/AuthContext";
+
 import api from "@/lib/axios";
 
-interface Message { role: "user" | "assistant"; content: string; timestamp: string; }
-interface Session { _id: string; title: string; createdAt: string; messages: Message[]; }
+interface RagOption {
+  courseId: string;
+  courseName: string;
+  subjects: string[];
+  chapters: string[];
+}
 
-const STARTER_CHIPS = ["Summarise Chapter 1", "Explain this topic simply", "Give me 5 practice questions", "Key formulas to remember"];
+interface RagSource {
+  documentTitle: string;
+  fileName: string;
+  chapterName?: string;
+  pageNumber?: number;
+}
 
-const mockSessions: Session[] = [
-  { _id: "s1", title: "CA Foundation doubts", createdAt: "2026-04-28T10:00:00Z", messages: [] },
+interface RagResponse {
+  answered: boolean;
+  answer: string;
+  sources: RagSource[];
+  confidenceScore: number;
+}
+
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+  answered?: boolean;
+  confidenceScore?: number;
+  sources?: RagSource[];
+}
+
+const fallbackMessage = "I could not find this answer in the uploaded syllabus chapters.";
+
+const starterQuestions = [
+  "What is risk governance?",
+  "Define investment risk",
+  "What is the role of a code of ethics in a profession?",
 ];
 
 export default function ChatPage() {
-  const { user } = useAuth();
-  const [sessions, setSessions] = useState<Session[]>(mockSessions);
-  const [activeSession, setActiveSession] = useState<Session | null>(null);
+  const [options, setOptions] = useState<RagOption[]>([]);
+  const [selectedCourseId, setSelectedCourseId] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState("");
+  const [selectedChapter, setSelectedChapter] = useState("");
+  const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [streaming, setStreaming] = useState(false);
-  const [courseContext, setCourseContext] = useState("");
-  const [enrolledCourses, setEnrolledCourses] = useState<{_id: string, title: string}[]>([]);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [loadingOptions, setLoadingOptions] = useState(true);
 
   useEffect(() => {
-    api.get("/student/chat/sessions").then(r => { if (r.data?.sessions?.length) setSessions(r.data.sessions); }).catch(() => {});
-    api.get("/student/dashboard").then(r => { if (r.data?.enrolledCourses) setEnrolledCourses(r.data.enrolledCourses); }).catch(() => {});
+    const loadOptions = async () => {
+      try {
+        const response = await api.get("/rag/options");
+        const nextOptions = response.data?.options ?? [];
+        setOptions(nextOptions);
+        setSelectedCourseId("");
+        setSelectedSubject("");
+        setSelectedChapter("");
+      } catch {
+        toast.error("Failed to load available course material.");
+      } finally {
+        setLoadingOptions(false);
+      }
+    };
+
+    void loadOptions();
   }, []);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, streaming]);
+  const activeCourse = useMemo(
+    () => options.find((option) => option.courseId === selectedCourseId) ?? null,
+    [options, selectedCourseId],
+  );
 
-  const createSession = async () => {
+  useEffect(() => {
+    if (!selectedCourseId) {
+      setSelectedSubject("");
+      setSelectedChapter("");
+      return;
+    }
+
+    if (!activeCourse) {
+      setSelectedSubject("");
+      setSelectedChapter("");
+      return;
+    }
+
+    if (activeCourse.subjects.length > 0 && !activeCourse.subjects.includes(selectedSubject)) {
+      setSelectedSubject(activeCourse.subjects[0]);
+    }
+
+    if (selectedChapter && !activeCourse.chapters.includes(selectedChapter)) {
+      setSelectedChapter("");
+    }
+  }, [activeCourse, selectedChapter, selectedSubject]);
+
+  const sendQuestion = async (input?: string) => {
+    const nextQuestion = (input ?? question).trim();
+    if (!nextQuestion || submitting) {
+      return;
+    }
+
+    setQuestion("");
+    setSubmitting(true);
+    setMessages((current) => [...current, { role: "user", content: nextQuestion }]);
+
     try {
-      const r = await api.post("/student/chat/sessions");
-      const s = r.data.session ?? { _id: Date.now().toString(), title: "New Chat", createdAt: new Date().toISOString(), messages: [] };
-      setSessions(prev => [s, ...prev]);
-      setActiveSession(s);
-      setMessages([]);
-    } catch { toast.error("Failed to create session."); }
-  };
-
-  const loadSession = (s: Session) => {
-    setActiveSession(s);
-    setMessages(s.messages ?? []);
-  };
-
-  const sendMessage = async (text?: string) => {
-    const msg = text ?? input.trim();
-    if (!msg || streaming) return;
-    setInput("");
-
-    const userMsg: Message = { role: "user", content: msg, timestamp: new Date().toISOString() };
-    setMessages(prev => [...prev, userMsg]);
-    setStreaming(true);
-
-    // Add empty assistant message for streaming
-    const assistantMsg: Message = { role: "assistant", content: "", timestamp: new Date().toISOString() };
-    setMessages(prev => [...prev, assistantMsg]);
-
-    const sessionId = activeSession?._id ?? "temp";
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/student/chat/${sessionId}/message`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("capitalLabAccessToken")}` },
-        body: JSON.stringify({ message: msg, courseIds: courseContext ? [courseContext] : enrolledCourses.map(c => c._id) }),
+      const response = await api.post<RagResponse>("/rag/chat", {
+        question: nextQuestion,
+        courseId: selectedCourseId || undefined,
+        subject: selectedSubject || undefined,
+        chapterName: selectedChapter || undefined,
       });
 
-      if (!response.ok) throw new Error("Stream failed");
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let full = "";
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          full += decoder.decode(value, { stream: true });
-          setMessages(prev => prev.map((m, i) => i === prev.length - 1 ? { ...m, content: full } : m));
-        }
-      }
-    } catch {
-      setMessages(prev => prev.map((m, i) => i === prev.length - 1 ? { ...m, content: "I encountered an error. Please try again." } : m));
+      const result = response.data;
+      setMessages((current) => [
+        ...current,
+        {
+          role: "assistant",
+          content: result.answer,
+          answered: result.answered,
+          confidenceScore: result.confidenceScore,
+          sources: result.sources,
+        },
+      ]);
+    } catch (error: any) {
+      const message = error?.response?.data?.message || "Failed to get an answer.";
+      setMessages((current) => [
+        ...current,
+        { role: "assistant", content: message, answered: false, sources: [] },
+      ]);
+      toast.error(message);
+    } finally {
+      setSubmitting(false);
     }
-    setStreaming(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); void sendMessage(); }
   };
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] gap-5">
-      {/* Session Sidebar */}
-      <div className="w-60 shrink-0 flex flex-col gap-3">
-        <button onClick={createSession} className="flex items-center justify-center gap-2 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors">
-          <Plus className="w-4 h-4" /> New Chat
-        </button>
-        <div className="flex-1 bg-white rounded-2xl shadow-soft border border-gray-100 overflow-y-auto">
-          {sessions.length === 0 ? (
-            <div className="p-4 text-center text-gray-400 text-xs">No sessions yet. Start a new chat!</div>
-          ) : sessions.map(s => (
-            <button key={s._id} onClick={() => loadSession(s)}
-              className={`w-full text-left px-4 py-3 border-b border-gray-50 last:border-0 hover:bg-indigo-50 transition-colors ${activeSession?._id === s._id ? "bg-indigo-50 border-l-2 border-l-indigo-500" : ""}`}>
-              <div className="text-xs font-medium text-brand-navy truncate">{s.title}</div>
-              <div className="text-xs text-gray-400 mt-0.5">{new Date(s.createdAt).toLocaleDateString("en-IN")}</div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Chat Area */}
-      <div className="flex-1 flex flex-col bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm font-semibold text-brand-navy">
-            <MessageSquare className="w-4 h-4 text-indigo-500" /> AI Study Assistant
+    <div className="space-y-5">
+      <div className="rounded-3xl border border-gray-100 bg-white p-6 shadow-soft">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-semibold text-brand-navy">
+              <BookOpen className="h-4 w-4 text-indigo-500" />
+              Ask From Uploaded Class Material
+            </div>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
+              Answers come only from admin-uploaded class PDFs and documents. If the uploaded material does not support the answer, the assistant will clearly say so.
+            </p>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400">Asking about:</span>
-            <select value={courseContext} onChange={e => setCourseContext(e.target.value)}
-              className="px-3 py-1.5 rounded-lg border border-gray-200 text-xs bg-white focus:outline-none">
-              <option value="">All my courses</option>
-              {enrolledCourses.map(c => <option key={c._id} value={c._id}>{c.title}</option>)}
+          <div className="grid gap-3 md:grid-cols-3">
+            <select
+              value={selectedCourseId}
+              onChange={(event) => {
+                setSelectedCourseId(event.target.value);
+                setSelectedChapter("");
+              }}
+              className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/20"
+            >
+              <option value="">
+                {loadingOptions ? "Loading courses..." : "All enrolled courses"}
+              </option>
+              {options.map((option) => (
+                <option key={option.courseId} value={option.courseId}>
+                  {option.courseName}
+                </option>
+              ))}
+            </select>
+            <select
+              value={selectedSubject}
+              onChange={(event) => setSelectedSubject(event.target.value)}
+              className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/20"
+            >
+              <option value="">All subjects</option>
+              {(activeCourse?.subjects ?? []).map((subject) => (
+                <option key={subject} value={subject}>
+                  {subject}
+                </option>
+              ))}
+            </select>
+            <select
+              value={selectedChapter}
+              onChange={(event) => setSelectedChapter(event.target.value)}
+              className="rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/20"
+            >
+              <option value="">All chapters</option>
+              {(activeCourse?.chapters ?? []).map((chapter) => (
+                <option key={chapter} value={chapter}>
+                  {chapter}
+                </option>
+              ))}
             </select>
           </div>
         </div>
+      </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
-          {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full text-center gap-5">
-              <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center">
-                <BookOpen className="w-8 h-8 text-indigo-500" />
+      <div className="rounded-3xl border border-gray-100 bg-white shadow-soft">
+        <div className="border-b border-gray-100 px-6 py-4">
+          <div className="flex items-center gap-2 text-sm font-semibold text-brand-navy">
+            <Search className="h-4 w-4 text-indigo-500" />
+            Ask From Uploaded Material
+          </div>
+        </div>
+
+        <div className="min-h-[420px] space-y-4 px-6 py-5">
+          {messages.length === 0 ? (
+            <div className="flex min-h-[320px] flex-col items-center justify-center gap-5 text-center">
+              <div className="rounded-2xl bg-indigo-50 p-4">
+                <BookOpen className="h-8 w-8 text-indigo-500" />
               </div>
               <div>
-                <h3 className="font-semibold text-brand-navy mb-1">Start a study session</h3>
-                <p className="text-gray-400 text-sm max-w-xs">Ask anything about your course materials. I&apos;ll answer from your uploaded documents.</p>
+                <h2 className="text-lg font-semibold text-brand-navy">Start with a class-material question</h2>
+                <p className="mt-2 max-w-md text-sm leading-6 text-gray-500">
+                  Ask from your uploaded class material, or narrow the course, subject, and chapter above before asking.
+                </p>
               </div>
-              <div className="grid grid-cols-2 gap-2 max-w-sm">
-                {STARTER_CHIPS.map(chip => (
-                  <button key={chip} onClick={() => { if (!activeSession) { void createSession().then(() => sendMessage(chip)); } else { void sendMessage(chip); } }}
-                    className="px-3 py-2 bg-indigo-50 text-indigo-700 rounded-xl text-xs font-medium hover:bg-indigo-100 transition-colors text-left">
-                    {chip}
+              <div className="grid gap-2 md:grid-cols-3">
+                {starterQuestions.map((starter) => (
+                  <button
+                    key={starter}
+                    onClick={() => void sendQuestion(starter)}
+                    className="rounded-2xl bg-indigo-50 px-4 py-3 text-left text-sm font-medium text-indigo-700 transition-colors hover:bg-indigo-100"
+                  >
+                    {starter}
                   </button>
                 ))}
               </div>
             </div>
+          ) : (
+            messages.map((message, index) => (
+              <div
+                key={`${message.role}-${index}`}
+                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`max-w-[80%] rounded-3xl px-5 py-4 text-sm leading-7 ${
+                    message.role === "user"
+                      ? "rounded-tr-sm bg-indigo-600 text-white"
+                      : "rounded-tl-sm border border-gray-100 bg-gray-50 text-gray-800"
+                  }`}
+                >
+                  <div className="whitespace-pre-wrap">{message.content}</div>
+
+                  {message.role === "assistant" ? (
+                    <div className="mt-4 space-y-3 border-t border-gray-200 pt-3">
+                      <div className="flex flex-wrap items-center gap-3 text-xs">
+                        <span
+                          className={`rounded-full px-2.5 py-1 font-semibold ${
+                            message.answered
+                              ? "bg-green-100 text-green-700"
+                              : "bg-amber-100 text-amber-700"
+                          }`}
+                        >
+                          {message.answered ? "Answered from syllabus" : "Fallback returned"}
+                        </span>
+                        {typeof message.confidenceScore === "number" ? (
+                          <span className="text-gray-500">
+                            Confidence: {message.confidenceScore.toFixed(2)}
+                          </span>
+                        ) : null}
+                      </div>
+
+                      {message.sources && message.sources.length > 0 ? (
+                        <div className="space-y-2">
+                          <div className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                            Sources
+                          </div>
+                          {message.sources.map((source, sourceIndex) => (
+                            <div
+                              key={`${source.fileName}-${sourceIndex}`}
+                              className="rounded-2xl border border-gray-200 bg-white px-4 py-3 text-xs text-gray-600"
+                            >
+                              <div className="font-semibold text-brand-navy">{source.documentTitle}</div>
+                              <div>
+                                File: {source.fileName}
+                                {source.chapterName ? ` | Chapter: ${source.chapterName}` : ""}
+                                {typeof source.pageNumber === "number"
+                                  ? ` | Page: ${source.pageNumber}`
+                                  : ""}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : message.content === fallbackMessage ? (
+                        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-700">
+                          No supporting syllabus chunks were strong enough for this question.
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            ))
           )}
 
-          {messages.map((msg, i) => (
-            <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-              {msg.role === "assistant" && (
-                <div className="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold mr-2 mt-1 shrink-0">CL</div>
-              )}
-              <div className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${msg.role === "user" ? "bg-indigo-600 text-white rounded-tr-sm" : "bg-gray-100 text-gray-800 rounded-tl-sm"}`}>
-                {msg.content || (msg.role === "assistant" && <Loader2 className="w-4 h-4 animate-spin text-gray-400" />)}
+          {submitting ? (
+            <div className="flex justify-start">
+              <div className="rounded-3xl rounded-tl-sm border border-gray-100 bg-gray-50 px-5 py-4 text-sm text-gray-500">
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Searching uploaded chapters...
+                </div>
               </div>
             </div>
-          ))}
-          <div ref={bottomRef} />
+          ) : null}
         </div>
 
-        {/* Disclaimer */}
-        <div className="px-6 py-2 border-t border-gray-100 text-xs text-gray-400 text-center">
-          Answers are based on your course materials. For complex doubts, ask your instructor.
-        </div>
-
-        {/* Input */}
-        <div className="px-6 pb-5">
-          <div className="flex gap-2 items-end">
-            <textarea ref={textareaRef} value={input} onChange={e => setInput(e.target.value)} onKeyDown={handleKeyDown}
-              placeholder="Ask a question about your course..." rows={2}
-              className="flex-1 px-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none" />
-            <button onClick={() => sendMessage()} disabled={!input.trim() || streaming}
-              className="p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 shrink-0">
-              {streaming ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+        <div className="border-t border-gray-100 px-6 py-4">
+          <div className="flex gap-3">
+            <textarea
+              value={question}
+              onChange={(event) => setQuestion(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  void sendQuestion();
+                }
+              }}
+              rows={3}
+              placeholder="Ask a question from your uploaded class material..."
+              className="flex-1 rounded-2xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/20"
+            />
+            <button
+              onClick={() => void sendQuestion()}
+              disabled={!question.trim() || submitting || loadingOptions}
+              className="self-end rounded-2xl bg-indigo-600 p-3 text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
             </button>
           </div>
         </div>

@@ -53,6 +53,7 @@ router.get("/courses/:courseId/documents", getCourseDocuments);
 router.post("/courses/:courseId/documents/upload", uploadDocument, uploadCourseDocument);
 router.delete("/courses/:courseId/documents/:id", deleteDocument);
 router.post("/documents/:id/process", processDocument);
+router.post("/documents/:id/reindex", processDocument);
 
 // ─── Leads ──────────────────────────────────────────────────────────
 router.get("/leads", getLeads);
