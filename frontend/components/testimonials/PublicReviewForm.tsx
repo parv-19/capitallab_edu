@@ -8,8 +8,8 @@ import { companyInfo } from "@/lib/site-content";
 
 const courseOptions = [
   { value: "", label: "General / Not specific" },
-  { value: "course-cfa", label: "CFA" },
-  { value: "course-cma-us", label: "CMA US" },
+  { value: "cfa", label: "CFA" },
+  { value: "cma-us", label: "CMA US" },
 ];
 
 interface PublicReviewFormProps {

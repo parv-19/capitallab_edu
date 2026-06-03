@@ -1,9 +1,26 @@
 import { Router } from "express";
 
+import { Course } from "../models/Course.model";
 import { Testimonial } from "../models/Testimonial.model";
 import { asyncHandler } from "../utils/asyncHandler";
 
 const router = Router();
+
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+async function resolveCourseId(rawCourseId?: string) {
+  const candidate = rawCourseId?.trim();
+  if (!candidate) return null;
+
+  if (UUID_PATTERN.test(candidate)) {
+    return candidate;
+  }
+
+  const normalizedSlug = candidate.replace(/^course-/, "");
+  const course = await Course.findOne({ slug: normalizedSlug });
+  return course?.id ?? null;
+}
 
 router.post(
   "/public",
@@ -39,10 +56,12 @@ router.post(
       return res.status(400).json({ message: "Rating must be between 1 and 5." });
     }
 
+    const resolvedCourseId = await resolveCourseId(courseId);
+
     const testimonial = await Testimonial.create({
       studentName: studentName.trim(),
       designation: designation.trim(),
-      courseId: courseId?.trim() || null,
+      courseId: resolvedCourseId,
       rating: normalizedRating,
       review: review.trim(),
       status: "pending",
