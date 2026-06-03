@@ -5,6 +5,54 @@ import { asyncHandler } from "../utils/asyncHandler";
 
 const router = Router();
 
+router.post(
+  "/public",
+  asyncHandler(async (req, res) => {
+    const {
+      studentName,
+      designation,
+      rating,
+      review,
+      courseId,
+    } = req.body as {
+      studentName?: string;
+      designation?: string;
+      rating?: number;
+      review?: string;
+      courseId?: string;
+    };
+
+    if (!studentName?.trim()) {
+      return res.status(400).json({ message: "Student name is required." });
+    }
+
+    if (!designation?.trim()) {
+      return res.status(400).json({ message: "Designation is required." });
+    }
+
+    if (!review?.trim()) {
+      return res.status(400).json({ message: "Review is required." });
+    }
+
+    const normalizedRating = Number(rating);
+    if (!Number.isInteger(normalizedRating) || normalizedRating < 1 || normalizedRating > 5) {
+      return res.status(400).json({ message: "Rating must be between 1 and 5." });
+    }
+
+    const testimonial = await Testimonial.create({
+      studentName: studentName.trim(),
+      designation: designation.trim(),
+      courseId: courseId?.trim() || null,
+      rating: normalizedRating,
+      review: review.trim(),
+      status: "pending",
+      featured: false,
+    });
+
+    res.status(201).json({ testimonial });
+  }),
+);
+
 router.get(
   "/",
   asyncHandler(async (req, res) => {

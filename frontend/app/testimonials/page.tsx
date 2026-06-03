@@ -3,6 +3,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { buildMetadata } from "@/lib/seo";
 import { getApprovedTestimonials } from "@/lib/server/testimonials";
+import PublicReviewForm from "@/components/testimonials/PublicReviewForm";
 
 export const metadata = buildMetadata({
   title: "Student Testimonials",
@@ -66,6 +67,8 @@ export default async function TestimonialsPage() {
           </div>
         </div>
       </section>
+
+      <PublicReviewForm />
 
       <Footer />
     </>

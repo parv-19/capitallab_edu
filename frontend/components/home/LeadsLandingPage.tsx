@@ -46,13 +46,52 @@ export default function LeadsLandingPage({ styles, markup, testimonials = [] }: 
       cleanupFns.push(() => link.removeEventListener("click", handleHomeRedirect));
     });
 
+    const menuButton = root.querySelector<HTMLButtonElement>("#leadsMenuBtn");
+    const mobileNav = root.querySelector<HTMLElement>("#leadsMobileNav");
+    const mobileNavClose = root.querySelector<HTMLButtonElement>("#leadsMobileNavClose");
+    const mobileNavLinks = Array.from(root.querySelectorAll<HTMLAnchorElement>("#leadsMobileNav a"));
+
+    const setScrollLock = (locked: boolean) => {
+      document.documentElement.style.overflowY = locked ? "hidden" : "auto";
+      document.body.style.overflowY = locked ? "hidden" : "auto";
+    };
+
+    const closeMobileNav = () => {
+      mobileNav?.classList.remove("open");
+      mobileNav?.setAttribute("aria-hidden", "true");
+      menuButton?.setAttribute("aria-expanded", "false");
+      setScrollLock(false);
+    };
+
+    if (menuButton && mobileNav) {
+      const handleMenuClick = () => {
+        const willOpen = !mobileNav.classList.contains("open");
+        mobileNav.classList.toggle("open", willOpen);
+        mobileNav.setAttribute("aria-hidden", willOpen ? "false" : "true");
+        menuButton.setAttribute("aria-expanded", willOpen ? "true" : "false");
+        setScrollLock(willOpen);
+      };
+
+      menuButton.addEventListener("click", handleMenuClick);
+      cleanupFns.push(() => menuButton.removeEventListener("click", handleMenuClick));
+    }
+
+    if (mobileNavClose) {
+      mobileNavClose.addEventListener("click", closeMobileNav);
+      cleanupFns.push(() => mobileNavClose.removeEventListener("click", closeMobileNav));
+    }
+
+    mobileNavLinks.forEach((link) => {
+      link.addEventListener("click", closeMobileNav);
+      cleanupFns.push(() => link.removeEventListener("click", closeMobileNav));
+    });
+
     const testimonialGrid = root.querySelector<HTMLElement>(".testi-grid");
     if (testimonialGrid && testimonials.length > 0) {
       testimonialGrid.innerHTML = testimonials
-        .slice(0, 3)
         .map(
           (testimonial) => `<div class="testi-card">
-            <div class="testi-stars">${"★".repeat(Math.max(0, Math.min(5, testimonial.rating || 5)))}</div>
+            <div class="testi-stars">${"&#9733;".repeat(Math.max(0, Math.min(5, testimonial.rating || 5)))}</div>
             <p class="testi-text">"${testimonial.review}"</p>
             <div class="testi-author">
               <div class="testi-avatar">${initials(testimonial.studentName)}</div>
@@ -64,6 +103,146 @@ export default function LeadsLandingPage({ styles, markup, testimonials = [] }: 
           </div>`,
         )
         .join("");
+
+      let viewport = testimonialGrid.parentElement;
+      if (!viewport?.classList.contains("testi-carousel-viewport")) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "testi-carousel-viewport";
+        testimonialGrid.parentNode?.insertBefore(wrapper, testimonialGrid);
+        wrapper.appendChild(testimonialGrid);
+        viewport = wrapper;
+      }
+
+      testimonialGrid.classList.add("testi-carousel-track");
+
+      let controls = root.querySelector<HTMLElement>(".testi-controls");
+      if (!controls) {
+        controls = document.createElement("div");
+        controls.className = "testi-controls";
+        controls.innerHTML = `
+          <div class="testi-controls__buttons">
+            <button class="testi-btn" type="button" data-testi-prev aria-label="Previous review">&#8249;</button>
+            <button class="testi-btn" type="button" data-testi-next aria-label="Next review">&#8250;</button>
+          </div>
+          <div class="testi-dots" data-testi-dots aria-label="Review navigation"></div>
+        `;
+        viewport?.insertAdjacentElement("afterend", controls);
+      }
+
+      const prevButton = controls.querySelector<HTMLButtonElement>("[data-testi-prev]");
+      const nextButton = controls.querySelector<HTMLButtonElement>("[data-testi-next]");
+      const dotsWrap = controls.querySelector<HTMLElement>("[data-testi-dots]");
+      let currentIndex = 0;
+      let touchStartX = 0;
+      let autoplay: ReturnType<typeof setInterval> | null = null;
+
+      const getCardsPerView = () => {
+        if (window.innerWidth <= 900) return 1;
+        if (window.innerWidth <= 1180) return 2;
+        return 3;
+      };
+
+      const getMaxIndex = () => Math.max(0, testimonials.length - getCardsPerView());
+
+      const renderDots = () => {
+        if (!dotsWrap) return;
+        const total = getMaxIndex() + 1;
+        dotsWrap.innerHTML = "";
+        for (let index = 0; index < total; index += 1) {
+          const dot = document.createElement("button");
+          dot.type = "button";
+          dot.className = `testi-dot${index === currentIndex ? " active" : ""}`;
+          dot.dataset.index = String(index);
+          dotsWrap.appendChild(dot);
+        }
+      };
+
+      const updateCarousel = () => {
+        const card = testimonialGrid.querySelector<HTMLElement>(".testi-card");
+        if (!card) return;
+        currentIndex = Math.max(0, Math.min(currentIndex, getMaxIndex()));
+        const gap = window.innerWidth <= 900 ? 12 : 20;
+        const slideWidth = card.getBoundingClientRect().width + gap;
+        testimonialGrid.style.transform = `translateX(${-currentIndex * slideWidth}px)`;
+        if (prevButton) prevButton.disabled = getMaxIndex() === 0;
+        if (nextButton) nextButton.disabled = getMaxIndex() === 0;
+        renderDots();
+      };
+
+      const stopAutoplay = () => {
+        if (autoplay) {
+          clearInterval(autoplay);
+          autoplay = null;
+        }
+      };
+
+      const startAutoplay = () => {
+        stopAutoplay();
+        if (getMaxIndex() === 0) return;
+        autoplay = setInterval(() => {
+          currentIndex = currentIndex >= getMaxIndex() ? 0 : currentIndex + 1;
+          updateCarousel();
+        }, 4500);
+      };
+
+      const handlePrev = () => {
+        currentIndex = currentIndex <= 0 ? getMaxIndex() : currentIndex - 1;
+        updateCarousel();
+        startAutoplay();
+      };
+
+      const handleNext = () => {
+        currentIndex = currentIndex >= getMaxIndex() ? 0 : currentIndex + 1;
+        updateCarousel();
+        startAutoplay();
+      };
+
+      const handleDotsClick = (event: Event) => {
+        const dot = (event.target as HTMLElement).closest<HTMLElement>(".testi-dot");
+        if (!dot) return;
+        currentIndex = Number(dot.dataset.index || "0");
+        updateCarousel();
+        startAutoplay();
+      };
+
+      const handleTouchStart = (event: TouchEvent) => {
+        touchStartX = event.changedTouches[0]?.clientX ?? 0;
+        stopAutoplay();
+      };
+
+      const handleTouchEnd = (event: TouchEvent) => {
+        const delta = (event.changedTouches[0]?.clientX ?? 0) - touchStartX;
+        if (Math.abs(delta) >= 40) {
+          if (delta < 0) handleNext();
+          else handlePrev();
+        } else {
+          startAutoplay();
+        }
+      };
+
+      prevButton?.addEventListener("click", handlePrev);
+      nextButton?.addEventListener("click", handleNext);
+      dotsWrap?.addEventListener("click", handleDotsClick);
+      window.addEventListener("resize", updateCarousel);
+      viewport?.addEventListener("mouseenter", stopAutoplay);
+      viewport?.addEventListener("mouseleave", startAutoplay);
+      viewport?.addEventListener("touchstart", handleTouchStart, { passive: true });
+      viewport?.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+      updateCarousel();
+      startAutoplay();
+
+      cleanupFns.push(() => {
+        prevButton?.removeEventListener("click", handlePrev);
+        nextButton?.removeEventListener("click", handleNext);
+        dotsWrap?.removeEventListener("click", handleDotsClick);
+        window.removeEventListener("resize", updateCarousel);
+        viewport?.removeEventListener("mouseenter", stopAutoplay);
+        viewport?.removeEventListener("mouseleave", startAutoplay);
+        viewport?.removeEventListener("touchstart", handleTouchStart);
+        viewport?.removeEventListener("touchend", handleTouchEnd);
+        stopAutoplay();
+      });
     }
 
     const submitBtn = root.querySelector<HTMLButtonElement>("[data-leads-submit]");
@@ -145,7 +324,10 @@ export default function LeadsLandingPage({ styles, markup, testimonials = [] }: 
       cleanupFns.push(() => submitBtn.removeEventListener("click", submitClickHandler));
     }
 
-    return () => cleanupFns.forEach((fn) => fn());
+    return () => {
+      cleanupFns.forEach((fn) => fn());
+      setScrollLock(false);
+    };
   }, [testimonials]);
 
   return (
