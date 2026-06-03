@@ -6,34 +6,43 @@ import api from "@/lib/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Testimonial } from "@/types";
 
-const fallbackTestimonials = [
+type MarketingTestimonial = Pick<Testimonial, "studentName" | "review" | "designation"> & {
+  rating?: number;
+};
+
+const fallbackTestimonials: MarketingTestimonial[] = [
   {
     studentName: "Moksh",
     designation: "Capital Lab Education Student",
+    rating: 5,
     review:
       "Your teaching method was great. The lecture were fun and also very helpful in remembering the concept. There was no boredom in your lecture and there was a personal connection which all the students studying with you felt in the class. You were more than a teacher. A friend and a mentor.",
   },
   {
     studentName: "Dhriti Pandey",
     designation: "Capital Lab Education Student",
+    rating: 5,
     review:
       "I wanted to express how much I've enjoyed being in your class. Your teaching has been truly great Sir. I always felt comfortable asking questions and you explained everything so clearly, specially with those helpful examples and Excel sheets which really boosted my understanding of the topics. I appreciate how you made the classroom such a welcoming space for learning and discussion. Thank you for creating such a positive learning environment.",
   },
   {
     studentName: "Tamanna",
     designation: "US CMA Student",
+    rating: 5,
     review:
       "I am extremely satisfied with the depth of knowledge and exceptional teaching style. The way of explaining concepts is very clear and accurate, which makes even difficult topics easy to understand. I really appreciate the efforts put into each session and guidance in my US CMA preparation.",
   },
   {
     studentName: "Poorva",
     designation: "Capital Lab Education Student",
+    rating: 5,
     review:
       "Your teaching method was really really great and helpful. Helped a lot in clearing certain concepts, was able to understand it all very easily. You created a very positive and comfortable learning environment. Truly a great experience!",
   },
   {
     studentName: "Mudrika",
     designation: "Capital Lab Education Student",
+    rating: 5,
     review:
       "It was great learning with you. You made stuff easy to understand for everybody. Your fun and friendly energy made finance feel easy. A really wonderful mentor and tutor!",
   },
@@ -64,7 +73,7 @@ function validatePhone(phone: string) {
 interface ApprovedLandingPageProps {
   styles: string;
   markup: string;
-  testimonials?: Testimonial[];
+  testimonials?: MarketingTestimonial[];
 }
 
 export default function ApprovedLandingPage({ styles, markup, testimonials = fallbackTestimonials }: ApprovedLandingPageProps) {
