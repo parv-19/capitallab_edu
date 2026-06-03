@@ -16,6 +16,8 @@ html {
   scroll-behavior: smooth;
   overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
 }
 
 body {
@@ -26,6 +28,30 @@ body {
   background: #f5f7fb;
   color: #0f172a;
   font-family: "Poppins", sans-serif;
+  scrollbar-gutter: stable;
+  scrollbar-width: auto;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 12px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track {
+  background: #e5e7eb;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 999px;
+  border: 2px solid #e5e7eb;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
 }
 
 @keyframes fadeInUp {
