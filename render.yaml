@@ -1,0 +1,80 @@
+services:
+  - type: web
+    name: capitallabedu-api
+    runtime: node
+    plan: free
+    branch: main
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      - key: FRONTEND_URL
+        value: https://www.capitallabedu.com
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: LLM_PROVIDER
+        value: openai
+      - key: OPENAI_LLM_MODEL
+        value: gpt-4o-mini
+      - key: EMBEDDING_PROVIDER
+        value: openai
+      - key: OPENAI_EMBEDDING_MODEL
+        value: text-embedding-3-small
+      - key: LARGE_DOCUMENT_EMBEDDING_PROVIDER
+        value: openai
+      - key: EMBEDDING_DIMENSION
+        value: "1536"
+      - key: EMBEDDING_BATCH_SIZE
+        value: "12"
+      - key: EMBEDDING_TIMEOUT_MS
+        value: "30000"
+      - key: PYTHON_INGESTION_ENABLED
+        value: "true"
+      - key: PYTHON_EXECUTABLE
+        value: python
+      - key: PYTHON_INGESTION_TIMEOUT_MS
+        value: "300000"
+      - key: VECTOR_INDEX_NAME
+        value: document_chunks_vector_index
+      - key: RAG_TOP_K
+        value: "8"
+      - key: RAG_RERANK_TOP_K
+        value: "4"
+      - key: RAG_MIN_SCORE
+        value: "0.72"
+      - key: DEBUG_RAG
+        value: "false"
+      - key: GOOGLE_APPS_SCRIPT_LEADS_URL
+        sync: false
+      - key: MAX_UPLOAD_SIZE_MB
+        value: "50"
+      - key: UPLOAD_DIR
+        value: uploads
+      - key: NODEMAILER_USER
+        sync: false
+      - key: NODEMAILER_PASS
+        sync: false
+      - key: ADMIN_EMAIL
+        value: admin@capitallabedu.com
