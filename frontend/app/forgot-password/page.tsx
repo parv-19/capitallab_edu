@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { GraduationCap, Loader2, Mail, ArrowLeft } from "lucide-react";
+import { Loader2, Mail, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import * as authApi from "@/lib/auth";
 
@@ -28,10 +28,11 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
       <div className="w-full max-w-md">
         <div className="flex items-center gap-2 mb-8">
-          <div className="w-8 h-8 rounded-lg bg-brand-gold flex items-center justify-center">
-            <GraduationCap className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-bold text-brand-navy text-lg">Capital<span className="text-brand-gold">Lab</span></span>
+          <img
+            src="/api/site-assets/logo"
+            alt="Capital Lab Education"
+            className="h-12 w-auto rounded-sm bg-white p-1 shadow-sm"
+          />
         </div>
 
         {sent ? (

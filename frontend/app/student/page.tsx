@@ -1,134 +1,254 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpen, CheckCircle, Clock, Flame, ArrowRight } from "lucide-react";
+import { ArrowRight, BookOpen, CheckCircle, Clock, Flame } from "lucide-react";
+
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/lib/axios";
 
 const quotes = [
-  "Every expert was once a beginner.", "Discipline is the bridge between goals and achievement.",
-  "Small progress is still progress.", "Study now, shine later.", "Your future self will thank you.",
-  "One concept at a time.", "Believe in the process.", "Success is the sum of small efforts repeated daily.",
-  "Hard work beats talent when talent doesn't work hard.", "The CA journey is tough — so are you.",
+  "Every expert was once a beginner.",
+  "Discipline is the bridge between goals and achievement.",
+  "Small progress is still progress.",
+  "Study now, shine later.",
+  "Your future self will thank you.",
+  "One concept at a time.",
+  "Believe in the process.",
+  "Success is the sum of small efforts repeated daily.",
+  "Hard work beats talent when talent doesn't work hard.",
+  "The CA journey is tough - so are you.",
 ];
 
-const mockDashboard = {
-  enrolledCourses: [
-    { _id: "1", title: "CA Foundation", instructor: "CA Priya Mehta", progress: 45, totalLessons: 20, completedLessons: 9, slug: "ca-foundation" },
-    { _id: "2", title: "CA Intermediate", instructor: "CA Rajesh Patel", progress: 15, totalLessons: 35, completedLessons: 5, slug: "ca-intermediate" },
-  ],
-  stats: { lessonsCompleted: 14, coursesEnrolled: 2, streak: 7 },
-  recentActivity: [
-    { lessonTitle: "Journal Entries & Ledger", courseTitle: "CA Foundation", timestamp: "2026-04-28T18:00:00Z" },
-    { lessonTitle: "Ratio and Proportion", courseTitle: "CA Foundation", timestamp: "2026-04-27T17:30:00Z" },
-    { lessonTitle: "Company Accounts", courseTitle: "CA Intermediate", timestamp: "2026-04-26T16:00:00Z" },
-  ],
+const emptyDashboard = {
+  enrolledCourses: [] as Array<{
+    _id: string;
+    title: string;
+    instructor: string;
+    progress: number;
+    totalLessons: number;
+    completedLessons: number;
+    slug: string;
+  }>,
+  stats: { lessonsCompleted: 0, coursesEnrolled: 0, streak: 0 },
+  recentActivity: [] as Array<{
+    courseId: string;
+    lastAccessed?: string;
+    percentComplete?: number;
+  }>,
 };
 
 export default function StudentDashboard() {
   const { user } = useAuth();
-  const [data, setData] = useState(mockDashboard);
+  const [data, setData] = useState(emptyDashboard);
   const quote = quotes[new Date().getDay() % quotes.length];
 
   useEffect(() => {
-    api.get("/student/dashboard").then(r => { if (r.data) setData(r.data); }).catch(() => {});
+    api
+      .get("/student/dashboard")
+      .then((response) => {
+        if (response.data) {
+          setData({
+            ...emptyDashboard,
+            ...response.data,
+            enrolledCourses: response.data.enrolledCourses ?? [],
+            recentActivity: response.data.recentActivity ?? [],
+          });
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const firstName = user?.name?.split(" ")[0] ?? "Student";
 
+  const stats = [
+    {
+      icon: CheckCircle,
+      label: "Lessons Done",
+      value: data.stats.lessonsCompleted,
+      tint: "from-emerald-500/16 to-white",
+      iconWrap: "bg-emerald-500/12 text-emerald-700",
+    },
+    {
+      icon: BookOpen,
+      label: "Courses",
+      value: data.stats.coursesEnrolled,
+      tint: "from-indigo-500/16 to-white",
+      iconWrap: "bg-indigo-500/12 text-indigo-700",
+    },
+    {
+      icon: Flame,
+      label: "Day Streak",
+      value: data.stats.streak,
+      tint: "from-orange-500/14 to-white",
+      iconWrap: "bg-orange-500/12 text-orange-700",
+    },
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-indigo-900 to-indigo-700 rounded-2xl p-7 text-white relative overflow-hidden">
-        <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-10">
-          <BookOpen className="w-32 h-32" />
+    <div className="space-y-7">
+      <section className="relative overflow-hidden rounded-[24px] border border-indigo-300/15 bg-[radial-gradient(circle_at_top_left,_rgba(129,140,248,0.42),_transparent_22%),linear-gradient(135deg,_#1d2a63_0%,_#302d7b_52%,_#4338ca_100%)] px-5 py-6 text-white shadow-[0_24px_70px_rgba(49,46,129,0.28)] sm:rounded-[30px] sm:px-7 sm:py-8">
+        <div className="absolute right-4 top-1/2 hidden -translate-y-1/2 opacity-10 sm:right-8 lg:block">
+          <BookOpen className="h-36 w-36" />
         </div>
-        <div className="relative">
-          <div className="text-indigo-300 text-sm mb-1">{new Date().toLocaleDateString("en-IN", { weekday: "long", month: "long", day: "numeric" })}</div>
-          <h1 className="text-2xl font-extrabold mb-2">Welcome back, {firstName}! 👋</h1>
-          <p className="text-indigo-200 text-sm italic">&ldquo;{quote}&rdquo;</p>
-        </div>
-      </div>
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/12 to-transparent" />
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        {[
-          { icon: CheckCircle, label: "Lessons Done", value: data.stats.lessonsCompleted, color: "text-green-600", bg: "bg-green-50" },
-          { icon: BookOpen, label: "Courses", value: data.stats.coursesEnrolled, color: "text-indigo-600", bg: "bg-indigo-50" },
-          { icon: Flame, label: "Day Streak", value: data.stats.streak, color: "text-orange-600", bg: "bg-orange-50" },
-        ].map(({ icon: Icon, label, value, color, bg }) => (
-          <div key={label} className="bg-white rounded-2xl p-5 shadow-soft border border-gray-100 text-center">
-            <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center mx-auto mb-2`}>
-              <Icon className={`w-5 h-5 ${color}`} />
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-indigo-200/80">
+              Student Dashboard
             </div>
-            <div className="text-2xl font-extrabold text-brand-navy">{value}</div>
-            <div className="text-gray-400 text-xs mt-0.5">{label}</div>
+            <h1 className="mt-3 text-3xl font-extrabold tracking-tight">
+              Welcome back, {firstName}
+            </h1>
+            <p className="mt-3 max-w-xl text-sm leading-7 text-indigo-100/90">
+              Keep your coursework visible, maintain momentum, and jump straight into the
+              study material that matters today.
+            </p>
+            <p className="mt-4 text-sm italic text-indigo-100/85">&ldquo;{quote}&rdquo;</p>
           </div>
-        ))}
-      </div>
 
-      {/* My Courses */}
-      <div>
-        <h2 className="text-lg font-bold text-brand-navy mb-4">My Courses</h2>
-        {data.enrolledCourses.length > 0 ? (
-          <div className="grid sm:grid-cols-2 gap-4">
-            {data.enrolledCourses.map(course => (
-              <div key={course._id} className="bg-white rounded-2xl p-6 shadow-soft border border-gray-100">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center">
-                    <BookOpen className="w-6 h-6 text-indigo-600" />
-                  </div>
-                  <span className="text-xs text-gray-400">{course.completedLessons}/{course.totalLessons} lessons</span>
-                </div>
-                <h3 className="font-bold text-brand-navy mb-1">{course.title}</h3>
-                <p className="text-gray-400 text-xs mb-4">{course.instructor}</p>
-                <div className="mb-4">
-                  <div className="flex justify-between text-xs text-gray-400 mb-1.5">
-                    <span>Progress</span><span className="text-indigo-600 font-semibold">{course.progress}%</span>
-                  </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-indigo-500 rounded-full transition-all duration-500" style={{ width: `${course.progress}%` }} />
-                  </div>
-                </div>
-                <Link href={`/student/courses/${course._id}`}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors">
-                  Continue Learning <ArrowRight className="w-4 h-4" />
-                </Link>
+          <div className="inline-flex items-center rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-medium text-indigo-50 backdrop-blur">
+            {new Date().toLocaleDateString("en-IN", {
+              weekday: "long",
+              month: "long",
+              day: "numeric",
+            })}
+          </div>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {stats.map(({ icon: Icon, label, value, tint, iconWrap }) => (
+          <article
+            key={label}
+            className={`overflow-hidden rounded-[26px] border border-slate-200/80 bg-gradient-to-br ${tint} p-5 shadow-[0_16px_40px_rgba(15,23,42,0.06)]`}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${iconWrap}`}>
+                <Icon className="h-5 w-5" />
               </div>
+              <span className="rounded-full border border-white/80 bg-white/75 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                Live
+              </span>
+            </div>
+
+            <div className="mt-6 text-4xl font-extrabold tracking-tight text-slate-950">
+              {value}
+            </div>
+            <div className="mt-2 text-sm font-medium text-slate-500">{label}</div>
+          </article>
+        ))}
+      </section>
+
+      <section>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-xl font-bold tracking-tight text-brand-navy">My Courses</h2>
+          <span className="text-sm text-slate-400">
+            {data.enrolledCourses.length} enrolled
+          </span>
+        </div>
+
+        {data.enrolledCourses.length > 0 ? (
+          <div className="grid gap-4 sm:grid-cols-2">
+            {data.enrolledCourses.map((course) => (
+              <article
+                key={course._id}
+                className="overflow-hidden rounded-[26px] border border-slate-200/80 bg-white p-6 shadow-[0_16px_40px_rgba(15,23,42,0.06)]"
+              >
+                <div className="mb-5 flex items-start justify-between">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500/10">
+                    <BookOpen className="h-6 w-6 text-indigo-600" />
+                  </div>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-medium text-slate-500">
+                    {course.completedLessons}/{course.totalLessons} lessons
+                  </span>
+                </div>
+
+                <h3 className="text-xl font-bold tracking-tight text-brand-navy">{course.title}</h3>
+                <p className="mt-1 text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
+                  {course.instructor}
+                </p>
+
+                <div className="mt-6">
+                  <div className="mb-1.5 flex justify-between text-xs text-slate-400">
+                    <span>Progress</span>
+                    <span className="font-semibold text-indigo-600">{course.progress}%</span>
+                  </div>
+                  <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-500"
+                      style={{ width: `${course.progress}%` }}
+                    />
+                  </div>
+                </div>
+
+                <Link
+                  href={`/student/courses/${course._id}`}
+                  className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700"
+                >
+                  Continue Learning <ArrowRight className="h-4 w-4" />
+                </Link>
+              </article>
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-2xl p-10 text-center shadow-soft border border-gray-100">
-            <BookOpen className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-            <h3 className="font-semibold text-gray-600 mb-2">No Courses Yet</h3>
-            <p className="text-gray-400 text-sm mb-5">You aren&apos;t enrolled in any courses. Browse our programmes and enquire.</p>
-            <Link href="/courses" className="px-6 py-2.5 bg-brand-navy text-white rounded-xl text-sm font-semibold hover:bg-brand-navyDark transition-colors">
-              Browse Courses →
+          <div className="rounded-[26px] border border-slate-200/80 bg-white p-10 text-center shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
+            <BookOpen className="mx-auto mb-4 h-12 w-12 text-slate-200" />
+            <h3 className="mb-2 font-semibold text-slate-700">No Courses Yet</h3>
+            <p className="mb-5 text-sm text-slate-400">
+              You are not enrolled in any courses yet. Browse the available programs and
+              start learning.
+            </p>
+            <Link
+              href="/courses"
+              className="inline-flex items-center gap-2 rounded-2xl bg-brand-navy px-6 py-3 text-sm font-semibold text-white transition hover:bg-brand-navyDark"
+            >
+              Browse Courses <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         )}
-      </div>
+      </section>
 
-      {/* Recent Activity */}
-      {data.recentActivity.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="font-bold text-brand-navy flex items-center gap-2"><Clock className="w-4 h-4 text-indigo-500" /> Recent Activity</h2>
+      {data.recentActivity.length > 0 ? (
+        <section className="overflow-hidden rounded-[26px] border border-slate-200/80 bg-white shadow-[0_16px_40px_rgba(15,23,42,0.06)]">
+          <div className="border-b border-slate-100 px-6 py-5">
+            <h2 className="flex items-center gap-2 text-base font-bold text-brand-navy">
+              <Clock className="h-4 w-4 text-indigo-500" />
+              Recent Activity
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Your latest learning progress across enrolled courses.
+            </p>
           </div>
-          <div className="divide-y divide-gray-50">
-            {data.recentActivity.map((a, i) => (
-              <div key={i} className="flex items-center justify-between px-6 py-3.5 hover:bg-gray-50 transition-colors">
+
+          <div className="divide-y divide-slate-100">
+            {data.recentActivity.map((activity, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-slate-50"
+              >
                 <div>
-                  <div className="text-sm font-medium text-brand-navy">{a.lessonTitle}</div>
-                  <div className="text-xs text-gray-400">{a.courseTitle}</div>
+                  <div className="text-sm font-semibold text-brand-navy">
+                    {data.enrolledCourses.find((course) => course._id === activity.courseId)?.title ??
+                      "Course Activity"}
+                  </div>
+                  <div className="text-xs text-slate-400">
+                    {typeof activity.percentComplete === "number"
+                      ? `${activity.percentComplete}% complete`
+                      : "Progress updated"}
+                  </div>
                 </div>
-                <div className="text-xs text-gray-400">{new Date(a.timestamp).toLocaleDateString("en-IN")}</div>
+                <div className="text-xs font-medium text-slate-400">
+                  {activity.lastAccessed
+                    ? new Date(activity.lastAccessed).toLocaleDateString("en-IN")
+                    : "Recently"}
+                </div>
               </div>
             ))}
           </div>
-        </div>
-      )}
+        </section>
+      ) : null}
     </div>
   );
 }

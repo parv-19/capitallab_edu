@@ -1,115 +1,288 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Users, MessageSquare, BookOpen, Star, TrendingUp, ArrowRight } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  ArrowRight,
+  BookOpen,
+  MessageSquare,
+  Star,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+
 import api from "@/lib/axios";
 
-const mockStats = { totalLeads: 48, newLeadsThisMonth: 12, totalStudents: 31, activeCourses: 2, pendingTestimonials: 5,
-  weeklyLeads: [{ week: "Apr 1", count: 8 }, { week: "Apr 8", count: 11 }, { week: "Apr 15", count: 7 }, { week: "Apr 22", count: 12 }] };
+const emptyStats = {
+  totalLeads: 0,
+  newLeadsThisMonth: 0,
+  totalStudents: 0,
+  activeCourses: 0,
+  pendingTestimonials: 0,
+  weeklyLeads: [] as Array<{ week: string; count: number }>,
+};
 
-const mockRecentLeads = [
-  { _id: "l1", name: "Arjun Mehta", phone: "9876543210", courseInterest: "CA Foundation", createdAt: "2026-04-28", status: "new" },
-  { _id: "l2", name: "Priya Shah", phone: "9876543211", courseInterest: "CA Intermediate", createdAt: "2026-04-27", status: "contacted" },
-  { _id: "l3", name: "Rohan Desai", phone: "9876543212", courseInterest: "Both Courses", createdAt: "2026-04-26", status: "visit_scheduled" },
-  { _id: "l4", name: "Nidhi Joshi", phone: "9876543213", courseInterest: "CA Foundation", createdAt: "2026-04-25", status: "enrolled" },
-];
+type LeadRow = {
+  _id: string;
+  name: string;
+  phone: string;
+  courseInterest: string;
+  createdAt: string;
+  status: string;
+};
 
 const STATUS_COLORS: Record<string, string> = {
-  new: "bg-blue-100 text-blue-700",
-  contacted: "bg-yellow-100 text-yellow-700",
-  visit_scheduled: "bg-purple-100 text-purple-700",
-  enrolled: "bg-green-100 text-green-700",
-  closed: "bg-gray-100 text-gray-500",
+  new: "bg-sky-100 text-sky-700",
+  contacted: "bg-amber-100 text-amber-700",
+  visit_scheduled: "bg-violet-100 text-violet-700",
+  enrolled: "bg-emerald-100 text-emerald-700",
+  closed: "bg-slate-100 text-slate-500",
 };
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState(mockStats);
-  const [recentLeads, setRecentLeads] = useState(mockRecentLeads);
+  const [stats, setStats] = useState(emptyStats);
+  const [recentLeads, setRecentLeads] = useState<LeadRow[]>([]);
 
   useEffect(() => {
-    api.get("/admin/stats").then(r => { if (r.data) setStats(r.data); }).catch(() => {});
-    api.get("/admin/leads?limit=10").then(r => { if (r.data?.leads?.length) setRecentLeads(r.data.leads); }).catch(() => {});
+    api
+      .get("/admin/stats")
+      .then((response) => {
+        if (response.data) {
+          setStats({
+            ...emptyStats,
+            ...response.data,
+            weeklyLeads: response.data.weeklyLeads ?? [],
+          });
+        }
+      })
+      .catch(() => {});
+
+    api
+      .get("/admin/leads?limit=10")
+      .then((response) => {
+        setRecentLeads(response.data?.leads ?? []);
+      })
+      .catch(() => {});
   }, []);
 
   const statCards = [
-    { label: "Leads This Month", value: stats.newLeadsThisMonth, icon: MessageSquare, color: "text-blue-600", bg: "bg-blue-50" },
-    { label: "Total Students", value: stats.totalStudents, icon: Users, color: "text-green-600", bg: "bg-green-50" },
-    { label: "Active Courses", value: stats.activeCourses, icon: BookOpen, color: "text-brand-navy", bg: "bg-brand-navy/5" },
-    { label: "Pending Reviews", value: stats.pendingTestimonials, icon: Star, color: "text-amber-600", bg: "bg-amber-50" },
+    {
+      label: "Leads This Month",
+      value: stats.newLeadsThisMonth,
+      icon: MessageSquare,
+      tint: "from-sky-500/16 via-white to-sky-50/70",
+      iconWrap: "bg-sky-500/12 text-sky-700",
+    },
+    {
+      label: "Total Students",
+      value: stats.totalStudents,
+      icon: Users,
+      tint: "from-emerald-500/16 via-white to-emerald-50/70",
+      iconWrap: "bg-emerald-500/12 text-emerald-700",
+    },
+    {
+      label: "Active Courses",
+      value: stats.activeCourses,
+      icon: BookOpen,
+      tint: "from-brand-navy/12 via-white to-indigo-50/70",
+      iconWrap: "bg-brand-navy/10 text-brand-navy",
+    },
+    {
+      label: "Pending Reviews",
+      value: stats.pendingTestimonials,
+      icon: Star,
+      tint: "from-amber-500/14 via-white to-amber-50/70",
+      iconWrap: "bg-amber-500/12 text-amber-700",
+    },
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-brand-navy">Dashboard Overview</h1>
-        <div className="text-sm text-gray-400">{new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</div>
-      </div>
-
-      {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="bg-white rounded-2xl p-5 shadow-soft border border-gray-100">
-            <div className={`w-10 h-10 rounded-xl ${bg} flex items-center justify-center mb-3`}>
-              <Icon className={`w-5 h-5 ${color}`} />
+    <div className="space-y-7">
+      <section className="overflow-hidden rounded-[34px] border border-slate-200/80 bg-[radial-gradient(circle_at_top_left,_rgba(30,58,138,0.16),_transparent_24%),radial-gradient(circle_at_bottom_right,_rgba(214,164,67,0.14),_transparent_22%),linear-gradient(135deg,_#ffffff_0%,_#f8fbff_55%,_#eef4ff_100%)] px-7 py-7 shadow-[0_24px_70px_rgba(15,23,42,0.08)]">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+          <div>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+              Admin Command Center
             </div>
-            <div className="text-3xl font-extrabold text-brand-navy">{value}</div>
-            <div className="text-gray-400 text-sm mt-1">{label}</div>
+            <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-950">
+              Dashboard Overview
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-500">
+              Track lead momentum, student growth, and course operations from one
+              focused workspace.
+            </p>
           </div>
+
+          <div className="grid gap-3 sm:grid-cols-3 xl:w-[520px]">
+            <div className="rounded-2xl border border-white/80 bg-white/80 px-4 py-3 shadow-sm backdrop-blur">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Total Leads
+              </div>
+              <div className="mt-1 text-2xl font-extrabold text-slate-950">{stats.totalLeads}</div>
+            </div>
+            <div className="rounded-2xl border border-white/80 bg-white/80 px-4 py-3 shadow-sm backdrop-blur">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Monthly New
+              </div>
+              <div className="mt-1 text-2xl font-extrabold text-slate-950">{stats.newLeadsThisMonth}</div>
+            </div>
+            <div className="rounded-2xl border border-white/80 bg-white/80 px-4 py-3 shadow-sm backdrop-blur">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+                Today
+              </div>
+              <div className="mt-1 text-sm font-semibold text-slate-600">
+                {new Date().toLocaleDateString("en-IN", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {statCards.map(({ label, value, icon: Icon, tint, iconWrap }) => (
+          <article
+            key={label}
+            className={`overflow-hidden rounded-[28px] border border-slate-200/80 bg-gradient-to-br ${tint} p-5 shadow-[0_18px_45px_rgba(15,23,42,0.06)]`}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${iconWrap}`}>
+                <Icon className="h-5 w-5" />
+              </div>
+              <span className="rounded-full border border-white/80 bg-white/85 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Synced
+              </span>
+            </div>
+            <div className="mt-6 text-4xl font-extrabold tracking-tight text-slate-950">
+              {value}
+            </div>
+            <div className="mt-2 text-sm font-medium text-slate-500">{label}</div>
+            <div className="mt-4 h-px bg-gradient-to-r from-slate-200/80 to-transparent" />
+            <div className="mt-3 text-xs text-slate-400">
+              Live operational signal from current backend data
+            </div>
+          </article>
         ))}
-      </div>
+      </section>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Bar Chart */}
-        <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-soft border border-gray-100">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="font-bold text-brand-navy flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-brand-gold" /> Weekly Leads
-            </h2>
-            <span className="text-xs text-gray-400">Last 4 weeks</span>
+      <section className="grid gap-6 xl:grid-cols-[minmax(0,1.75fr)_minmax(320px,0.95fr)]">
+        <div className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+            <div>
+              <h2 className="flex items-center gap-2 text-base font-bold text-slate-900">
+                <TrendingUp className="h-4 w-4 text-brand-gold" />
+                Weekly Leads
+              </h2>
+              <p className="mt-1 text-xs uppercase tracking-[0.18em] text-slate-400">
+                Demand pulse
+              </p>
+            </div>
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-500">
+              Last 4 weeks
+            </span>
           </div>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={stats.weeklyLeads} barSize={32}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="week" tick={{ fontSize: 12, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid #e5e7eb", boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }} />
-              <Bar dataKey="count" fill="#1E3A8A" radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+
+          <div className="px-6 py-6">
+            {stats.weeklyLeads.length > 0 ? (
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={stats.weeklyLeads} barSize={34}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#eef2f7" />
+                  <XAxis
+                    dataKey="week"
+                    tick={{ fontSize: 12, fill: "#94a3b8" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 12, fill: "#94a3b8" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "14px",
+                      border: "1px solid #e2e8f0",
+                      boxShadow: "0 14px 34px rgba(15,23,42,0.08)",
+                    }}
+                  />
+                  <Bar dataKey="count" fill="#1d3f91" radius={[10, 10, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-[220px] items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 text-sm text-slate-400">
+                No lead trend data yet.
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-white rounded-2xl p-6 shadow-soft border border-gray-100">
-          <h2 className="font-bold text-brand-navy mb-4">Quick Actions</h2>
-          <div className="space-y-2">
-            <Link href="/admin/courses" className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-brand-navy/5 transition-colors text-sm font-medium text-brand-navy">
-              Add New Course <ArrowRight className="w-4 h-4 text-brand-gold" />
+        <div className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-[linear-gradient(180deg,_#ffffff_0%,_#f8fafc_100%)] shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+          <div className="border-b border-slate-100 px-6 py-5">
+            <h2 className="text-base font-bold text-slate-900">Quick Actions</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Jump straight into the work that moves the institute forward.
+            </p>
+          </div>
+
+          <div className="space-y-3 px-5 py-5">
+            <Link
+              href="/admin/courses"
+              className="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white px-4 py-3.5 text-sm font-semibold text-slate-800 transition hover:-translate-y-0.5 hover:border-brand-gold/50 hover:shadow-md"
+            >
+              Add New Course <ArrowRight className="h-4 w-4 text-brand-gold" />
             </Link>
-            <Link href="/admin/leads" className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-brand-navy/5 transition-colors text-sm font-medium text-brand-navy">
-              View All Leads <ArrowRight className="w-4 h-4 text-brand-gold" />
+            <Link
+              href="/admin/leads"
+              className="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white px-4 py-3.5 text-sm font-semibold text-slate-800 transition hover:-translate-y-0.5 hover:border-brand-gold/50 hover:shadow-md"
+            >
+              View All Leads <ArrowRight className="h-4 w-4 text-brand-gold" />
             </Link>
-            <Link href="/admin/students" className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-brand-navy/5 transition-colors text-sm font-medium text-brand-navy">
-              Manage Students <ArrowRight className="w-4 h-4 text-brand-gold" />
+            <Link
+              href="/admin/students"
+              className="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white px-4 py-3.5 text-sm font-semibold text-slate-800 transition hover:-translate-y-0.5 hover:border-brand-gold/50 hover:shadow-md"
+            >
+              Manage Students <ArrowRight className="h-4 w-4 text-brand-gold" />
             </Link>
-            <Link href="/admin/testimonials" className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-brand-navy/5 transition-colors text-sm font-medium text-brand-navy">
-              Review Testimonials <ArrowRight className="w-4 h-4 text-brand-gold" />
+            <Link
+              href="/admin/testimonials"
+              className="flex items-center justify-between rounded-2xl border border-slate-200/80 bg-white px-4 py-3.5 text-sm font-semibold text-slate-800 transition hover:-translate-y-0.5 hover:border-brand-gold/50 hover:shadow-md"
+            >
+              Review Testimonials <ArrowRight className="h-4 w-4 text-brand-gold" />
             </Link>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Recent Leads Table */}
-      <div className="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <h2 className="font-bold text-brand-navy">Recent Leads</h2>
-          <Link href="/admin/leads" className="text-sm text-brand-gold hover:underline font-medium">View all →</Link>
+      <section className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.06)]">
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+          <div>
+            <h2 className="text-base font-bold text-slate-900">Recent Leads</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Latest incoming enquiries from the CRM.
+            </p>
+          </div>
+          <Link href="/admin/leads" className="text-sm font-medium text-brand-gold transition hover:underline">
+            View all {"->"}
+          </Link>
         </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-50 text-gray-400 text-xs uppercase tracking-wide">
+              <tr className="bg-slate-50 text-xs uppercase tracking-[0.16em] text-slate-400">
                 <th className="px-6 py-3 text-left font-semibold">Name</th>
                 <th className="px-6 py-3 text-left font-semibold">Phone</th>
                 <th className="px-6 py-3 text-left font-semibold">Course</th>
@@ -117,15 +290,21 @@ export default function AdminDashboard() {
                 <th className="px-6 py-3 text-left font-semibold">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
-              {recentLeads.map(lead => (
-                <tr key={lead._id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-3.5 font-medium text-brand-navy">{lead.name}</td>
-                  <td className="px-6 py-3.5 text-gray-500">{lead.phone}</td>
-                  <td className="px-6 py-3.5 text-gray-600">{lead.courseInterest}</td>
-                  <td className="px-6 py-3.5 text-gray-400">{new Date(lead.createdAt).toLocaleDateString("en-IN")}</td>
-                  <td className="px-6 py-3.5">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${STATUS_COLORS[lead.status] ?? "bg-gray-100 text-gray-500"}`}>
+            <tbody className="divide-y divide-slate-100">
+              {recentLeads.map((lead) => (
+                <tr key={lead._id} className="transition-colors hover:bg-slate-50">
+                  <td className="px-6 py-4 font-semibold text-slate-900">{lead.name}</td>
+                  <td className="px-6 py-4 text-slate-500">{lead.phone}</td>
+                  <td className="px-6 py-4 text-slate-600">{lead.courseInterest}</td>
+                  <td className="px-6 py-4 text-slate-400">
+                    {new Date(lead.createdAt).toLocaleDateString("en-IN")}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
+                        STATUS_COLORS[lead.status] ?? "bg-slate-100 text-slate-500"
+                      }`}
+                    >
                       {lead.status.replace("_", " ")}
                     </span>
                   </td>
@@ -133,8 +312,14 @@ export default function AdminDashboard() {
               ))}
             </tbody>
           </table>
+
+          {recentLeads.length === 0 ? (
+            <div className="px-6 py-12 text-center text-sm text-slate-400">
+              No recent leads yet.
+            </div>
+          ) : null}
         </div>
-      </div>
+      </section>
     </div>
   );
 }

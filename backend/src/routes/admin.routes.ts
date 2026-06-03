@@ -71,7 +71,7 @@ router.delete("/leads/:id", async (req, res) => {
 router.get("/students", getStudents);
 router.get("/students/:id", async (req, res) => {
   const { User } = await import("../models/User.model");
-  const student = await User.findById(req.params.id).populate("enrollments");
+  const student = await User.findById(String(req.params.id ?? ""));
   res.json(student);
 });
 router.patch("/students/:id/toggle-block", toggleStudentBlock);

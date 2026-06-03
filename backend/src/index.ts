@@ -3,10 +3,12 @@ import "dotenv/config";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
-import mongoose from "mongoose";
 
+import pool from "./db/pool";
+import { logRagConfiguration } from "./config/rag";
 import adminRoutes from "./routes/admin.routes";
 import authRoutes from "./routes/auth.routes";
+import chatRoutes from "./routes/chat.routes";
 import courseRoutes from "./routes/course.routes";
 import leadRoutes from "./routes/lead.routes";
 import ragRoutes from "./routes/rag.routes";
@@ -31,6 +33,7 @@ app.get("/api/health", (_req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api", chatRoutes);
 app.use("/api/courses", courseRoutes);
 app.use("/api/leads", leadRoutes);
 app.use("/api/testimonials", testimonialRoutes);
@@ -47,16 +50,14 @@ app.use((error: Error, _req: express.Request, res: express.Response, _next: expr
 
 const bootstrap = async () => {
   try {
-    await mongoose.connect(
-      process.env.MONGODB_URI ??
-        process.env.MONGO_URI ??
-        "mongodb://127.0.0.1:27017/capitallab",
-    );
+    await pool.query("SELECT 1");
+    console.log("Connected to Supabase PostgreSQL");
+    logRagConfiguration();
     app.listen(port, () => {
       console.log(`Backend listening on http://localhost:${port}`);
     });
   } catch (error) {
-    console.error("Failed to start backend", error);
+    console.error("Failed to connect to database:", error);
     process.exit(1);
   }
 };

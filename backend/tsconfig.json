@@ -11,7 +11,9 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "types": [
-      "node"
+      "node",
+      "express",
+      "multer"
     ]
   },
   "include": [

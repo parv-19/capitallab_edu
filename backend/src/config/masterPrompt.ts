@@ -4,6 +4,7 @@ import OpenAI from "openai";
 
 import {
   GROQ_MODEL,
+  LOCAL_LLM_BASE_URL,
   LLM_MODEL,
   LLM_PROVIDER,
   RAG_NOT_FOUND_MESSAGE,
@@ -207,6 +208,21 @@ async function callOpenAI(prompt: string): Promise<string> {
   return response.output_text?.trim() || RAG_NOT_FOUND_MESSAGE;
 }
 
+async function callLocal(prompt: string): Promise<string> {
+  const openai = new OpenAI({
+    apiKey: process.env.LOCAL_LLM_API_KEY?.trim() || "local",
+    baseURL: LOCAL_LLM_BASE_URL,
+  });
+  const response = await openai.chat.completions.create({
+    model: LLM_MODEL,
+    temperature: 0.2,
+    max_tokens: 700,
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  return response.choices[0]?.message?.content?.trim() || RAG_NOT_FOUND_MESSAGE;
+}
+
 async function callGroq(prompt: string): Promise<string> {
   if (!process.env.GROQ_API_KEY || process.env.GROQ_API_KEY.trim() === "") {
     return RAG_NOT_FOUND_MESSAGE;
@@ -228,6 +244,28 @@ export async function runCFAChat(
   _conversationHistory: ChatMessage[] = [],
 ): Promise<string> {
   const prompt = buildUserMessage(retrievedChunks, userQuery);
+
+  if (LLM_PROVIDER === "local") {
+    const localResult = await callLocal(prompt);
+    if (
+      localResult !== RAG_NOT_FOUND_MESSAGE ||
+      (!process.env.OPENAI_API_KEY && !process.env.GROQ_API_KEY && !process.env.ANTHROPIC_API_KEY)
+    ) {
+      return localResult;
+    }
+
+    const openAiResult = await callOpenAI(prompt);
+    if (openAiResult !== RAG_NOT_FOUND_MESSAGE || (!process.env.GROQ_API_KEY && !process.env.ANTHROPIC_API_KEY)) {
+      return openAiResult;
+    }
+
+    const groqResult = await callGroq(prompt);
+    if (groqResult !== RAG_NOT_FOUND_MESSAGE || !process.env.ANTHROPIC_API_KEY) {
+      return groqResult;
+    }
+
+    return callAnthropic(prompt);
+  }
 
   if (LLM_PROVIDER === "openai") {
     const openAiResult = await callOpenAI(prompt);

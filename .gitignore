@@ -1,6 +1,7 @@
 node_modules
 .next
 dist
+.claude
 .env
 .env.local
 coverage
@@ -8,6 +9,8 @@ uploads
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+frontend/.next-stale-*
+frontend/*.log
 pnpm-lock.yaml
 package-lock.json
 frontend/.next

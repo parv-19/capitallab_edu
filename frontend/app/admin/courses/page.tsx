@@ -8,15 +8,10 @@ import api from "@/lib/axios";
 
 interface Course { _id: string; title: string; slug: string; instructor: string; level: string; status: string; duration: string; shortDescription: string; description: string; }
 
-const mockCourses: Course[] = [
-  { _id: "1", title: "CA Foundation", slug: "ca-foundation", instructor: "CA Priya Mehta", level: "Beginner", status: "published", duration: "6 Months", shortDescription: "Perfect starting point", description: "Full Foundation coverage..." },
-  { _id: "2", title: "CA Intermediate", slug: "ca-intermediate", instructor: "CA Rajesh Patel", level: "Intermediate", status: "published", duration: "12 Months", shortDescription: "Group I & II comprehensive", description: "Full Intermediate coverage..." },
-];
-
 const emptyForm = { title: "", slug: "", instructor: "", duration: "", level: "Beginner", shortDescription: "", description: "", status: "draft" };
 
 export default function AdminCoursesPage() {
-  const [courses, setCourses] = useState<Course[]>(mockCourses);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editCourse, setEditCourse] = useState<Course | null>(null);
   const [form, setForm] = useState(emptyForm);
@@ -24,7 +19,7 @@ export default function AdminCoursesPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    api.get("/admin/courses").then(r => { if (r.data?.courses?.length) setCourses(r.data.courses); }).catch(() => {});
+    api.get("/admin/courses").then(r => { setCourses(r.data?.courses ?? []); }).catch(() => {});
   }, []);
 
   const openAdd = () => { setEditCourse(null); setForm(emptyForm); setDialogOpen(true); };
@@ -60,7 +55,7 @@ export default function AdminCoursesPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold text-brand-navy">Courses</h1>
         <button onClick={openAdd} className="flex items-center gap-2 px-4 py-2 bg-brand-navy text-white rounded-xl text-sm font-medium hover:bg-brand-navyDark transition-colors">
           <Plus className="w-4 h-4" /> Add Course
@@ -68,6 +63,35 @@ export default function AdminCoursesPage() {
       </div>
 
       <div className="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden">
+        <div className="divide-y divide-gray-100 md:hidden">
+          {courses.map((c) => (
+            <div key={c._id} className="space-y-3 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-navy/10">
+                  <BookOpen className="h-4 w-4 text-brand-navy" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold text-brand-navy">{c.title}</div>
+                  <div className="truncate text-xs text-gray-400">{c.slug}</div>
+                </div>
+                <span className={`shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold ${c.status === "published" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
+                  {c.status}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div><div className="text-gray-400">Instructor</div><div className="text-gray-700">{c.instructor}</div></div>
+                <div><div className="text-gray-400">Duration</div><div className="text-gray-700">{c.duration}</div></div>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => openEdit(c)} className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600">Edit</button>
+                <Link href={`/admin/courses/${c._id}/lessons`} className="rounded-lg bg-brand-navy/5 px-3 py-1.5 text-xs font-medium text-brand-navy">Lessons</Link>
+                <Link href={`/admin/courses/${c._id}/documents`} className="rounded-lg bg-brand-gold/10 px-3 py-1.5 text-xs font-medium text-brand-gold">Docs</Link>
+                <button onClick={() => setDeleteId(c._id)} className="rounded-lg border border-red-100 px-3 py-1.5 text-xs font-medium text-red-500">Delete</button>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="hidden overflow-x-auto md:block">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-50 text-gray-400 text-xs uppercase tracking-wide">
@@ -119,6 +143,8 @@ export default function AdminCoursesPage() {
             ))}
           </tbody>
         </table>
+        {courses.length === 0 ? <div className="px-6 py-12 text-center text-sm text-gray-400">No courses created yet.</div> : null}
+        </div>
       </div>
 
       {/* Add/Edit Dialog */}
@@ -131,7 +157,7 @@ export default function AdminCoursesPage() {
               <button onClick={() => setDialogOpen(false)} className="text-gray-400 hover:text-gray-700 p-1"><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={handleSave} className="px-6 py-5 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="col-span-2">
                   <label className="block text-xs font-semibold text-gray-500 mb-1.5 uppercase">Title *</label>
                   <input required value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value, slug: autoSlug(e.target.value) }))}

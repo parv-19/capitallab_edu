@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, GraduationCap, ChevronDown, LogOut, LayoutDashboard } from "lucide-react";
+import { Menu, X, ChevronDown, LogOut, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
@@ -11,6 +11,7 @@ const navLinks = [
   { label: "Courses", href: "/courses" },
   { label: "About", href: "/about" },
   { label: "Testimonials", href: "/testimonials" },
+  { label: "Enroll Free", href: "/leads" },
 ];
 
 export default function Navbar() {
@@ -44,29 +45,40 @@ export default function Navbar() {
       <div className="container-shell flex items-center justify-between h-16">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-lg bg-brand-gold flex items-center justify-center">
-            <GraduationCap className="w-5 h-5 text-white" />
-          </div>
-          <span className="font-bold text-white text-lg tracking-tight">
-            Capital<span className="text-brand-gold">Lab</span>
-          </span>
+          <img
+            src="/api/site-assets/logo"
+            alt="Capital Lab Education"
+            className="h-10 w-auto rounded-sm bg-white p-1"
+          />
         </Link>
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                pathname === link.href
-                  ? "text-brand-gold"
-                  : "text-white/80 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {navLinks.map((link) => {
+            const isEnroll = link.href === "/leads";
+            const isActive = pathname === link.href;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={
+                  isEnroll
+                    ? `px-4 py-2 rounded-lg text-sm font-semibold transition-colors border ${
+                        isActive
+                          ? "border-brand-gold bg-brand-gold text-brand-navy"
+                          : "border-brand-gold/70 text-brand-gold hover:bg-brand-gold hover:text-brand-navy"
+                      }`
+                    : `px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        isActive
+                          ? "text-brand-gold"
+                          : "text-white/80 hover:text-white hover:bg-white/10"
+                      }`
+                }
+              >
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Right CTA */}
@@ -127,19 +139,31 @@ export default function Navbar() {
       {menuOpen && (
         <div className="md:hidden bg-brand-navyDark border-t border-white/10">
           <div className="container-shell py-4 flex flex-col gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  pathname === link.href
-                    ? "text-brand-gold bg-white/5"
-                    : "text-white/80 hover:text-white hover:bg-white/10"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const isEnroll = link.href === "/leads";
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={
+                    isEnroll
+                      ? `px-4 py-3 rounded-lg text-sm font-semibold transition-colors text-center border ${
+                          isActive
+                            ? "border-brand-gold bg-brand-gold text-brand-navy"
+                            : "border-brand-gold/70 text-brand-gold hover:bg-brand-gold hover:text-brand-navy"
+                        }`
+                      : `px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                          isActive
+                            ? "text-brand-gold bg-white/5"
+                            : "text-white/80 hover:text-white hover:bg-white/10"
+                        }`
+                  }
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
             <div className="border-t border-white/10 mt-2 pt-3">
               {isAuthenticated ? (
                 <>

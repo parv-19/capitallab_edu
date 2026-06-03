@@ -1,0 +1,2051 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Capital Lab Education</title>
+<meta name="description" content="Capital Lab Education helps students and professionals prepare for CFA and US CMA with practical mentorship, mock exams, LMS support, and career guidance." />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Poppins:wght@600;700;800&family=Source+Sans+3:wght@300;400;500;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #0D1B3E;
+    --navy-mid: #1A2D5A;
+    --navy-light: #2A4080;
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --gold-pale: #F5E9C8;
+    --cream: #FDFAF4;
+    --text-dark: #0D1B3E;
+    --text-mid: #3A4A6B;
+    --text-muted: #7A8099;
+    --white: #ffffff;
+    --soft-lilac: #F5F6FF;
+  }
+
+  html { scroll-behavior: smooth; }
+  body { overflow-x: hidden; }
+  img { max-width: 100%; height: auto; }
+  .page { font-family: 'Source Sans 3', sans-serif; color: var(--text-dark); background: var(--cream); overflow-x: hidden; }
+
+  .nav {
+    background: var(--navy);
+    padding: 18px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 500;
+    border-bottom: 2px solid var(--gold);
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--white);
+  }
+  .brand-wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 25px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.6px;
+    text-transform: none;
+    white-space: nowrap;
+  }
+  .brand-wordmark .brand-main {
+    color: var(--white);
+    font-weight: 700;
+  }
+  .brand-wordmark .brand-accent {
+    color: var(--gold);
+    font-weight: 800;
+    letter-spacing: -0.8px;
+    text-shadow: 0 0 18px rgba(201,168,76,0.15);
+  }
+  .nav-logo img {
+    width: 42px;
+    height: 42px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.94);
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .nav-logo span { color: var(--gold); }
+  .nav-links { display: flex; gap: 32px; align-items: center; }
+  .nav-links a { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 14px; font-weight: 500; letter-spacing: 0.3px; transition: color 0.2s; }
+  .nav-links a:hover { color: var(--gold); }
+  .nav-cta { background: var(--gold); color: var(--navy) !important; padding: 8px 20px; border-radius: 4px; font-weight: 600 !important; }
+  .nav-leads { border: 1.5px solid var(--gold) !important; color: var(--gold) !important; padding: 7px 18px; border-radius: 4px; font-weight: 600 !important; transition: background 0.2s, color 0.2s !important; }
+  .nav-leads:hover { background: var(--gold) !important; color: var(--navy) !important; }
+
+  /* â”€â”€ HAMBURGER & MOBILE NAV â”€â”€ */
+  .hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    cursor: pointer;
+    padding: 4px;
+    background: none;
+    border: none;
+    z-index: 502;
+  }
+  .hamburger span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--white);
+    border-radius: 2px;
+    transition: transform 0.3s ease, opacity 0.3s ease, background 0.2s;
+  }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); background: var(--gold); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); background: var(--gold); }
+
+  .mobile-nav {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: var(--navy);
+    z-index: 501;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .mobile-nav.open { opacity: 1; transform: translateX(0); }
+  .mobile-nav a {
+    color: rgba(255,255,255,0.8);
+    text-decoration: none;
+    font-size: 22px;
+    font-weight: 500;
+    font-family: 'Playfair Display', serif;
+    padding: 18px 0;
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+    transition: color 0.2s, background 0.2s;
+  }
+  .mobile-nav a:first-of-type { border-top: 1px solid rgba(201,168,76,0.1); }
+  .mobile-nav a:hover { color: var(--gold); background: rgba(201,168,76,0.05); }
+  .mobile-nav .mobile-cta {
+    margin-top: 28px;
+    background: var(--gold);
+    color: var(--navy) !important;
+    padding: 14px 40px;
+    border-radius: 4px;
+    font-weight: 700 !important;
+    font-family: 'Source Sans 3', sans-serif !important;
+    font-size: 16px !important;
+    border: none !important;
+    width: auto !important;
+  }
+  .mobile-nav-logo {
+    position: absolute;
+    top: 22px; left: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--white);
+  }
+  .mobile-nav-logo .brand-wordmark { font-size: 22px; }
+  .mobile-nav-logo img {
+    width: 38px;
+    height: 38px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.94);
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .mobile-nav-logo span { color: var(--gold); }
+
+  .hero { background: var(--navy); padding: 88px 48px 80px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -60px; right: -60px; width: 320px; height: 320px; border: 1px solid rgba(201,168,76,0.15); border-radius: 50%; pointer-events: none; }
+  .hero::after { content: ''; position: absolute; bottom: -40px; left: -40px; width: 220px; height: 220px; border: 1px solid rgba(201,168,76,0.1); border-radius: 50%; pointer-events: none; }
+  .hero-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; margin-bottom: 20px; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: 52px; font-weight: 700; color: var(--white); line-height: 1.15; margin-bottom: 22px; max-width: 720px; margin-left: auto; margin-right: auto; }
+  .hero h1 span { color: var(--gold); }
+  .hero-sub { font-size: 18px; color: rgba(255,255,255,0.7); max-width: 560px; margin: 0 auto 36px; line-height: 1.7; font-weight: 300; }
+  .hero-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .btn-primary { background: var(--gold); color: var(--navy); padding: 14px 32px; border: none; border-radius: 4px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'Source Sans 3', sans-serif; letter-spacing: 0.3px; }
+  .btn-outline { background: transparent; color: var(--white); padding: 13px 32px; border: 1px solid rgba(255,255,255,0.4); border-radius: 4px; font-size: 15px; font-weight: 500; cursor: pointer; font-family: 'Source Sans 3', sans-serif; }
+  .hero-stats { margin-top: 56px; display: flex; justify-content: center; gap: 64px; border-top: 1px solid rgba(201,168,76,0.2); padding-top: 40px; flex-wrap: wrap; }
+  .stat-item { text-align: center; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700; color: var(--gold); }
+  .stat-label { font-size: 13px; color: rgba(255,255,255,0.55); margin-top: 4px; letter-spacing: 0.5px; }
+
+  .section { padding: 80px 48px; max-width: 1000px; margin: 0 auto; }
+  .section-anchor { scroll-margin-top: 110px; }
+  .section-label { font-size: 11px; font-weight: 600; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; margin-bottom: 12px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700; color: var(--navy); line-height: 1.2; margin-bottom: 16px; }
+  .section-divider { width: 48px; height: 2px; background: var(--gold); margin-bottom: 24px; }
+  .section-body { font-size: 16px; line-height: 1.8; color: var(--text-mid); max-width: 680px; }
+
+  .about-bg { background: var(--white); }
+  .about-intro-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 58px;
+    font-weight: 700;
+    line-height: 1.08;
+    color: var(--navy);
+    max-width: 920px;
+    margin-bottom: 18px;
+  }
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 40px; }
+  .about-pillar {
+    background: var(--white);
+    padding: 40px 36px;
+    border: 1px solid rgba(13,27,62,0.08);
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(13,27,62,0.08);
+  }
+  .about-pillar-full { grid-column: 1 / -1; }
+  .pillar-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: var(--navy);
+    margin-bottom: 16px;
+  }
+  .pillar-text { font-size: 15px; color: var(--text-mid); line-height: 1.9; }
+
+  .team-section {
+    background: linear-gradient(180deg, var(--soft-lilac) 0%, var(--soft-lilac) 50%, var(--white) 50%, var(--white) 100%);
+  }
+  .team-header { text-align: center; margin-bottom: 40px; }
+  .team-header .section-label { color: var(--navy); }
+  .team-header .section-divider { margin-left: auto; margin-right: auto; }
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .team-card {
+    background: var(--white);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(13,27,62,0.1);
+    border: 1px solid rgba(13,27,62,0.06);
+  }
+  .team-card img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+  }
+  .team-card:first-child img { object-position: center 35%; }
+  .team-card:last-child img { object-position: center 18%; }
+  .team-card-body { padding: 22px 20px 24px; }
+  .team-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--navy);
+    margin-bottom: 14px;
+  }
+  .team-list { list-style: none; }
+  .team-list li {
+    font-size: 14px;
+    color: var(--text-dark);
+    padding: 7px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .team-list li::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 8px;
+  }
+  #about-us > .section-body { display: none; }
+  .about-pillar .pillar-icon { display: none; }
+
+  .programs-bg { background: var(--cream); }
+  .programs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 40px; }
+  .program-card { background: var(--white); border-radius: 4px; overflow: hidden; border: 1px solid rgba(13,27,62,0.1); }
+  .program-header { background: var(--navy); padding: 28px; }
+  .program-badge { display: inline-block; background: var(--gold); color: var(--navy); font-size: 11px; font-weight: 700; letter-spacing: 2px; padding: 4px 10px; border-radius: 2px; margin-bottom: 12px; text-transform: uppercase; }
+  .program-name { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--white); }
+  .program-full { font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+  .program-body { padding: 28px; }
+  .program-desc { font-size: 14px; color: var(--text-mid); line-height: 1.7; margin-bottom: 20px; }
+  .program-highlights { list-style: none; }
+  .program-highlights li { font-size: 14px; color: var(--text-dark); padding: 7px 0; border-bottom: 1px solid rgba(13,27,62,0.06); display: flex; align-items: flex-start; gap: 10px; }
+  .program-highlights li::before { content: ''; width: 6px; height: 6px; background: var(--gold); border-radius: 50%; flex-shrink: 0; margin-top: 7px; }
+  .program-detail-section {
+    background:
+      radial-gradient(circle at top right, rgba(201,168,76,0.08), transparent 22%),
+      var(--white);
+    border-top: 1px solid rgba(13,27,62,0.08);
+  }
+  .program-detail-section.alt {
+    background:
+      radial-gradient(circle at top left, rgba(13,27,62,0.04), transparent 20%),
+      var(--cream);
+  }
+  .program-hero {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+    border-radius: 26px;
+    padding: 40px 36px;
+    color: var(--white);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(13,27,62,0.18);
+  }
+  .program-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent 40%);
+    pointer-events: none;
+  }
+  .program-hero::after {
+    content: '';
+    position: absolute;
+    top: -80px;
+    right: -80px;
+    width: 220px;
+    height: 220px;
+    border: 1px solid rgba(201,168,76,0.18);
+    border-radius: 50%;
+  }
+  .program-hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 40px;
+    line-height: 1.04;
+    letter-spacing: -0.6px;
+    margin-bottom: 16px;
+    max-width: 760px;
+    position: relative;
+    z-index: 1;
+  }
+  .program-hero-subtitle {
+    font-size: 18px;
+    line-height: 1.65;
+    color: rgba(255,255,255,0.86);
+    max-width: 760px;
+    position: relative;
+    z-index: 1;
+  }
+  .program-hero-desc {
+    font-size: 14px;
+    line-height: 1.8;
+    color: rgba(255,255,255,0.74);
+    max-width: 800px;
+    margin-top: 24px;
+    position: relative;
+    z-index: 1;
+  }
+  .program-cta-row { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 32px; position: relative; z-index: 1; }
+  .program-cta-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 180px;
+    padding: 15px 24px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.2px;
+    transition: transform 0.15s, opacity 0.2s, box-shadow 0.2s, background 0.2s;
+  }
+  .program-cta-link:hover { transform: translateY(-1px); }
+  .program-cta-link.primary { background: var(--gold); color: var(--navy); box-shadow: 0 12px 24px rgba(201,168,76,0.22); }
+  .program-cta-link.secondary { border: 1px solid rgba(255,255,255,0.32); color: var(--white); background: rgba(255,255,255,0.04); }
+  .program-content-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    max-width: 980px;
+    margin: 34px auto 0;
+    align-items: start;
+  }
+  .program-panel {
+    background: var(--white);
+    border: 1px solid rgba(13,27,62,0.08);
+    border-radius: 22px;
+    padding: 24px 22px;
+    box-shadow: 0 16px 34px rgba(13,27,62,0.06);
+    position: relative;
+    overflow: hidden;
+  }
+  .program-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--gold), rgba(201,168,76,0.2));
+  }
+  .program-panel h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: var(--navy);
+    line-height: 1.14;
+    margin-bottom: 14px;
+  }
+  .program-panel p { font-size: 14px; line-height: 1.72; color: var(--text-mid); max-width: 62ch; }
+  .program-stack { display: grid; gap: 14px; }
+  .program-accordion { display: grid; gap: 16px; }
+  .program-accordion-item {
+    background: var(--white);
+    border: 1px solid rgba(13,27,62,0.08);
+    border-radius: 20px;
+    box-shadow: 0 14px 30px rgba(13,27,62,0.06);
+    overflow: hidden;
+  }
+  .program-accordion-trigger {
+    width: 100%;
+    background: transparent;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px 18px;
+    cursor: pointer;
+    text-align: left;
+  }
+  .program-accordion-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 21px;
+    line-height: 1.12;
+    color: var(--navy);
+  }
+  .program-accordion-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid rgba(13,27,62,0.1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--navy);
+    flex-shrink: 0;
+    transition: transform 0.25s ease, background 0.2s, color 0.2s;
+  }
+  .program-accordion-icon::before {
+    content: '+';
+    font-size: 24px;
+    line-height: 1;
+  }
+  .program-accordion-item.active .program-accordion-icon {
+    transform: rotate(45deg);
+    background: var(--navy);
+    color: var(--white);
+  }
+  .program-accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+  }
+  .program-accordion-inner {
+    padding: 0 18px 18px;
+    border-top: 1px solid rgba(13,27,62,0.06);
+  }
+  .program-accordion-inner p:first-child,
+  .program-accordion-inner .program-number-list:first-child { margin-top: 18px; }
+  .program-data-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .program-data-card {
+    background: linear-gradient(180deg, rgba(13,27,62,0.035), rgba(13,27,62,0.015));
+    border: 1px solid rgba(13,27,62,0.08);
+    border-radius: 16px;
+    padding: 14px 13px;
+  }
+  .program-data-card h4 {
+    color: var(--navy);
+    font-size: 15px;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+  .program-data-card p {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-mid);
+    margin: 0;
+  }
+  .program-data-card ul {
+    list-style: none;
+    display: grid;
+    gap: 8px;
+  }
+  .program-data-card li {
+    font-size: 13px;
+    line-height: 1.62;
+    color: var(--text-dark);
+    padding-left: 12px;
+    position: relative;
+  }
+  .program-data-card li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+  .program-advantage-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .program-advantage-card {
+    background: #fff;
+    border: 1px solid rgba(13,27,62,0.08);
+    border-radius: 18px;
+    padding: 16px 14px;
+    box-shadow: 0 10px 24px rgba(13,27,62,0.05);
+  }
+  .program-advantage-card strong {
+    display: block;
+    color: var(--navy);
+    font-size: 15px;
+    margin-bottom: 6px;
+    line-height: 1.35;
+  }
+  .program-advantage-card p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-mid);
+  }
+  .program-stat-strip {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .program-stat {
+    background: rgba(13,27,62,0.03);
+    border: 1px solid rgba(13,27,62,0.08);
+    border-radius: 16px;
+    padding: 12px 10px;
+    text-align: center;
+  }
+  .program-stat-value {
+    display: block;
+    color: var(--navy);
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.3;
+  }
+  .program-stat-label {
+    display: block;
+    color: var(--text-muted);
+    font-size: 10px;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .program-list { list-style: none; display: grid; gap: 14px; margin-top: 22px; }
+  .program-list li { font-size: 14px; color: var(--text-dark); line-height: 1.8; display: flex; gap: 10px; }
+  .program-list li::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    background: var(--gold);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 8px;
+  }
+  .program-number-list { display: grid; gap: 14px; margin-top: 14px; }
+  .program-number-item {
+    padding-left: 16px;
+    border-left: 2px solid rgba(201,168,76,0.4);
+  }
+  .program-number-item strong { display: block; color: var(--navy); font-size: 15px; margin-bottom: 5px; }
+  .program-number-item p { margin: 0; }
+  .career-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px; }
+  .career-box {
+    background: linear-gradient(180deg, rgba(13,27,62,0.03), rgba(13,27,62,0.015));
+    border: 1px solid rgba(13,27,62,0.08);
+    border-radius: 18px;
+    padding: 22px 20px;
+  }
+  .career-box h4 { color: var(--navy); font-size: 18px; margin-bottom: 14px; }
+  .career-note { margin-top: 16px; font-size: 13px; color: var(--text-mid); font-weight: 700; }
+  .syllabus-block { margin-top: 16px; }
+  .syllabus-block h4 { color: var(--navy); font-size: 16px; margin-bottom: 8px; }
+  .syllabus-block p { margin-bottom: 8px; }
+  .syllabus-topics { list-style: none; display: grid; gap: 10px; }
+  .syllabus-topics li {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-dark);
+    padding: 0 0 12px 14px;
+    border-bottom: 1px solid rgba(13,27,62,0.06);
+    position: relative;
+  }
+  .syllabus-topics li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+  .program-mini-note {
+    margin-top: 12px;
+    font-size: 13px;
+    color: var(--navy);
+    font-weight: 600;
+    padding-left: 16px;
+    border-left: 2px solid rgba(201,168,76,0.45);
+  }
+
+  .instructor-bg { background: var(--navy); }
+  .instructor-bg .section-title { color: var(--white); }
+  .instructor-bg .section-body { color: rgba(255,255,255,0.65); }
+  .instructor-card { margin-top: 44px; background: rgba(255,255,255,0.05); border: 1px solid rgba(201,168,76,0.2); border-radius: 4px; padding: 40px; display: grid; grid-template-columns: auto 1fr; gap: 40px; align-items: start; }
+  .instructor-avatar {
+    width: 140px;
+    height: 140px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(201,168,76,0.18);
+  }
+  .instructor-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .instructor-name { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+  .instructor-title { font-size: 14px; color: var(--gold); font-weight: 500; letter-spacing: 0.3px; margin-bottom: 20px; }
+  .cred-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .cred-tag { background: rgba(201,168,76,0.15); color: var(--gold-light); font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 2px; letter-spacing: 0.5px; }
+  .instructor-bio { font-size: 14px; color: rgba(255,255,255,0.65); line-height: 1.8; margin-bottom: 24px; }
+  .expertise-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .exp-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(255,255,255,0.7); }
+  .exp-dot { width: 5px; height: 5px; background: var(--gold); border-radius: 50%; flex-shrink: 0; }
+
+  .testimonials-bg { background: var(--white); }
+  .testimonials-carousel { margin-top: 40px; overflow: hidden; }
+  .testimonials-track {
+    display: flex;
+    gap: 24px;
+    transition: transform 0.35s ease;
+    will-change: transform;
+  }
+  .testimonial-card {
+    background: var(--white);
+    border-radius: 18px;
+    padding: 40px 38px 34px;
+    border: 1px solid rgba(13,27,62,0.08);
+    box-shadow: 0 12px 30px rgba(13,27,62,0.08);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 270px;
+    flex: 0 0 calc(50% - 12px);
+  }
+  .testimonial-quote {
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    font-family: 'Playfair Display', serif;
+    font-size: 72px;
+    line-height: 1;
+    color: #6670d9;
+    opacity: 0.95;
+  }
+  .testimonial-text {
+    font-size: 15px;
+    color: var(--text-dark);
+    line-height: 1.9;
+    margin-bottom: 34px;
+    padding-right: 24px;
+    flex: 1;
+  }
+  .testimonial-footer {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: auto;
+  }
+  .testimonial-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+  .testimonial-author {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--navy);
+    line-height: 1.2;
+  }
+  .testimonial-role { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .testimonial-controls {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 34px;
+  }
+  .testimonial-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1.5px solid #6670d9;
+    background: transparent;
+    color: #6670d9;
+    font-size: 28px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, transform 0.15s;
+  }
+  .testimonial-btn:hover { background: #6670d9; color: var(--white); transform: translateY(-1px); }
+  .testimonial-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+  .testimonial-dots {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .testimonial-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(102,112,217,0.25);
+    cursor: pointer;
+    transition: transform 0.15s, background 0.2s;
+  }
+  .testimonial-dot.active {
+    background: #6670d9;
+    transform: scale(1.15);
+  }
+
+  .contact-bg { background: var(--navy); }
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; margin-top: 40px; align-items: start; }
+  .contact-bg .section-title { color: var(--white); }
+  .contact-bg .section-body { color: rgba(255,255,255,0.65); }
+  .contact-info-item { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+  .contact-icon { width: 40px; height: 40px; background: rgba(201,168,76,0.15); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--gold); }
+  .contact-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  .contact-detail-label { font-size: 11px; color: var(--gold); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+  .contact-detail-value { font-size: 15px; color: rgba(255,255,255,0.85); margin-top: 2px; }
+  .contact-form { display: flex; flex-direction: column; gap: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-field { background: rgba(255,255,255,0.07); border: 1px solid rgba(201,168,76,0.2); border-radius: 4px; padding: 12px 16px; font-size: 14px; color: var(--white); font-family: 'Source Sans 3', sans-serif; width: 100%; }
+  .form-field::placeholder { color: rgba(255,255,255,0.35); }
+  textarea.form-field { height: 100px; resize: none; }
+  select.form-field option { background: var(--navy); color: var(--white); }
+  .submit-btn { background: var(--gold); color: var(--navy); border: none; padding: 14px; border-radius: 4px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Source Sans 3', sans-serif; letter-spacing: 0.3px; }
+
+  .footer { background: #060E20; padding: 32px 48px; text-align: center; border-top: 1px solid rgba(201,168,76,0.2); }
+  .footer-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .footer-logo img {
+    width: 38px;
+    height: 38px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.94);
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .footer-logo .brand-wordmark { font-size: 22px; }
+  .footer-tagline { font-size: 13px; color: rgba(255,255,255,0.35); }
+
+  /* â”€â”€ POPUP MODAL â”€â”€ */
+  .popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 14, 32, 0.82);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, visibility 0.35s ease;
+  }
+  .popup-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  .popup-modal {
+    background: var(--navy);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 92vh;
+    overflow-y: auto;
+    position: relative;
+    transform: translateY(24px) scale(0.97);
+    transition: transform 0.35s ease;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gold) transparent;
+  }
+  .popup-overlay.active .popup-modal {
+    transform: translateY(0) scale(1);
+  }
+  .popup-header {
+    background: linear-gradient(135deg, var(--navy-mid), var(--navy));
+    padding: 28px 28px 20px;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    position: relative;
+  }
+  .popup-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .popup-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.2;
+  }
+  .popup-subtitle {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+  .popup-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 34px;
+    height: 34px;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.6);
+    font-size: 18px;
+    line-height: 1;
+    transition: background 0.2s, color 0.2s;
+  }
+  .popup-close:hover { background: rgba(201,168,76,0.2); color: var(--gold); }
+  .popup-body {
+    padding: 24px 28px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .popup-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .popup-field {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--white);
+    font-family: 'Source Sans 3', sans-serif;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .popup-field:focus { border-color: var(--gold); }
+  .popup-field::placeholder { color: rgba(255,255,255,0.35); }
+  textarea.popup-field { height: 88px; resize: none; }
+  select.popup-field { background: rgba(13,27,62,0.95); color: rgba(255,255,255,0.6); }
+  select.popup-field option { background: var(--navy); color: var(--white); }
+  .popup-submit {
+    background: var(--gold);
+    color: var(--navy);
+    border: none;
+    padding: 14px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Source Sans 3', sans-serif;
+    letter-spacing: 0.3px;
+    width: 100%;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .popup-submit:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .popup-skip {
+    text-align: center;
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+    cursor: pointer;
+    margin-top: -4px;
+    transition: color 0.2s;
+  }
+  .popup-skip:hover { color: rgba(255,255,255,0.6); }
+  .popup-gold-bar {
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+    border-radius: 8px 8px 0 0;
+  }
+
+  @media (max-width: 1024px) {
+    .nav { padding: 16px 28px; }
+    .nav-links { gap: 20px; }
+    .hero { padding: 74px 32px 68px; }
+    .hero h1 { font-size: 44px; max-width: 680px; }
+    .hero-sub { font-size: 17px; max-width: 620px; }
+    .hero-stats { gap: 34px; }
+    .section { padding: 68px 32px; max-width: 100%; }
+    .about-intro-title { font-size: 48px; max-width: 760px; }
+    .about-grid { gap: 22px; }
+    .program-hero-title { font-size: 36px; }
+    .program-content-grid { max-width: 100%; }
+    .team-grid { max-width: 100%; }
+    .contact-grid { gap: 36px; }
+  }
+
+  @media (max-width: 540px) {
+    .popup-form-row { grid-template-columns: 1fr; }
+    .popup-title { font-size: 22px; }
+    .popup-header { padding: 24px 20px 18px; }
+    .popup-body { padding: 20px 20px 24px; }
+  }
+
+  /* â”€â”€ COMPREHENSIVE MOBILE RESPONSIVE â”€â”€ */
+  @media (max-width: 768px) {
+    .nav { padding: 16px 20px; }
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+    .mobile-nav { display: flex; }
+    .section-anchor { scroll-margin-top: 92px; }
+
+    .nav-logo img { width: 38px; height: 38px; }
+    .brand-wordmark { font-size: 20px; gap: 3px; }
+    .mobile-nav-logo { left: 20px; right: 72px; }
+    .mobile-nav-logo .brand-wordmark { font-size: 18px; }
+    .mobile-nav a { font-size: 20px; }
+
+    .hero { padding: 60px 20px 56px; }
+    .hero h1 { font-size: 32px; }
+    .hero-sub { font-size: 15px; }
+    .hero-stats { gap: 28px; padding-top: 28px; margin-top: 40px; }
+    .stat-num { font-size: 28px; }
+
+    .section { padding: 56px 20px; }
+    .section-title { font-size: 28px; }
+    .about-intro-title { font-size: 36px; }
+
+    .about-grid { grid-template-columns: 1fr; gap: 16px; }
+    .team-grid { grid-template-columns: 1fr; }
+    .team-card img { height: 260px; }
+
+    .programs-grid { grid-template-columns: 1fr; gap: 24px; }
+    .program-content-grid { grid-template-columns: 1fr; gap: 18px; margin-top: 34px; }
+    .career-columns { grid-template-columns: 1fr; }
+    .program-data-grid { grid-template-columns: 1fr; }
+    .program-advantage-grid { grid-template-columns: 1fr; }
+    .program-stat-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .program-hero { padding: 34px 24px; border-radius: 22px; }
+    .program-hero::after { width: 150px; height: 150px; top: -56px; right: -56px; }
+    .program-hero-title { font-size: 34px; }
+    .program-hero-subtitle { font-size: 17px; line-height: 1.7; }
+    .program-hero-desc { margin-top: 18px; max-width: 100%; }
+    .program-cta-row { flex-direction: column; align-items: stretch; }
+    .program-cta-link { width: 100%; min-width: 0; }
+    .program-panel { padding: 26px 22px; border-radius: 18px; }
+    .program-panel h3 { font-size: 26px; }
+    .program-number-item { padding-left: 12px; }
+    .program-data-card h4,
+    .program-advantage-card strong { font-size: 16px; }
+
+    .instructor-card { grid-template-columns: 1fr; gap: 24px; padding: 24px; }
+    .instructor-avatar { width: 110px; height: 110px; }
+    .instructor-name { font-size: 22px; }
+    .expertise-grid { grid-template-columns: 1fr; }
+
+    .testimonials-track { gap: 20px; }
+    .testimonial-card { flex-basis: 100%; min-height: 0; padding: 32px 24px 26px; }
+    .testimonial-text { padding-right: 12px; margin-bottom: 24px; }
+    .testimonial-quote { font-size: 58px; right: 18px; top: 14px; }
+    .testimonial-controls { margin-top: 24px; }
+
+    .contact-grid { grid-template-columns: 1fr; gap: 36px; }
+    .contact-info-item { gap: 14px; }
+    .contact-detail-value { font-size: 14px; line-height: 1.7; word-break: break-word; }
+    .form-row { grid-template-columns: 1fr; }
+
+    .footer { padding: 24px 20px; }
+    .footer-logo { gap: 10px; }
+    .footer-tagline { line-height: 1.7; }
+  }
+
+  @media (max-width: 480px) {
+    .nav { padding: 14px 16px; }
+    .nav-logo { gap: 9px; }
+    .nav-logo img { width: 34px; height: 34px; border-radius: 7px; }
+    .brand-wordmark { font-size: 18px; letter-spacing: -0.5px; }
+    .mobile-nav-logo { top: 18px; left: 16px; right: 68px; }
+    .mobile-nav-logo img { width: 34px; height: 34px; border-radius: 7px; }
+    .mobile-nav-logo .brand-wordmark { font-size: 16px; }
+    .mobile-nav a { font-size: 18px; padding: 16px 0; }
+    .mobile-nav .mobile-cta { width: calc(100% - 32px) !important; text-align: center; }
+
+    .hero h1 { font-size: 26px; }
+    .hero-stats { gap: 20px; }
+    .stat-item { min-width: 40%; }
+    .btn-primary, .btn-outline { width: 100%; text-align: center; }
+    .hero-btns { flex-direction: column; align-items: center; }
+    .section-title { font-size: 24px; }
+    .section-label { letter-spacing: 2.2px; }
+    .about-intro-title { font-size: 30px; }
+    .about-pillar { padding: 28px 24px; border-radius: 14px; }
+    .pillar-title { font-size: 20px; }
+    .pillar-text { font-size: 14px; line-height: 1.8; }
+    .team-card-body { padding: 18px 18px 20px; }
+    .team-name { font-size: 24px; }
+    .team-card img { height: 220px; }
+    .program-hero-title { font-size: 29px; }
+    .program-hero-subtitle { font-size: 16px; }
+    .program-hero-desc { font-size: 14px; line-height: 1.85; }
+    .program-panel { padding: 22px 18px; }
+    .program-panel h3 { font-size: 23px; }
+    .career-box { padding: 18px 16px; }
+    .program-stat-strip { grid-template-columns: 1fr 1fr; }
+    .program-stat { padding: 14px 10px; }
+    .program-accordion-trigger { padding: 20px 18px; }
+    .program-accordion-title { font-size: 20px; }
+    .program-accordion-icon { width: 34px; height: 34px; }
+    .program-accordion-inner { padding: 0 18px 20px; }
+    .program-cta-link { width: 100%; }
+    .testimonial-card { padding: 28px 18px 22px; border-radius: 16px; }
+    .testimonial-text { font-size: 14px; line-height: 1.8; padding-right: 0; }
+    .testimonial-footer { align-items: flex-start; gap: 12px; }
+    .testimonial-author { font-size: 15px; }
+    .testimonial-role { line-height: 1.5; }
+    .contact-icon { width: 36px; height: 36px; }
+    .form-field { padding: 12px 14px; }
+    .footer-logo { flex-direction: column; }
+    .footer-logo .brand-wordmark { font-size: 20px; }
+    .footer-tagline { font-size: 12px; }
+  }
+
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-logo">
+      <img src="LOGO.PNG" alt="Capital Lab Education logo" />
+      <div class="brand-wordmark"><span class="brand-main">capital</span><span class="brand-accent">lab</span></div>
+    </div>
+    <div class="nav-links">
+      <a href="#about-us">About Us</a>
+      <a href="#cma-program">CMA US</a>
+      <a href="#cfa-program">CFA</a>
+      <a href="#instructor">Instructor</a>
+      <a href="#testimonials">Testimonials</a>
+      <a href="/leads" class="nav-leads">Book Free Call</a>
+      <a href="#" class="nav-cta">Enroll Now</a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- MOBILE NAV DRAWER -->
+  <div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile navigation">
+    <div class="mobile-nav-logo">
+      <img src="LOGO.PNG" alt="Capital Lab Education logo" />
+      <div class="brand-wordmark"><span class="brand-main">capital</span><span class="brand-accent">lab</span></div>
+    </div>
+    <a href="#about-us" onclick="closeMobileNav()">About Us</a>
+    <a href="#cma-program" onclick="closeMobileNav()">CMA US</a>
+    <a href="#cfa-program" onclick="closeMobileNav()">CFA</a>
+    <a href="#instructor" onclick="closeMobileNav()">Instructor</a>
+    <a href="#testimonials" onclick="closeMobileNav()">Testimonials</a>
+    <a href="/leads" class="nav-leads" onclick="closeMobileNav()">Book Free Call</a>
+    <a href="#" class="mobile-cta" onclick="closeMobileNav()">Enroll Now</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <p class="hero-eyebrow">Professional Finance Certification Coaching</p>
+    <h1>Your Gateway to Global <span>Finance Credentials</span></h1>
+    <p class="hero-sub">Expert-led coaching for CMA US and CFA - designed to help finance professionals achieve internationally recognized qualifications and elevate their careers.</p>
+    <div class="hero-btns">
+      <button class="btn-primary">Explore Our Programs</button>
+      <button class="btn-outline">Talk to an Advisor</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item"><div class="stat-num">10+</div><div class="stat-label">Years of expertise</div></div>
+      <div class="stat-item"><div class="stat-num">500+</div><div class="stat-label">Students trained</div></div>
+      <div class="stat-item"><div class="stat-num">2</div><div class="stat-label">Global certifications</div></div>
+      <div class="stat-item"><div class="stat-num">95%</div><div class="stat-label">Student satisfaction</div></div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <div class="about-bg">
+    <div class="section section-anchor" id="about-us">
+      <p class="section-label">Our Mission</p>
+      <h2 class="about-intro-title">Produce globally acclaimed finance artists</h2>
+      <div class="section-divider"></div>
+      <p class="section-body">Capital Lab Education is a specialized coaching institute focused exclusively on professional finance certifications. We combine deep industry expertise with structured, exam-focused learning - helping working professionals and students crack globally recognized credentials with confidence.</p>
+      <div class="about-grid">
+        <div class="about-pillar about-pillar-full">
+          <div class="pillar-icon"><i class="ti ti-target" aria-hidden="true"></i></div>
+          <div class="pillar-title">About Us</div>
+          <div class="pillar-text">Every session is structured around the actual exam pattern. No fluff - just concepts, practice, and strategy that matter on test day.</div>
+        </div>
+        <div class="about-pillar">
+          <div class="pillar-icon"><i class="ti ti-users" aria-hidden="true"></i></div>
+          <div class="pillar-title">Our Vision</div>
+          <div class="pillar-text">To be the catalyst for career transformation in the financial sector. We aim to bridge the gap between academic theory and real-world application, ensuring our students don't just pass exams, but become visionary leaders in investment management.</div>
+        </div>
+        <div class="about-pillar">
+          <div class="pillar-icon"><i class="ti ti-briefcase" aria-hidden="true"></i></div>
+          <div class="pillar-title">Our Commitment to Your Success</div>
+          <div class="pillar-text">Our instructor brings live industry experience in equity research, credit analysis, and financial modeling - so learning goes beyond textbooks.</div>
+        </div>
+        <div class="about-pillar">
+          <div class="pillar-icon"><i class="ti ti-device-laptop" aria-hidden="true"></i></div>
+          <div class="pillar-title">Online & Offline Options</div>
+          <div class="pillar-text">Flexible learning modes to suit your schedule. Whether you're a full-time professional or a recent graduate, we fit around your life.</div>
+        </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEAM -->
+  <div class="team-section">
+    <div class="section">
+      <div class="team-header">
+        <p class="section-label">Our Team</p>
+        <h2 class="about-intro-title" style="font-size: 48px; max-width: 760px; margin-left: auto; margin-right: auto;">A team of highly qualified professionals</h2>
+        <div class="section-divider"></div>
+      </div>
+      <div class="team-grid">
+        <article class="team-card">
+          <img src="instructur_harsh_new.jpeg" alt="Harsh Trivedi" />
+          <div class="team-card-body">
+            <div class="team-name">Harsh Trivedi</div>
+            <ul class="team-list">
+              <li>10+ years of experience</li>
+              <li>Equity Valuation</li>
+              <li>CFA L-2, PGDM, MBA</li>
+            </ul>
+          </div>
+        </article>
+        <article class="team-card">
+          <img src="instructor_parth.jpg" alt="Parth Shah" />
+          <div class="team-card-body">
+            <div class="team-name">Parth Shah</div>
+            <ul class="team-list">
+              <li>1+ years of experience</li>
+              <li>Equity Valuation</li>
+              <li>CFA L-1, CMA US, B.com</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRAMS -->
+  <div class="programs-bg">
+    <div class="section">
+      <p class="section-label">Our Programs</p>
+      <h2 class="section-title">Two Globally Recognized Certifications</h2>
+      <div class="section-divider"></div>
+      <div class="programs-grid">
+        <div class="program-card">
+          <div class="program-header">
+            <div class="program-badge">IMA Certified</div>
+            <div class="program-name">US CMA</div>
+            <div class="program-full">Certified Management Accountant (USA)</div>
+          </div>
+          <div class="program-body">
+            <p class="program-desc">A global management accounting qualification focused on financial planning, performance management, analytics, cost control, internal controls, and strategic decision-making.</p>
+            <ul class="program-highlights">
+              <li>Globally recognized by the Institute of Management Accountants</li>
+              <li>Only 2 exam parts for a faster certification path</li>
+              <li>Built for analysts, accountants, managers, and entrepreneurs</li>
+              <li>Focus on analytics, performance, controls, and strategic finance</li>
+              <li>Offline classes, LMS, mocks, and placement support</li>
+            </ul>
+          </div>
+        </div>
+        <div class="program-card">
+          <div class="program-header">
+            <div class="program-badge">CFA Institute</div>
+            <div class="program-name">CFA</div>
+            <div class="program-full">Chartered Financial Analyst</div>
+          </div>
+          <div class="program-body">
+            <p class="program-desc">A globally respected finance qualification for students and professionals who want careers in investment banking, equity research, portfolio management, corporate finance, and financial analysis.</p>
+            <ul class="program-highlights">
+              <li>Globally recognized across investment and finance industries</li>
+              <li>Three progressive levels (L1 -> L2 -> L3)</li>
+              <li>Three progressive levels with deep valuation and ethics focus</li>
+              <li>Ideal for students, professionals, and career changers</li>
+              <li>Practical mentoring, mocks, LMS access, and career support</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="program-detail-section alt">
+    <div class="section section-anchor" id="cfa-program">
+      <div class="program-hero">
+        <div class="program-hero-title">CFA - Chartered Financial Analyst</div>
+        <div class="program-hero-subtitle">Build a global career in investment, finance, portfolio management, equity research, and corporate finance with Capital Lab Education.</div>
+        <p class="program-hero-desc">The CFA program is a globally respected finance credential for candidates who want strong skills in investment analysis, markets, portfolio management, ethics, and valuation. At Capital Lab Education, we simplify the journey with structured preparation, mocks, LMS support, and practical guidance.</p>
+        <div class="program-cta-row">
+          <a href="#" class="program-cta-link primary nav-cta-trigger">Enroll Now</a>
+          <a href="#" class="program-cta-link secondary nav-cta-trigger">Talk to Counsellor</a>
+        </div>
+      </div>
+      <div class="program-content-grid">
+        <div class="program-stack program-accordion" id="cfaAccordion">
+          <div class="program-accordion-item active">
+            <button class="program-accordion-trigger" type="button" aria-expanded="true">
+              <span class="program-accordion-title">What is CFA?</span>
+              <span class="program-accordion-icon" aria-hidden="true"></span>
+            </button>
+            <div class="program-accordion-content">
+              <div class="program-accordion-inner">
+                <p>CFA is one of the most respected qualifications in global finance. It builds skills in analysis, valuation, portfolio management, economics, fixed income, derivatives, and ethics.</p>
+                <p class="program-mini-note">It signals strong technical depth, discipline, and readiness for high-responsibility finance roles.</p>
+              </div>
+            </div>
+          </div>
+          <div class="program-accordion-item">
+            <button class="program-accordion-trigger" type="button" aria-expanded="false">
+              <span class="program-accordion-title">Why Choose CFA?</span>
+              <span class="program-accordion-icon" aria-hidden="true"></span>
+            </button>
+            <div class="program-accordion-content">
+              <div class="program-accordion-inner">
+                <div class="program-number-list">
+                  <div class="program-number-item"><strong>1. Global Recognition</strong><p>Highly respected across investment and finance worldwide.</p></div>
+                  <div class="program-number-item"><strong>2. Better Roles</strong><p>Opens pathways into banking, research, portfolio, and corporate finance.</p></div>
+                  <div class="program-number-item"><strong>3. Long-Term Growth</strong><p>Supports better compensation and stronger career progression over time.</p></div>
+                  <div class="program-number-item"><strong>4. Powerful Network</strong><p>Connects you to a large global finance community and mentorship ecosystem.</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="program-accordion-item">
+            <button class="program-accordion-trigger" type="button" aria-expanded="false">
+              <span class="program-accordion-title">Who Should Pursue CFA?</span>
+              <span class="program-accordion-icon" aria-hidden="true"></span>
+            </button>
+            <div class="program-accordion-content">
+              <div class="program-accordion-inner">
+                <div class="program-number-list">
+                  <div class="program-number-item"><strong>Finance Professionals</strong><p>Upgrade technical skills and prepare for bigger roles.</p></div>
+                  <div class="program-number-item"><strong>Students & Graduates</strong><p>Build a strong base for investment, research, and corporate finance careers.</p></div>
+                  <div class="program-number-item"><strong>Career Changers</strong><p>Use CFA as a structured path into the finance industry.</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="program-stack program-accordion">
+          <div class="program-accordion-item">
+            <button class="program-accordion-trigger" type="button" aria-expanded="false">
+              <span class="program-accordion-title">CFA Career Opportunities</span>
+              <span class="program-accordion-icon" aria-hidden="true"></span>
+            </button>
+            <div class="program-accordion-content">
+              <div class="program-accordion-inner">
+                <div class="program-data-grid">
+                  <div class="program-data-card">
+                    <h4>Entry-Level Roles</h4>
+                    <ul>
+                      <li>Financial Analyst</li>
+                      <li>Equity Research Associate</li>
+                      <li>Investment Analyst</li>
+                      <li>Corporate Finance Executive</li>
+                      <li>Risk Analyst</li>
+                      <li>Banking & Financial Services</li>
+                    </ul>
+                    <p class="career-note">Expected CTC: Rs. 3-6 LPA.</p>
+                  </div>
+                  <div class="program-data-card">
+                    <h4>Experienced Roles</h4>
+                    <ul>
+                      <li>Investment Banking Associate</li>
+                      <li>M&amp;A Associate</li>
+                      <li>Research Analyst</li>
+                      <li>Portfolio Manager</li>
+                      <li>Corporate Finance Manager</li>
+                      <li>Senior Equity Researcher</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="program-accordion-item">
+            <button class="program-accordion-trigger" type="button" aria-expanded="false">
+              <span class="program-accordion-title">CFA Exam Structure</span>
+              <span class="program-accordion-icon" aria-hidden="true"></span>
+            </button>
+            <div class="program-accordion-content">
+              <div class="program-accordion-inner">
+                <p>The CFA path moves from core tools to valuation depth and finally to full portfolio management thinking.</p>
+                <div class="program-data-grid">
+                  <div class="program-data-card">
+                    <h4>CFA Level I</h4>
+                    <p>Focuses on core investment tools and concepts.</p>
+                    <p class="program-mini-note">Ethics, FSA, equity, fixed income, quant, economics, derivatives, alternatives, and portfolio basics.</p>
+                  </div>
+                  <div class="program-data-card">
+                    <h4>CFA Level II</h4>
+                    <p>Moves into deeper valuation and application.</p>
+                    <p class="program-mini-note">Ethics, FSA, equity, fixed income, derivatives, portfolio, economics, quant, and alternatives.</p>
+                  </div>
+                  <div class="program-data-card" style="grid-column: 1 / -1;">
+                    <h4>CFA Level III</h4>
+                    <p>Centers on portfolio management, asset allocation, risk, performance, and advanced decision-making.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="program-accordion-item">
+            <button class="program-accordion-trigger" type="button" aria-expanded="false">
+              <span class="program-accordion-title">Why Capital Lab Education for CFA?</span>
+              <span class="program-accordion-icon" aria-hidden="true"></span>
+            </button>
+            <div class="program-accordion-content">
+              <div class="program-accordion-inner">
+                <div class="program-advantage-grid">
+                  <div class="program-advantage-card"><strong>9-Month Roadmap</strong><p>A structured path from fundamentals to core CFA coverage.</p></div>
+                  <div class="program-advantage-card"><strong>Experienced Mentor</strong><p>Complex topics explained with practical, real-world context.</p></div>
+                  <div class="program-advantage-card"><strong>LMS Support</strong><p>Recorded lectures, quizzes, and progress tracking in one place.</p></div>
+                  <div class="program-advantage-card"><strong>Offline Classroom</strong><p>Better discipline, peer learning, and in-person doubt solving.</p></div>
+                  <div class="program-advantage-card"><strong>Full Mock Tests</strong><p>Build confidence, speed, and exam-day control.</p></div>
+                  <div class="program-advantage-card"><strong>Career Support</strong><p>Guidance for Excel, interviews, soft skills, and placements.</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="program-detail-section">
+    <div class="section section-anchor" id="cma-program">
+      <div class="program-hero">
+        <div class="program-hero-title">US CMA - Certified Management Accountant</div>
+        <div class="program-hero-subtitle">Become a strategic finance professional with a globally recognized management accounting qualification.</div>
+        <p class="program-hero-desc">US CMA is a globally recognized management accounting credential for students and professionals who want stronger skills in planning, analytics, controls, decision-making, and strategic finance.</p>
+        <div class="program-cta-row">
+          <a href="#" class="program-cta-link primary nav-cta-trigger">Start Your CMA Journey</a>
+          <a href="#" class="program-cta-link secondary nav-cta-trigger">Enroll Now</a>
+        </div>
+      </div>
+      <div class="program-content-grid">
+        <div class="program-stack program-accordion" id="cmaAccordion">
+          <div class="program-accordion-item active">
+            <button class="program-accordion-trigger" type="button" aria-expanded="true">
+              <span class="program-accordion-title">What is US CMA?</span>
+              <span class="program-accordion-icon" aria-hidden="true"></span>
+            </button>
+            <div class="program-accordion-content">
+              <div class="program-accordion-inner">
+                <p>US CMA is a global qualification in management accounting and strategic finance. It helps candidates move beyond bookkeeping and into analysis, planning, controls, and decision support.</p>
+                <p class="program-mini-note">It suits future finance leaders, analysts, controllers, and strategic decision-makers.</p>
+              </div>
+            </div>
+          </div>
+          <div class="program-accordion-item">
+            <button class="program-accordion-trigger" type="button" aria-expanded="false">
+              <span class="program-accordion-title">Why Choose US CMA?</span>
+              <span class="program-accordion-icon" aria-hidden="true"></span>
+            </button>
+            <div class="program-accordion-content">
+              <div class="program-accordion-inner">
+                <div class="program-advantage-grid">
+                  <div class="program-advantage-card"><strong>Global Prestige</strong><p>Recognized across multinational and corporate finance environments.</p></div>
+                  <div class="program-advantage-card"><strong>Career Growth</strong><p>Moves candidates toward analytical, strategic, and management-level roles.</p></div>
+                  <div class="program-advantage-card"><strong>Faster Path</strong><p>Only 2 exam parts, making the qualification more streamlined.</p></div>
+                  <div class="program-advantage-card"><strong>Strong ROI</strong><p>Good value for candidates who want quicker finance career growth.</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="program-accordion-item">
+            <button class="program-accordion-trigger" type="button" aria-expanded="false">
+              <span class="program-accordion-title">Who Should Pursue CMA?</span>
+              <span class="program-accordion-icon" aria-hidden="true"></span>
+            </button>
+            <div class="program-accordion-content">
+              <div class="program-accordion-inner">
+                <div class="program-data-grid">
+                  <div class="program-data-card"><h4>Finance Professionals</h4><p>Upgrade your profile and move toward strategic finance roles.</p></div>
+                  <div class="program-data-card"><h4>Aspiring Managers</h4><p>Build decision-making and leadership-focused finance skills.</p></div>
+                  <div class="program-data-card"><h4>CA / Semi-Qualified CA</h4><p>Add a global management accounting qualification to your profile.</p></div>
+                  <div class="program-data-card"><h4>Business Owners</h4><p>Use CMA thinking to improve planning, controls, and business performance.</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="program-accordion-item">
+            <button class="program-accordion-trigger" type="button" aria-expanded="false">
+              <span class="program-accordion-title">CMA Career Opportunities</span>
+              <span class="program-accordion-icon" aria-hidden="true"></span>
+            </button>
+            <div class="program-accordion-content">
+              <div class="program-accordion-inner">
+                <div class="program-data-grid">
+                  <div class="program-data-card">
+                    <h4>Entry-Level Candidates</h4>
+                    <ul>
+                      <li>Financial Analyst</li>
+                      <li>Management Accountant</li>
+                      <li>Cost Accountant</li>
+                      <li>Internal Auditor</li>
+                      <li>Risk Analyst</li>
+                      <li>Management Consultant</li>
+                    </ul>
+                    <p class="career-note">Expected CTC: Rs. 3-5 LPA.</p>
+                  </div>
+                  <div class="program-data-card">
+                    <h4>Experienced Roles</h4>
+                    <ul>
+                      <li>Chief Financial Officer</li>
+                      <li>Head of Finance</li>
+                      <li>Treasurer</li>
+                      <li>Corporate Controller</li>
+                      <li>Financial Risk Manager</li>
+                      <li>Chief Internal Auditor</li>
+                      <li>Senior Cost & Management Accountant</li>
+                    </ul>
+                    <p class="career-note">Expected CTC: Rs. 5-8 LPA+.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="program-accordion-item">
+            <button class="program-accordion-trigger" type="button" aria-expanded="false">
+              <span class="program-accordion-title">US CMA Exam Structure</span>
+              <span class="program-accordion-icon" aria-hidden="true"></span>
+            </button>
+            <div class="program-accordion-content">
+              <div class="program-accordion-inner">
+                <div class="program-stat-strip">
+                  <div class="program-stat"><span class="program-stat-value">2</span><span class="program-stat-label">Parts</span></div>
+                  <div class="program-stat"><span class="program-stat-value">100 MCQs</span><span class="program-stat-label">Per Part</span></div>
+                  <div class="program-stat"><span class="program-stat-value">2 Essays</span><span class="program-stat-label">Per Part</span></div>
+                  <div class="program-stat"><span class="program-stat-value">4 Hours</span><span class="program-stat-label">Duration</span></div>
+                  <div class="program-stat"><span class="program-stat-value">360 / 500</span><span class="program-stat-label">Pass Score</span></div>
+                </div>
+                <p class="program-mini-note">Testing windows: Jan-Feb, May-Jun, and Sep-Oct.</p>
+                <div class="program-data-grid">
+                  <div class="program-data-card">
+                    <h4>Part 1: Financial Planning, Performance, and Analytics</h4>
+                    <ul>
+                      <li>Planning, Budgeting & Forecasting - 20%</li>
+                      <li>Performance Management - 20%</li>
+                      <li>External Financial Reporting Decisions - 15%</li>
+                      <li>Cost Management - 15%</li>
+                      <li>Internal Controls - 15%</li>
+                      <li>Technology & Analytics - 15%</li>
+                    </ul>
+                  </div>
+                  <div class="program-data-card">
+                    <h4>Part 2: Strategic Financial Management</h4>
+                    <ul>
+                      <li>Business Decision Analysis - 25%</li>
+                      <li>Financial Statement Analysis - 20%</li>
+                      <li>Corporate Finance - 20%</li>
+                      <li>Professional Ethics - 15%</li>
+                      <li>Enterprise Risk Management - 10%</li>
+                      <li>Capital Investment Decisions - 10%</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="program-accordion-item">
+            <button class="program-accordion-trigger" type="button" aria-expanded="false">
+              <span class="program-accordion-title">Why Capital Lab Education for CMA?</span>
+              <span class="program-accordion-icon" aria-hidden="true"></span>
+            </button>
+            <div class="program-accordion-content">
+              <div class="program-accordion-inner">
+                <div class="program-advantage-grid">
+                  <div class="program-advantage-card"><strong>Offline Lectures</strong><p>Focused classroom learning with real-time interaction and accountability.</p></div>
+                  <div class="program-advantage-card"><strong>Concept Clarity</strong><p>Complex topics broken into easy, logical building blocks.</p></div>
+                  <div class="program-advantage-card"><strong>Expert Mentorship</strong><p>Faculty with both subject depth and practical industry understanding.</p></div>
+                  <div class="program-advantage-card"><strong>Real Examples</strong><p>Concepts taught with practical market and business use cases.</p></div>
+                  <div class="program-advantage-card"><strong>LMS Access</strong><p>Recorded lectures, tests, assignments, and progress tracking.</p></div>
+                  <div class="program-advantage-card"><strong>Hock Support</strong><p>Premium global study content and question banks for preparation.</p></div>
+                  <div class="program-advantage-card"><strong>Mock Exams</strong><p>Improve time management, confidence, and readiness.</p></div>
+                  <div class="program-advantage-card"><strong>Placement Support</strong><p>CV, interview, and finance-role guidance.</p></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSTRUCTOR -->
+  <div class="instructor-bg">
+    <div class="section section-anchor" id="instructor">
+      <p class="section-label" style="color: var(--gold);">Meet Your Instructor</p>
+      <h2 class="section-title">Learn From Someone Who's Done It</h2>
+      <div class="section-divider"></div>
+      <div class="instructor-card">
+        <div class="instructor-avatar">
+          <img src="instructur_harsh_new.jpeg" alt="Harsh Trivedi" />
+        </div>
+        <div>
+          <div class="instructor-name">Harsh Trivedi</div>
+          <div class="instructor-title">Finance Professional & Lead Instructor - Capital Lab Education</div>
+          <div class="cred-tags">
+            <span class="cred-tag">CFA Level 2</span>
+            <span class="cred-tag">PGDM</span>
+            <span class="cred-tag">MBA</span>
+            <span class="cred-tag">B.Com</span>
+          </div>
+          <p class="instructor-bio">With over 10 years of hands-on experience in the financial services industry, Harsh brings real-world depth to every classroom session. His professional journey spans equity valuation, real estate valuation, credit analysis, and financial analysis - giving students insight that goes far beyond what's written in textbooks. He has personally cleared CFA Level 2 and brings that exam experience directly into his teaching methodology, helping students navigate the most challenging concepts with clarity and precision.</p>
+          <div style="font-size: 13px; color: var(--gold); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;">Areas of Expertise</div>
+          <div class="expertise-grid">
+            <div class="exp-item"><div class="exp-dot"></div>Equity Valuation</div>
+            <div class="exp-item"><div class="exp-dot"></div>Real Estate Valuation</div>
+            <div class="exp-item"><div class="exp-dot"></div>Credit Analysis</div>
+            <div class="exp-item"><div class="exp-dot"></div>Financial Analysis</div>
+            <div class="exp-item"><div class="exp-dot"></div>Portfolio Management</div>
+            <div class="exp-item"><div class="exp-dot"></div>Financial Modeling</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS -->
+  <div class="testimonials-bg">
+    <div class="section section-anchor" id="testimonials">
+      <p class="section-label" style="color: var(--navy);">Reviews</p>
+      <h2 class="section-title">Why trust us?</h2>
+      <div class="section-divider"></div>
+      <div class="testimonials-carousel" id="testimonialsCarousel">
+        <div class="testimonials-track" id="testimonialsTrack">
+
+        <div class="testimonial-card">
+          <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <p class="testimonial-text">Truly great faculty. Harsh Sir has in-depth subject knowledge and a highly engaging teaching style. He is focused on practical application and highly committed to students' progress. Excited for Capital Labs!</p>
+          <div class="testimonial-footer">
+            <div class="testimonial-author">Rishabh Dayama</div>
+            <div class="testimonial-role">Capital Lab Education Student</div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <p class="testimonial-text">Harsh Sir, you are truly one of the best teachers. Your guidance is exceptional, and your knowledge is truly inspiring. The way you mentor and support your students makes a huge difference in our learning journey. Your teaching style is so clear that we understand everything in just one explanation. We feel really fortunate and grateful to have you as our mentor.</p>
+          <div class="testimonial-footer">
+            <div class="testimonial-author">Manya Patel</div>
+            <div class="testimonial-role">Capital Lab Education Student</div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+          <p class="testimonial-text">I'm really grateful to have you as my CFA mentor. Your ability to simplify complex concepts and explain them in a clear, practical way made a huge difference. What truly sets you apart is your approachability - it never felt like formal teaching, it felt like guidance from an elder brother who wants you to succeed. Highly recommended for anyone serious about CFA.</p>
+          <div class="testimonial-footer">
+            <div class="testimonial-author">Vishal Sharma</div>
+            <div class="testimonial-role">CFA Candidate | Capital Lab Education</div>
+          </div>
+        </div>
+
+      </div>
+      <div class="testimonial-controls">
+        <button class="testimonial-btn" id="testimonialPrev" type="button" aria-label="Previous testimonial">&#8249;</button>
+        <button class="testimonial-btn" id="testimonialNext" type="button" aria-label="Next testimonial">&#8250;</button>
+      </div>
+      <div class="testimonial-dots" id="testimonialDots" aria-label="Testimonial navigation"></div>
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="contact-bg">
+    <div class="section">
+      <p class="section-label" style="color: var(--gold);">Get In Touch</p>
+      <h2 class="section-title">Start Your Journey Today</h2>
+      <div class="section-divider"></div>
+      <p class="section-body">Have questions about which program suits you? Our team is happy to guide you through the options and help you pick the right path.</p>
+
+      <div class="contact-grid">
+        <div>
+          <div class="contact-info-item">
+            <div class="contact-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 21s-6-5.2-6-11a6 6 0 1 1 12 0c0 5.8-6 11-6 11Z"></path>
+                <circle cx="12" cy="10" r="2.5"></circle>
+              </svg>
+            </div>
+            <div>
+              <div class="contact-detail-label">Location</div>
+              <div class="contact-detail-value">201, Grace Business Park, Opp. Sagar Sangeeta 1, Nr. Saral Heights, Kargil Petrol Pump Road, Sola, Ahmedabad - 380060</div>
+            </div>
+          </div>
+          <div class="contact-info-item">
+            <div class="contact-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.4 19.4 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7l.5 3a2 2 0 0 1-.6 1.8l-1.3 1.3a16 16 0 0 0 6.3 6.3l1.3-1.3a2 2 0 0 1 1.8-.6l3 .5A2 2 0 0 1 22 16.9Z"></path>
+              </svg>
+            </div>
+            <div>
+              <div class="contact-detail-label">Phone</div>
+              <div class="contact-detail-value">6355258396</div>
+            </div>
+          </div>
+          <div class="contact-info-item">
+            <div class="contact-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <rect x="3" y="5" width="18" height="14" rx="2"></rect>
+                <path d="m4 7 8 6 8-6"></path>
+              </svg>
+            </div>
+            <div>
+              <div class="contact-detail-label">Email</div>
+              <div class="contact-detail-value">info@capitallabedu.com</div>
+            </div>
+          </div>
+          <div class="contact-info-item">
+            <div class="contact-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9"></circle>
+                <path d="M12 7v5l3 2"></path>
+              </svg>
+            </div>
+            <div>
+              <div class="contact-detail-label">Website</div>
+              <div class="contact-detail-value">www.capitallabedu.com</div>
+            </div>
+          </div>
+        </div>
+        <div class="contact-form">
+          <div class="form-row">
+            <input type="text" class="form-field" placeholder="Your Name" />
+            <input type="email" class="form-field" placeholder="Email Address" />
+          </div>
+          <input type="tel" class="form-field" placeholder="Phone Number" />
+          <select class="form-field" style="background: rgba(13,27,62,0.95); color: rgba(255,255,255,0.6);">
+            <option value="">Interested in...</option>
+            <option>CMA US Program</option>
+            <option>CFA Program</option>
+            <option>Both Programs</option>
+            <option>General Enquiry</option>
+          </select>
+          <textarea class="form-field" placeholder="Your message or questions..."></textarea>
+          <button class="submit-btn">Send Enquiry</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP MODAL -->
+  <div class="popup-overlay" id="contactPopup" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
+    <div class="popup-modal">
+      <div class="popup-gold-bar"></div>
+      <div class="popup-header">
+        <button class="popup-close" id="popupClose" aria-label="Close">&times;</button>
+        <p class="popup-label">Get In Touch</p>
+        <h2 class="popup-title" id="popupTitle">Start Your Journey Today</h2>
+        <p class="popup-subtitle">Have questions? Our team is ready to guide you to the right program.</p>
+      </div>
+      <div class="popup-body">
+        <div class="popup-form-row">
+          <input type="text" class="popup-field" placeholder="Your Name" />
+          <input type="email" class="popup-field" placeholder="Email Address" />
+        </div>
+        <input type="tel" class="popup-field" placeholder="Phone Number" />
+        <select class="popup-field">
+          <option value="">Interested in...</option>
+          <option>CMA US Program</option>
+          <option>CFA Program</option>
+          <option>Both Programs</option>
+          <option>General Enquiry</option>
+        </select>
+        <textarea class="popup-field" placeholder="Your message or questions..."></textarea>
+        <button class="popup-submit">Send Enquiry &#8594;</button>
+        <p class="popup-skip" id="popupSkip">No thanks, I'll explore on my own</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // â”€â”€ HAMBURGER MENU â”€â”€
+    var hamburger = document.getElementById('hamburger');
+    var mobileNav = document.getElementById('mobileNav');
+
+    function closeMobileNav() {
+      hamburger.classList.remove('open');
+      mobileNav.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+
+    hamburger.addEventListener('click', function () {
+      var isOpen = mobileNav.classList.toggle('open');
+      hamburger.classList.toggle('open');
+      hamburger.setAttribute('aria-expanded', isOpen);
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+    });
+
+    (function () {
+      var aboutSection = document.getElementById('about-us');
+      if (!aboutSection) return;
+
+      var introBody = aboutSection.querySelector('.section-body');
+      if (introBody) introBody.remove();
+
+      var cards = aboutSection.querySelectorAll('.about-pillar');
+      if (cards[0]) {
+        cards[0].querySelector('.pillar-title').textContent = 'About Us';
+        cards[0].querySelector('.pillar-text').textContent = 'At Capital Lab Education, we believe that mastering the complexities of the global financial markets requires more than just memorizing formulas. It requires a shift in perspective. Founded by industry experts, our mission is to provide aspiring professionals with the technical depth, ethical foundation, and analytical rigor necessary to excel in the most demanding financial environments.';
+      }
+      if (cards[1]) {
+        cards[1].querySelector('.pillar-title').textContent = 'Our Vision';
+        cards[1].querySelector('.pillar-text').textContent = 'To be the catalyst for career transformation in the financial sector. We aim to bridge the gap between academic theory and real-world application, ensuring our students do not just pass exams, but become visionary leaders in investment management.';
+      }
+      if (cards[2]) {
+        cards[2].querySelector('.pillar-title').textContent = 'Our Commitment to Your Success';
+        cards[2].querySelector('.pillar-text').textContent = 'Whether you are navigating the rigorous path of the CFA Program or looking to sharpen your valuation skills, Capital Lab Education is your partner in professional growth. We provide the structure, the clarity, and the new vision you need to unlock your full potential in the world of finance.';
+      }
+      if (cards[3]) {
+        cards[3].remove();
+      }
+    })();
+
+    // â”€â”€ POPUP FORM â”€â”€
+    (function () {
+      var track = document.getElementById('testimonialsTrack');
+      var prevBtn = document.getElementById('testimonialPrev');
+      var nextBtn = document.getElementById('testimonialNext');
+      var dotsWrap = document.getElementById('testimonialDots');
+      var carousel = document.getElementById('testimonialsCarousel');
+      if (!track || !prevBtn || !nextBtn || !dotsWrap || !carousel) return;
+
+      var testimonials = [
+        {
+          name: 'Moksh',
+          role: 'Capital Lab Education Student',
+          text: 'Your teaching method was great. The lecture were fun and also very helpful in remembering the concept. There was no boredom in your lecture and there was a personal connection which all the students studying with you felt in the class. You were more than a teacher. A friend and a mentor.'
+        },
+        {
+          name: 'Dhriti Pandey',
+          role: 'Capital Lab Education Student',
+          text: "I wanted to express how much I've enjoyed being in your class. Your teaching has been truly great Sir. I always felt comfortable asking questions and you explained everything so clearly, specially with those helpful examples and Excel sheets which really boosted my understanding of the topics. I appreciate how you made the classroom such a welcoming space for learning and discussion. Thank you for creating such a positive learning environment."
+        },
+        {
+          name: 'Tamanna',
+          role: 'US CMA Student',
+          text: 'I am extremely satisfied with the depth of knowledge and exceptional teaching style. The way of explaining concepts is very clear and accurate, which makes even difficult topics easy to understand. I really appreciate the efforts put into each session and guidance in my US CMA preparation.'
+        },
+        {
+          name: 'Poorva',
+          role: 'Capital Lab Education Student',
+          text: 'Your teaching method was really really great and helpful. Helped a lot in clearing certain concepts, was able to understand it all very easily. You created a very positive and comfortable learning environment. Truly a great experience!'
+        },
+        {
+          name: 'Mudrika',
+          role: 'Capital Lab Education Student',
+          text: 'It was great learning with you. You made stuff easy to understand for everybody. Your fun and friendly energy made finance feel easy. A really wonderful mentor and tutor!'
+        }
+      ];
+
+      function initials(name) {
+        return name.split(' ').map(function (part) { return part.charAt(0); }).join('').slice(0, 2).toUpperCase();
+      }
+
+      track.innerHTML = testimonials.map(function (item) {
+        return '<article class="testimonial-card">' +
+          '<div class="testimonial-quote">"</div>' +
+          '<p class="testimonial-text">' + item.text + '</p>' +
+          '<div class="testimonial-footer">' +
+            '<div class="testimonial-avatar">' + initials(item.name) + '</div>' +
+            '<div>' +
+              '<div class="testimonial-author">' + item.name + '</div>' +
+              '<div class="testimonial-role">' + item.role + '</div>' +
+            '</div>' +
+          '</div>' +
+        '</article>';
+      }).join('');
+
+      var currentIndex = 0;
+      var autoSlideTimer = null;
+      var startX = 0;
+      var endX = 0;
+
+      function getCardsPerView() {
+        return window.innerWidth <= 768 ? 1 : 2;
+      }
+
+      function getMaxIndex() {
+        return Math.max(0, testimonials.length - getCardsPerView());
+      }
+
+      function renderDots() {
+        var pages = getMaxIndex() + 1;
+        dotsWrap.innerHTML = '';
+        for (var i = 0; i < pages; i += 1) {
+          var dot = document.createElement('button');
+          dot.type = 'button';
+          dot.className = 'testimonial-dot' + (i === currentIndex ? ' active' : '');
+          dot.setAttribute('aria-label', 'Go to testimonial group ' + (i + 1));
+          dot.dataset.index = String(i);
+          dotsWrap.appendChild(dot);
+        }
+      }
+
+      function updateDots() {
+        var dots = dotsWrap.querySelectorAll('.testimonial-dot');
+        dots.forEach(function (dot, index) {
+          dot.classList.toggle('active', index === currentIndex);
+        });
+      }
+
+      function updateSlider() {
+        var card = track.querySelector('.testimonial-card');
+        if (!card) return;
+
+        var cardsPerView = getCardsPerView();
+        var maxIndex = Math.max(0, testimonials.length - cardsPerView);
+        currentIndex = Math.max(0, Math.min(currentIndex, maxIndex));
+
+        var gap = window.innerWidth <= 768 ? 20 : 24;
+        var slideWidth = card.getBoundingClientRect().width + gap;
+        track.style.transform = 'translateX(' + (-currentIndex * slideWidth) + 'px)';
+        prevBtn.disabled = maxIndex === 0;
+        nextBtn.disabled = maxIndex === 0;
+        renderDots();
+        updateDots();
+      }
+
+      function goToIndex(index) {
+        currentIndex = index;
+        updateSlider();
+      }
+
+      function nextSlide() {
+        var maxIndex = getMaxIndex();
+        currentIndex = currentIndex >= maxIndex ? 0 : currentIndex + 1;
+        updateSlider();
+      }
+
+      function prevSlide() {
+        var maxIndex = getMaxIndex();
+        currentIndex = currentIndex <= 0 ? maxIndex : currentIndex - 1;
+        updateSlider();
+      }
+
+      function stopAutoSlide() {
+        if (autoSlideTimer) {
+          clearInterval(autoSlideTimer);
+          autoSlideTimer = null;
+        }
+      }
+
+      function startAutoSlide() {
+        stopAutoSlide();
+        autoSlideTimer = setInterval(nextSlide, 4500);
+      }
+
+      prevBtn.addEventListener('click', function () {
+        prevSlide();
+        startAutoSlide();
+      });
+
+      nextBtn.addEventListener('click', function () {
+        nextSlide();
+        startAutoSlide();
+      });
+
+      dotsWrap.addEventListener('click', function (event) {
+        var dot = event.target.closest('.testimonial-dot');
+        if (!dot) return;
+        goToIndex(Number(dot.dataset.index));
+        startAutoSlide();
+      });
+
+      window.addEventListener('resize', updateSlider);
+      carousel.addEventListener('mouseenter', stopAutoSlide);
+      carousel.addEventListener('mouseleave', startAutoSlide);
+      carousel.addEventListener('touchstart', function (event) {
+        stopAutoSlide();
+        startX = event.changedTouches[0].clientX;
+      }, { passive: true });
+      carousel.addEventListener('touchend', function (event) {
+        endX = event.changedTouches[0].clientX;
+        var delta = endX - startX;
+        if (Math.abs(delta) < 40) return;
+        if (delta < 0) {
+          nextSlide();
+        } else {
+          prevSlide();
+        }
+        startAutoSlide();
+      }, { passive: true });
+
+      updateSlider();
+      startAutoSlide();
+    })();
+
+    (function () {
+      var cfaCard = document.querySelector('.programs-grid .program-card:last-child');
+      if (cfaCard) {
+        var cfaHighlights = cfaCard.querySelectorAll('.program-highlights li');
+        if (cfaHighlights[1]) {
+          cfaHighlights[1].textContent = 'Strong path into banking, research, portfolio, and corporate finance';
+        }
+      }
+    })();
+
+    (function () {
+      var accordions = document.querySelectorAll('.program-accordion');
+      if (!accordions.length) return;
+
+      function syncItem(item, isOpen) {
+        var trigger = item.querySelector('.program-accordion-trigger');
+        var content = item.querySelector('.program-accordion-content');
+        item.classList.toggle('active', isOpen);
+        trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        content.style.maxHeight = isOpen ? content.scrollHeight + 'px' : '0px';
+      }
+
+      accordions.forEach(function (accordion) {
+        var items = accordion.querySelectorAll('.program-accordion-item');
+
+        items.forEach(function (item) {
+          var trigger = item.querySelector('.program-accordion-trigger');
+          syncItem(item, item.classList.contains('active'));
+
+          trigger.addEventListener('click', function () {
+            var shouldOpen = !item.classList.contains('active');
+            items.forEach(function (other) { syncItem(other, false); });
+            syncItem(item, shouldOpen);
+          });
+        });
+      });
+
+      window.addEventListener('resize', function () {
+        document.querySelectorAll('.program-accordion-item.active .program-accordion-content').forEach(function (content) {
+          content.style.maxHeight = content.scrollHeight + 'px';
+        });
+      });
+    })();
+
+    (function () {
+      var overlay = document.getElementById('contactPopup');
+      var closeBtn = document.getElementById('popupClose');
+      var skipBtn  = document.getElementById('popupSkip');
+
+      function openPopup() {
+        // Don't open if mobile nav is open
+        if (mobileNav.classList.contains('open')) return;
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+      function closePopup() { overlay.classList.remove('active'); document.body.style.overflow = ''; }
+
+      setTimeout(openPopup, 2000);
+
+      document.querySelectorAll('.nav-cta-trigger').forEach(function (trigger) {
+        trigger.addEventListener('click', function (e) {
+          e.preventDefault();
+          openPopup();
+        });
+      });
+
+      closeBtn.addEventListener('click', closePopup);
+      skipBtn.addEventListener('click', closePopup);
+      overlay.addEventListener('click', function (e) { if (e.target === overlay) closePopup(); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          closePopup();
+          closeMobileNav();
+        }
+      });
+    })();
+  </script>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-logo">
+      <img src="LOGO.PNG" alt="Capital Lab Education logo" />
+      <div class="brand-wordmark"><span class="brand-main">capital</span><span class="brand-accent">lab</span></div>
+    </div>
+    <div class="footer-tagline">&#169; 2025 Capital Lab Education. Empowering finance professionals with globally recognized certifications.</div>
+  </footer>
+
+</div>
+</body>
+</html>

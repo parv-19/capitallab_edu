@@ -1,0 +1,2225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Capital Lab Education — Ahmedabad's specialist CFA & US CMA coaching institute. Expert-led, small batches, offline + LMS. Book your free counselling call today.">
+<meta property="og:title" content="Clear your CFA or US CMA with the right strategy — Capital Lab Education">
+<meta property="og:description" content="Structured 9-month roadmap, expert mentorship & real exam strategy. Small batches, offline + LMS. Book your free counselling call today.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<title>Capital Lab Education — CFA & CMA Coaching in Ahmedabad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #1A2D5A;
+    --green-light: #EEF1F8;
+    --green-mid: #2A4080;
+    --green-dark: #0D1B3E;
+    --gold: #C9A84C;
+    --gold-light: #F5E9C8;
+    --text: #0D1B3E;
+    --text-muted: #3A4A6B;
+    --text-light: #7A8099;
+    --bg: #FDFAF4;
+    --white: #FFFFFF;
+    --border: #E2E6F0;
+    --border-mid: #C8CEDF;
+    --radius: 12px;
+    --radius-lg: 18px;
+    --shadow: 0 2px 16px rgba(13,27,62,0.07);
+    --shadow-lg: 0 8px 40px rgba(13,27,62,0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Lora', serif;
+    line-height: 1.25;
+    font-weight: 600;
+  }
+
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ─── NAVBAR ─── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: var(--green-dark);
+    border-bottom: 2px solid var(--gold);
+    padding: 0 24px;
+  }
+
+  .nav-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-img {
+    width: 38px;
+    height: 38px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  .logo-mark {
+    width: 36px;
+    height: 36px;
+    background: var(--green);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-family: 'Lora', serif;
+    font-size: 15px;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-text {
+    font-family: 'Lora', serif;
+    font-size: 17px;
+    color: #fff;
+    white-space: nowrap;
+  }
+
+  .logo-text span {
+    color: var(--gold);
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-size: 14px;
+    color: rgba(255,255,255,0.75);
+    font-weight: 400;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--gold); }
+
+  .nav-cta {
+    background: var(--gold);
+    color: var(--green-dark) !important;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .nav-cta:hover {
+    background: #E8C97A;
+    transform: translateY(-1px);
+  }
+
+  .nav-cta-mobile { display: none; }
+
+  @media (max-width: 900px) {
+    .nav-cta-mobile {
+      display: inline-flex;
+      font-size: 13px;
+      padding: 7px 14px;
+      white-space: nowrap;
+      background: var(--gold);
+      color: var(--green-dark) !important;
+      font-weight: 600;
+    }
+    .nav-cta-mobile:hover { background: #E8C97A; }
+    .nav-inner { height: 56px; }
+  }
+
+  /* ─── HERO ─── */
+  .hero-section {
+    background: var(--green-dark);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 360px; height: 360px;
+    border: 1px solid rgba(201,168,76,0.12);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .hero-section::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -60px;
+    width: 240px; height: 240px;
+    border: 1px solid rgba(201,168,76,0.08);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .hero {
+    padding: 72px 24px 64px;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 64px;
+    align-items: start;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-left { padding-top: 8px; }
+  .hero-mobile-cta { display: none; }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.9);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+    letter-spacing: 0.02em;
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.3); }
+  }
+
+  .hero h1 {
+    font-size: 46px;
+    color: #fff;
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+  }
+
+  .hero h1 em {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .hero-sub {
+    font-size: 17px;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 32px;
+    line-height: 1.7;
+    max-width: 520px;
+  }
+
+  .hero-proof {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .hero-proof-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.75);
+  }
+
+  .proof-icon {
+    width: 20px;
+    height: 20px;
+    background: rgba(201,168,76,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .proof-icon svg { width: 11px; height: 11px; stroke: var(--gold); fill: none; stroke-width: 2.5; }
+
+  .hero-divider {
+    width: 1px;
+    height: 14px;
+    background: rgba(255,255,255,0.2);
+  }
+
+  /* ─── FORM CARD ─── */
+  .form-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    position: sticky;
+    top: 80px;
+  }
+
+  .form-card-header {
+    background: var(--green);
+    padding: 20px 24px;
+    color: #fff;
+  }
+
+  .form-card-header h3 {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    font-weight: 400;
+    margin-bottom: 4px;
+  }
+
+  .form-card-header p {
+    font-size: 13px;
+    opacity: 0.8;
+  }
+
+  .form-urgency {
+    background: #FFF8E7;
+    border-bottom: 1px solid #F0E2B0;
+    padding: 10px 24px;
+    font-size: 12px;
+    color: #8A6914;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: 500;
+  }
+
+  .urgency-dot {
+    width: 7px;
+    height: 7px;
+    background: #C9A84C;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: pulse 1.5s infinite;
+  }
+
+  .form-body { padding: 20px 24px 24px; }
+
+  .form-group { margin-bottom: 14px; }
+
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1px solid var(--border-mid);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(15,122,90,0.08);
+    background: #fff;
+  }
+
+  .form-group textarea { resize: none; height: 68px; }
+
+  .form-hint {
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    padding: 13px;
+    border-radius: 9px;
+    font-size: 15px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s, transform 0.15s;
+    margin-top: 4px;
+  }
+
+  .btn-primary:hover {
+    background: var(--green-dark);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active { transform: scale(0.98); }
+
+  .btn-wa {
+    width: 100%;
+    background: #fff;
+    color: #128C7E;
+    border: 1px solid #128C7E;
+    padding: 11px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s;
+    margin-top: 10px;
+  }
+
+  .btn-wa:hover { background: #f0faf9; }
+
+  .form-privacy {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: 12px;
+  }
+
+  /* ─── STATS STRIP ─── */
+  .stats-strip {
+    background: var(--green-dark);
+    border-top: 2px solid var(--gold);
+    border-bottom: 2px solid var(--gold);
+  }
+
+  .stats-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .stat-item {
+    padding: 28px 16px;
+    text-align: center;
+    border-right: 1px solid rgba(201,168,76,0.2);
+  }
+
+  .stat-item:last-child { border-right: none; }
+
+  .stat-num {
+    font-family: 'Lora', serif;
+    font-size: 36px;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 5px;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+  }
+
+  /* ─── SECTION SHARED ─── */
+  .section {
+    padding: 80px 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-full {
+    padding: 80px 0;
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-full .section { padding-top: 0; padding-bottom: 0; }
+
+  .section-navy {
+    background: var(--green-dark);
+    border-top: none;
+    border-bottom: none;
+    padding: 80px 0;
+  }
+
+  .section-navy .section { padding-top: 0; padding-bottom: 0; }
+  .section-navy .section-title { color: #fff; }
+  .section-navy .section-sub { color: rgba(255,255,255,0.6); }
+  .section-navy .eyebrow { color: var(--gold); }
+
+  .eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+
+  .section-gold-line {
+    width: 48px;
+    height: 2px;
+    background: var(--gold);
+    margin-bottom: 28px;
+  }
+
+  .section-title {
+    font-family: 'Lora', serif;
+    font-size: 36px;
+    color: var(--text);
+    margin-bottom: 14px;
+    max-width: 600px;
+  }
+
+  .section-sub {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 560px;
+    margin-bottom: 48px;
+    line-height: 1.7;
+  }
+
+  /* ─── WHY US ─── */
+  .why-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .why-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--gold);
+    border-radius: var(--radius-lg);
+    padding: 28px 24px;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+
+  .why-card:hover {
+    box-shadow: 0 8px 28px rgba(13,27,62,0.12);
+    transform: translateY(-3px);
+  }
+
+  .why-icon-wrap {
+    width: 44px;
+    height: 44px;
+    background: var(--green-dark);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .why-icon-wrap svg {
+    width: 22px;
+    height: 22px;
+    stroke: var(--gold);
+    fill: none;
+    stroke-width: 1.8;
+  }
+
+  .why-card h3 {
+    font-family: 'Lora', serif;
+    font-size: 18px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--green-dark);
+  }
+
+  .why-card p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+
+  /* ─── PROGRAMS ─── */
+  .programs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    align-items: stretch;
+  }
+
+  .prog-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-3px);
+  }
+
+  .prog-header {
+    padding: 28px 28px 20px;
+    background: var(--green-dark);
+    border-bottom: 2px solid var(--gold);
+  }
+
+  .prog-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+
+  .prog-tag.cfa {
+    background: var(--gold);
+    color: var(--green-dark);
+  }
+
+  .prog-tag.cma {
+    background: var(--gold);
+    color: var(--green-dark);
+  }
+
+  .prog-tag.foundation {
+    background: rgba(201,168,76,0.25);
+    color: #E8C97A;
+    border: 1px solid rgba(201,168,76,0.4);
+  }
+
+  .prog-included {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    background: var(--gold-light);
+    color: #7A5A14;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid #E8C97A;
+  }
+
+  .prog-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--white);
+    transition: box-shadow 0.2s, transform 0.2s;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .prog-header h3 {
+    font-size: 22px;
+    margin-bottom: 8px;
+    color: #fff;
+  }
+
+  .prog-header p {
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.6;
+  }
+
+  .prog-body {
+    padding: 20px 28px 28px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .prog-features { list-style: none; margin-bottom: 24px; flex: 1; }
+
+  .prog-features li {
+    font-size: 14px;
+    color: var(--text);
+    padding: 7px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .prog-features li:last-child { border-bottom: none; }
+
+  .prog-features li::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    background: var(--gold);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  .prog-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--green-dark);
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: gap 0.2s, color 0.2s;
+    margin-top: auto;
+  }
+
+  .prog-cta:hover { gap: 11px; color: var(--gold); }
+
+  /* ─── INSTRUCTOR ─── */
+  .instr-section {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 64px;
+    align-items: center;
+  }
+
+  .instr-photo-wrap {
+    position: relative;
+  }
+
+  .instr-photo-bg {
+    width: 100%;
+    aspect-ratio: 3/4;
+    background: linear-gradient(145deg, var(--green-light) 0%, #C8D4E8 100%);
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .instr-initials {
+    font-family: 'Lora', serif;
+    font-size: 72px;
+    color: var(--green);
+    opacity: 0.4;
+  }
+
+  .instr-badge-float {
+    position: absolute;
+    bottom: -16px;
+    right: -16px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .instr-badge-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--gold-light);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    color: var(--gold);
+  }
+
+  .instr-badge-text { font-size: 13px; font-weight: 500; }
+  .instr-badge-sub { font-size: 11px; color: var(--text-muted); }
+
+  .instr-name {
+    font-size: 32px;
+    margin-bottom: 6px;
+  }
+
+  .instr-title {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .instr-creds {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .cred-chip {
+    font-size: 12px;
+    background: var(--green-light);
+    color: var(--green-dark);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .instr-bio {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.75;
+    margin-bottom: 24px;
+  }
+
+  .expertise-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .expertise-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .expertise-item::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    background: var(--green);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ─── TESTIMONIALS ─── */
+  .testi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .testi-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .testi-card:hover {
+    background: rgba(255,255,255,0.09);
+    border-color: rgba(201,168,76,0.45);
+  }
+
+  .testi-stars {
+    color: var(--gold);
+    font-size: 14px;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+  }
+
+  .testi-text {
+    font-family: 'Lora', serif;
+    font-size: 15px;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.7;
+    margin-bottom: 20px;
+    flex: 1;
+    font-style: italic;
+  }
+
+  .testi-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .testi-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(201,168,76,0.2);
+    border: 1px solid rgba(201,168,76,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .testi-name { font-size: 14px; font-weight: 600; color: #fff; }
+  .testi-meta { font-size: 12px; color: rgba(255,255,255,0.5); }
+
+  /* ─── CTA BAND ─── */
+  .cta-band {
+    background: var(--green-dark);
+    padding: 72px 24px;
+    text-align: center;
+  }
+
+  .cta-band h2 {
+    font-family: 'Lora', serif;
+    font-size: 40px;
+    color: #fff;
+    margin-bottom: 12px;
+  }
+
+  .cta-band p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 32px;
+  }
+
+  .cta-band-btns {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-white {
+    background: var(--gold);
+    color: var(--green-dark);
+    padding: 13px 28px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: background 0.2s, transform 0.15s;
+  }
+
+  .btn-white:hover { background: #E8C97A; transform: translateY(-1px); }
+
+  .btn-outline-white {
+    background: transparent;
+    color: #fff;
+    padding: 13px 28px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    border: 1px solid rgba(201,168,76,0.5);
+    cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .btn-outline-white:hover { background: rgba(201,168,76,0.08); border-color: var(--gold); }
+
+  /* ─── LOCATION ─── */
+  .location-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: center;
+  }
+
+  .map-embed {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    height: 340px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+
+  .location-details h3 {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .location-details p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.65;
+    margin-bottom: 24px;
+  }
+
+  .contact-list { list-style: none; }
+
+  .contact-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+
+  .contact-list li:last-child { border-bottom: none; }
+
+  .contact-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--green-light);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .contact-icon svg {
+    width: 15px;
+    height: 15px;
+    stroke: var(--green);
+    fill: none;
+    stroke-width: 2;
+  }
+
+  .contact-label { font-size: 11px; color: var(--text-light); }
+  .contact-val { font-weight: 500; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--green-dark);
+    border-top: 2px solid var(--gold);
+    padding: 52px 24px 28px;
+  }
+
+  .footer-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr;
+    gap: 40px;
+    padding-bottom: 36px;
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+  }
+
+  .footer-brand .footer-tagline {
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    margin-top: 10px;
+    line-height: 1.6;
+    max-width: 280px;
+  }
+
+  .footer-col-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .footer-nav-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .footer-nav-links a {
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+    transition: color 0.2s;
+  }
+
+  .footer-nav-links a:hover { color: var(--gold); }
+
+  .footer-contact-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .footer-contact-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .footer-contact-icon {
+    width: 30px;
+    height: 30px;
+    background: rgba(201,168,76,0.12);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .footer-contact-icon svg {
+    width: 14px;
+    height: 14px;
+    stroke: var(--gold);
+    fill: none;
+    stroke-width: 2;
+  }
+
+  .footer-contact-list a {
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    transition: color 0.2s;
+  }
+
+  .footer-contact-list a:hover { color: var(--gold); }
+
+  .footer-bottom {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .footer-copy {
+    font-size: 12px;
+    color: rgba(255,255,255,0.35);
+  }
+
+  .footer-copy-right {
+    font-size: 12px;
+    color: rgba(255,255,255,0.25);
+  }
+
+  /* legacy — keep for mobile override */
+  .footer-links { display: none; }
+
+  /* ─── MOBILE STICKY CTA BAR ─── */
+  .mobile-cta-bar {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+    z-index: 300;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.10);
+    gap: 10px;
+    align-items: center;
+  }
+
+  .mobile-cta-bar .btn-mob-call {
+    flex: 1;
+    background: var(--green);
+    color: #fff;
+    border: none;
+    padding: 14px 10px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 48px;
+  }
+
+  .mobile-cta-bar .btn-mob-wa {
+    flex: 1;
+    background: #fff;
+    color: #128C7E;
+    border: 1.5px solid #128C7E;
+    padding: 14px 10px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 48px;
+  }
+
+  /* ─── INSTRUCTOR ─── */
+  .instr-bg {
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .instr-gold-divider {
+    width: 48px;
+    height: 2px;
+    background: var(--gold);
+    margin-bottom: 36px;
+  }
+
+  /* Featured instructor card (Harsh) */
+  .instr-featured-card {
+    background: var(--white);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(13,27,62,0.13);
+    border: 1px solid rgba(13,27,62,0.07);
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    align-items: stretch;
+  }
+
+  .instr-featured-img {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .instr-featured-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 15%;
+    display: block;
+  }
+
+  .instr-featured-body {
+    padding: 32px 36px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .instr-card-role {
+    font-size: 13px;
+    color: var(--gold);
+    font-weight: 500;
+    margin-bottom: 16px;
+    margin-top: 4px;
+  }
+
+  .instr-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .instr-chip {
+    background: var(--green-light);
+    color: var(--green-dark);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+  }
+
+  .instr-bio-text {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.8;
+    margin-bottom: 24px;
+  }
+
+  .instr-exp-heading {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+
+  .instr-exp-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .instr-exp-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .instr-exp-item::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    background: var(--gold);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .instr-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .instr-card {
+    background: var(--white);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 12px 30px rgba(13,27,62,0.10);
+    border: 1px solid rgba(13,27,62,0.06);
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+
+  .instr-card:hover {
+    box-shadow: 0 18px 40px rgba(13,27,62,0.14);
+    transform: translateY(-3px);
+  }
+
+  .instr-card-img {
+    width: 100%;
+    height: 300px;
+    overflow: hidden;
+  }
+
+  .instr-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 15%;
+    display: block;
+  }
+
+  .instr-card-body { padding: 22px 20px 24px; }
+
+  .instr-card-name {
+    font-family: 'Lora', serif;
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--green-dark);
+    margin-bottom: 14px;
+  }
+
+  .instr-team-list { list-style: none; }
+
+  .instr-team-list li {
+    font-size: 14px;
+    color: var(--text);
+    padding: 7px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .instr-team-list li:last-child { border-bottom: none; }
+
+  .instr-team-list li::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    background: var(--gold);
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  /* ─── PREVENT HORIZONTAL SCROLL ─── */
+  html, body { overflow-x: hidden; max-width: 100vw; }
+
+  /* ─── TABLET 768–1100px ─── */
+  @media (max-width: 1100px) {
+    .hero { max-width: 100%; padding-left: 20px; padding-right: 20px; }
+    .container { padding: 0 20px; }
+  }
+
+  /* ─── TABLET 600–900px ─── */
+  @media (max-width: 900px) {
+    body { padding-bottom: 76px; }
+    .mobile-cta-bar { display: flex; }
+
+    /* NAV */
+    .nav-links { display: none; }
+    .nav-inner { padding: 0 16px; }
+
+    /* HERO */
+    .hero-section::before, .hero-section::after { display: none; }
+    .hero {
+      grid-template-columns: 1fr;
+      padding: 28px 16px 32px;
+      gap: 20px;
+      max-width: 100%;
+    }
+    .hero h1 { font-size: 28px; }
+    .hero-sub { font-size: 14px; max-width: 100%; margin-bottom: 20px; }
+    .hero-badge { font-size: 11px; margin-bottom: 16px; }
+    .hero-proof { gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+    .hero-proof-item { font-size: 12px; }
+    .hero-mobile-cta { display: flex; gap: 10px; flex-wrap: wrap; }
+    .hero-mobile-cta .btn-hero-call {
+      flex: 1; min-width: 140px;
+      background: var(--gold); color: var(--green-dark);
+      border: none; padding: 13px 16px; border-radius: 8px;
+      font-size: 14px; font-weight: 600;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; gap: 7px;
+    }
+    .hero-mobile-cta .btn-hero-wa {
+      flex: 1; min-width: 120px;
+      background: transparent; color: #fff;
+      border: 1px solid rgba(255,255,255,0.3); padding: 13px 16px; border-radius: 8px;
+      font-size: 14px; font-weight: 500;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      cursor: pointer; display: flex; align-items: center;
+      justify-content: center; gap: 7px;
+    }
+
+    /* FORM — compact on mobile */
+    .form-card { display: block; position: static; width: 100%; }
+    .form-card-header { padding: 14px 16px; }
+    .form-card-header h3 { font-size: 15px; }
+    .form-card-header p { font-size: 12px; }
+    .form-urgency { padding: 8px 16px; font-size: 11px; }
+    .form-body { padding: 12px 16px 16px; }
+    .form-group { margin-bottom: 10px; }
+    .form-group label { font-size: 10px; margin-bottom: 3px; }
+    .form-group input,
+    .form-group select { padding: 8px 10px; font-size: 14px; min-height: 38px; }
+    .form-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+    .form-hint { font-size: 10px; }
+    .btn-primary { padding: 11px; font-size: 13px; min-height: 44px; margin-top: 2px; }
+    .btn-wa { padding: 9px; font-size: 13px; margin-top: 8px; }
+    .form-privacy { font-size: 10px; margin-top: 8px; }
+
+    /* STATS */
+    .stats-inner { grid-template-columns: repeat(2, 1fr); }
+    .stat-item:nth-child(2) { border-right: none; }
+    .stat-num { font-size: 26px; }
+    .stat-label { font-size: 11px; }
+    .stat-item { padding: 20px 12px; }
+
+    /* SECTIONS */
+    .section { padding: 36px 16px; }
+    .section-full { padding: 36px 0; }
+    .section-navy { padding: 36px 0; }
+    .section-title { font-size: 24px; margin-bottom: 8px; }
+    .section-sub { font-size: 14px; margin-bottom: 24px; }
+    .section-gold-line { margin-bottom: 16px; }
+
+    /* WHY GRID — 2 columns, compact cards */
+    .why-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .why-card { padding: 16px 14px; border-top-width: 2px; }
+    .why-icon-wrap { width: 36px; height: 36px; margin-bottom: 10px; }
+    .why-card h3 { font-size: 14px; margin-bottom: 5px; }
+    .why-card p { font-size: 12px; line-height: 1.5; }
+
+    /* PROGRAMS */
+    .programs-grid { grid-template-columns: 1fr; gap: 14px; }
+    .prog-header { padding: 20px 20px 16px; }
+    .prog-header h3 { font-size: 18px; }
+    .prog-body { padding: 16px 20px 18px; }
+    .prog-features li { font-size: 13px; padding: 5px 0; }
+
+    /* INSTRUCTOR */
+    .instr-cards-grid { grid-template-columns: 1fr 1fr; gap: 14px; max-width: 100% !important; }
+    .instr-card-img { height: 200px; }
+    .instr-card-body { padding: 14px 14px 16px; }
+    .instr-card-name { font-size: 18px; margin-bottom: 8px; }
+    .instr-team-list li { font-size: 12px; padding: 5px 0; }
+
+    /* TESTIMONIALS — show only first card */
+    .testi-grid { grid-template-columns: 1fr; gap: 12px; }
+    .testi-card:not(:first-child) { display: none; }
+    .testi-text { font-size: 14px; }
+
+    /* LOCATION — hide on mobile (not critical for ads) */
+    section:has(.location-grid) { display: none; }
+
+    /* CTA BAND */
+    .cta-band { padding: 36px 16px; }
+    .cta-band h2 { font-size: 24px; }
+    .cta-band p { font-size: 13px; margin-bottom: 20px; }
+    .cta-band-btns { flex-direction: column; align-items: center; gap: 10px; }
+    .btn-white, .btn-outline-white { width: 100%; max-width: 300px; padding: 12px 20px; }
+
+    /* CTA BAND */
+    .cta-band { padding: 48px 16px; }
+    .cta-band h2 { font-size: 28px; }
+    .cta-band-btns { flex-direction: column; align-items: center; }
+    .btn-white, .btn-outline-white { width: 100%; max-width: 320px; }
+
+    /* FOOTER */
+    .footer-inner { grid-template-columns: 1fr 1fr; gap: 32px; }
+    .footer-brand { grid-column: 1 / -1; }
+  }
+
+  /* ─── MOBILE < 540px ─── */
+  @media (max-width: 540px) {
+    /* HERO */
+    .hero { padding: 24px 14px 20px; }
+    .hero h1 { font-size: 26px; letter-spacing: -0.3px; }
+    .hero-sub { font-size: 14px; line-height: 1.65; }
+    .hero-proof { gap: 8px; }
+    .hero-divider { display: none; }
+    .hero-badge { padding: 4px 12px; }
+
+    /* FORM */
+    .form-row { grid-template-columns: 1fr; gap: 0; }
+    .form-group input,
+    .form-group select,
+    .form-group textarea { font-size: 16px; min-height: 44px; }
+    .btn-primary, .btn-wa { min-height: 48px; font-size: 14px; }
+
+    /* STATS */
+    .stats-inner { grid-template-columns: repeat(2, 1fr); }
+    .stat-item { padding: 20px 12px; }
+    .stat-num { font-size: 26px; }
+
+    /* SECTIONS */
+    .section { padding: 40px 14px; }
+    .section-full { padding: 40px 0; }
+    .section-title { font-size: 24px; }
+    .eyebrow { font-size: 11px; }
+
+    /* WHY GRID */
+    .why-grid { grid-template-columns: 1fr; gap: 12px; }
+    .why-card { padding: 18px 16px; }
+    .why-card h3 { font-size: 16px; }
+    .why-card p { font-size: 13px; }
+
+    /* PROGRAMS */
+    .prog-header { padding: 20px 20px 16px; }
+    .prog-body { padding: 16px 20px 20px; }
+    .prog-header h3 { font-size: 18px; }
+
+    /* INSTRUCTOR */
+    .instr-featured-img { height: 240px; }
+    .instr-featured-body { padding: 20px 16px; }
+    .instr-exp-grid { grid-template-columns: 1fr; }
+    .instr-card-img { height: 240px; }
+    .instr-card-name { font-size: 22px; }
+
+    /* TESTIMONIALS */
+    .testi-card { padding: 18px; }
+    .testi-text { font-size: 15px; }
+
+    /* LOCATION */
+    .map-embed { height: 220px; }
+    .location-details h3 { font-size: 20px; }
+
+    /* CTA BAND */
+    .cta-band h2 { font-size: 22px; }
+    .cta-band p { font-size: 14px; }
+
+    /* FOOTER */
+    .footer-inner { grid-template-columns: 1fr; gap: 28px; }
+    .footer-brand { grid-column: auto; }
+    .footer-bottom { flex-direction: column; align-items: flex-start; gap: 4px; }
+
+    /* NAV */
+    .logo-text { font-size: 15px; }
+    .logo-mark { width: 30px; height: 30px; font-size: 13px; }
+  }
+
+  /* ─── VERY SMALL < 380px ─── */
+  @media (max-width: 380px) {
+    .hero h1 { font-size: 23px; }
+    .hero-proof-item { font-size: 11px; }
+    .stat-num { font-size: 22px; }
+    .section-title { font-size: 21px; }
+    .form-card-header { padding: 16px; }
+    .form-body { padding: 14px; }
+    .mobile-cta-bar { padding: 10px 12px; gap: 8px; }
+    .btn-mob-call, .btn-mob-wa { font-size: 13px; }
+  }
+
+  /* ─── SUCCESS STATE ─── */
+  .form-success {
+    display: none;
+    text-align: center;
+    padding: 32px 24px;
+  }
+
+  .form-success.show { display: block; }
+  .form-body.hide { display: none; }
+
+  .success-icon {
+    width: 56px;
+    height: 56px;
+    background: var(--green-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+
+  .success-icon svg {
+    width: 26px;
+    height: 26px;
+    stroke: var(--green);
+    fill: none;
+    stroke-width: 2.5;
+  }
+
+  .success-title {
+    font-family: 'Lora', serif;
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .success-sub { font-size: 14px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <img src="logo.png" alt="Capital Lab Education" class="logo-img" onerror="this.style.display='none';document.querySelector('.logo-mark').style.display='flex'">
+      <div class="logo-mark" style="display:none">CL</div>
+      <span class="logo-text">Capital <span>Lab</span></span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#why">Why us</a></li>
+      <li><a href="#programs">Programs</a></li>
+      <li><a href="#instructor">Instructor</a></li>
+      <li><a href="#testimonials">Reviews</a></li>
+      <li><a href="#contact-form" class="nav-cta">Book free call</a></li>
+    </ul>
+    <a href="#contact-form" class="nav-cta nav-cta-mobile">Book free call</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero-section">
+<section>
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-badge">Ahmedabad's CFA & US CMA coaching institute</div>
+      <h1>Clear your CFA or US CMA with the <em>right strategy</em>, not just hard work</h1>
+      <p class="hero-sub">Confused where to start? Studying hard but not clearing? We give you a structured 9-month roadmap, expert mentorship, and real exam strategy — so you stop guessing and start progressing.</p>
+      <div class="hero-proof">
+        <div class="hero-proof-item">
+          <div class="proof-icon">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          Small batches
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-proof-item">
+          <div class="proof-icon">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          Offline + LMS
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-proof-item">
+          <div class="proof-icon">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          10+ years experience
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-proof-item">
+          <div class="proof-icon">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          Free counselling call
+        </div>
+        <div class="hero-divider"></div>
+        <div class="hero-proof-item">
+          <div class="proof-icon">
+            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          Finance Foundation
+        </div>
+      </div>
+
+      <!-- Mobile-only CTAs (form is hidden on mobile) -->
+      <div class="hero-mobile-cta">
+        <button class="btn-hero-call" onclick="document.getElementById('contact-form').scrollIntoView({behavior:'smooth'})">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 17z"/></svg>
+          Book free call
+        </button>
+        <button class="btn-hero-wa" onclick="window.open('https://wa.me/916355258396?text=Hi%2C%20I%20want%20to%20know%20more%20about%20CFA%20coaching%20at%20Capital%20Lab','_blank')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          WhatsApp
+        </button>
+      </div>
+    </div>
+
+    <!-- FORM -->
+    <div class="form-card" id="contact-form">
+      <div class="form-card-header">
+        <h3>Book your free counselling call</h3>
+        <p>Our advisor will call you within 2 hours</p>
+      </div>
+      <div class="form-urgency">
+        <div class="urgency-dot"></div>
+        Limited slots this week
+      </div>
+      <div class="form-body" id="formBody">
+        <div class="form-group">
+          <label>Your full name *</label>
+          <input type="text" id="fname" placeholder="e.g. Raj Patel" autocomplete="off">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>WhatsApp number *</label>
+            <input type="tel" id="fphone" placeholder="+91 XXXXX XXXXX" autocomplete="off" inputmode="numeric">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="femail" placeholder="your@email.com">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Your State *</label>
+            <input type="text" id="fstate" placeholder="e.g. Gujarat" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label>Your City *</label>
+            <input type="text" id="fcity" placeholder="e.g. Ahmedabad" autocomplete="off">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Interested in</label>
+            <select id="fprog">
+              <option value="">Select</option>
+              <option>CFA — Chartered Financial Analyst</option>
+              <option>US CMA — Certified Management Accountant</option>
+              <option>Finance Foundation Program</option>
+              <option>Help me decide</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Your background</label>
+            <select id="fstream">
+              <option value="">Select</option>
+              <option>Commerce — 12th</option>
+              <option>Science — 12th</option>
+              <option>Arts — 12th</option>
+              <option>Graduate / Working</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Available for a call this week? *</label>
+          <select id="favail">
+            <option value="">Select</option>
+            <option>Yes — call me anytime</option>
+            <option>Yes — mornings (10am–1pm)</option>
+            <option>Yes — evenings (5pm–8pm)</option>
+            <option>Next week works better</option>
+          </select>
+          <div class="form-hint">We call when you're free — not just when it suits us</div>
+        </div>
+        <button class="btn-primary" onclick="submitForm()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.73 17z"/></svg>
+          Book my free counselling call
+        </button>
+        <button class="btn-wa" onclick="window.open('https://wa.me/916355258396?text=Hi%2C%20I%20want%20to%20know%20more%20about%20CFA%20coaching%20at%20Capital%20Lab','_blank')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          Chat on WhatsApp instead
+        </button>
+        <p class="form-privacy">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px;margin-top:-2px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Your details are private and never shared</p>
+      </div>
+      <div class="form-success" id="formSuccess">
+        <div class="success-icon">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="success-title">You're booked in!</div>
+        <p class="success-sub">We'll call you on WhatsApp within 2 hours. <br>In the meantime, feel free to explore below.</p>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="stats-inner">
+    <div class="stat-item">
+      <div class="stat-num">10+</div>
+      <div class="stat-label">Years of expertise</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">500+</div>
+      <div class="stat-label">Students trained</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">95%</div>
+      <div class="stat-label">Student satisfaction</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">2</div>
+      <div class="stat-label">Global certifications</div>
+    </div>
+  </div>
+</div>
+
+<!-- WHY US -->
+<section id="why">
+  <div class="section">
+    <p class="eyebrow">Why Capital Lab</p>
+    <h2 class="section-title">Not just coaching — a clear roadmap to clearing</h2>
+    <div class="section-gold-line"></div>
+    <p class="section-sub">Most students fail CFA not because they're not working hard, but because they don't have the right strategy. We fix that.</p>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon-wrap">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></svg>
+        </div>
+        <h3>9-month structured roadmap</h3>
+        <p>Every week is mapped — from fundamentals to exam-day strategy. You'll never wonder what to study next.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/><circle cx="5" cy="9" r="2.5"/><path d="M2 19c0-2.5 1.3-4.5 3-5"/></svg>
+        </div>
+        <h3>Small batches, personal attention</h3>
+        <p>We cap every batch so Harsh Sir knows every student by name — not just a roll number on an attendance sheet.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon-wrap">
+          <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h3>Real industry experience</h3>
+        <p>10+ years in equity research, credit analysis, and financial modeling — so learning goes beyond the textbook.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+        <h3>Offline classroom + LMS</h3>
+        <p>In-person doubt solving and peer learning, backed by recorded lectures, quizzes, and progress tracking on LMS.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <h3>Full mock tests</h3>
+        <p>Build exam-day confidence, speed, and control. Every mock is reviewed with you so mistakes don't repeat.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon-wrap">
+          <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="13" y2="11"/></svg>
+        </div>
+        <h3>Finance Foundation Program</h3>
+        <p>Designed for students with little or no finance background. Covers accounting, investments, and business fundamentals from scratch — building a strong base to confidently pursue CFA, US CMA, and finance careers.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROGRAMS -->
+<div class="section-full" id="programs">
+  <div class="section">
+    <p class="eyebrow">Our programs</p>
+    <h2 class="section-title">Three programs, one clear path to finance</h2>
+    <div class="section-gold-line"></div>
+    <p class="section-sub">Whether you're starting from scratch or targeting a global certification, we have a program built for you.</p>
+    <div class="programs-grid">
+      <div class="prog-card">
+        <div class="prog-header">
+          <span class="prog-tag cfa">CFA Institute</span>
+          <h3>Chartered Financial Analyst</h3>
+          <p>For students and professionals targeting investment banking, equity research, portfolio management, and corporate finance.</p>
+        </div>
+        <div class="prog-body">
+          <ul class="prog-features">
+            <li>Three progressive levels (L1 → L2 → L3)</li>
+            <li>Deep valuation, ethics, and portfolio focus</li>
+            <li>Ideal for students, graduates, and career changers</li>
+            <li>9-month structured roadmap with weekly targets</li>
+            <li>Offline classroom + LMS + full mock tests</li>
+            <li>Placement support: CV, interviews, Excel</li>
+            <li>Expected CTC after clearing: ₹3–6 LPA (entry)</li>
+          </ul>
+          <button class="prog-cta" onclick="document.getElementById('contact-form').scrollIntoView({behavior:'smooth'})">
+            Book a CFA counselling call →
+          </button>
+        </div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-header">
+          <span class="prog-tag cma">IMA Certified</span>
+          <h3>US CMA — Certified Management Accountant</h3>
+          <p>For analysts and managers focused on strategic finance, planning, analytics, controls, and decision-making.</p>
+        </div>
+        <div class="prog-body">
+          <ul class="prog-features">
+            <li>Only 2 exam parts — faster path to certification</li>
+            <li>Covers planning, performance, analytics & controls</li>
+            <li>Ideal for CAs, finance professionals, and analysts</li>
+            <li>Hock study material — globally trusted content</li>
+            <li>Offline lectures + LMS + mock exams</li>
+            <li>Placement support and career guidance</li>
+            <li>Expected CTC: ₹3–5 LPA entry, ₹5–8 LPA+ senior</li>
+          </ul>
+          <button class="prog-cta" onclick="document.getElementById('contact-form').scrollIntoView({behavior:'smooth'})">
+            Book a CMA counselling call →
+          </button>
+        </div>
+      </div>
+      <div class="prog-card">
+        <div class="prog-header">
+          <span class="prog-tag foundation">Foundation Program</span>
+          <h3>Finance Foundation</h3>
+          <p>For students with little or no finance background. Build your base before pursuing CFA, US CMA, or a finance career.</p>
+          <div class="prog-included">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Included with both CFA &amp; US CMA programs
+          </div>
+        </div>
+        <div class="prog-body">
+          <ul class="prog-features">
+            <li>No prior finance knowledge required</li>
+            <li>Covers accounting, investments & business fundamentals</li>
+            <li>Ideal for arts, science & non-commerce graduates</li>
+            <li>Perfect launchpad before CFA or US CMA</li>
+            <li>Offline classroom + LMS support</li>
+            <li>Personal guidance from day one</li>
+            <li>Builds confidence for global finance certifications</li>
+          </ul>
+          <button class="prog-cta" onclick="document.getElementById('contact-form').scrollIntoView({behavior:'smooth'})">
+            Book a Foundation counselling call →
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INSTRUCTOR -->
+<div class="instr-bg" id="instructor">
+  <div class="section">
+    <p class="eyebrow">Your Mentors</p>
+    <h2 class="section-title">Learn From Those Who've Done It</h2>
+    <div class="instr-gold-divider"></div>
+
+    <div class="instr-cards-grid">
+
+      <!-- Harsh Trivedi -->
+      <div class="instr-card">
+        <div class="instr-card-img">
+          <img src="instructur_harsh_new.jpeg" alt="Harsh Trivedi">
+        </div>
+        <div class="instr-card-body">
+          <div class="instr-card-name">Harsh Trivedi</div>
+          <ul class="instr-team-list">
+            <li>10+ years of experience</li>
+            <li>Equity Valuation</li>
+            <li>CFA L-2, PGDM, MBA</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Parth Shah -->
+      <div class="instr-card">
+        <div class="instr-card-img">
+          <img src="instructor_parth.jpg" alt="Parth Shah">
+        </div>
+        <div class="instr-card-body">
+          <div class="instr-card-name">Parth Shah</div>
+          <ul class="instr-team-list">
+            <li>1+ years of experience</li>
+            <li>Equity Valuation</li>
+            <li>CFA L-1, CMA US, B.Com</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<div class="section-navy" id="testimonials">
+  <div class="section">
+    <p class="eyebrow">Student reviews</p>
+    <h2 class="section-title">What our students say</h2>
+    <div class="section-gold-line"></div>
+    <p class="section-sub">Real feedback from students who've been through the program.</p>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"Truly great faculty. Harsh Sir has in-depth subject knowledge and a highly engaging teaching style — focused on practical application and committed to students' progress."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">RD</div>
+          <div>
+            <div class="testi-name">Rishabh Dayama</div>
+            <div class="testi-meta">CFA Student · Capital Lab Education</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"Your guidance is exceptional. The way you mentor and support students makes a huge difference. Your teaching style is so clear that we understand everything in just one explanation."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">MP</div>
+          <div>
+            <div class="testi-name">Manya Patel</div>
+            <div class="testi-meta">CFA Student · Capital Lab Education</div>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"It never felt like formal teaching — it felt like guidance from an elder brother who wants you to succeed. Highly recommended for anyone serious about CFA."</p>
+        <div class="testi-author">
+          <div class="testi-avatar">VS</div>
+          <div>
+            <div class="testi-name">Vishal Sharma</div>
+            <div class="testi-meta">CFA Candidate · Capital Lab Education</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOCATION -->
+<section>
+  <div class="section">
+    <p class="eyebrow">Find us</p>
+    <h2 class="section-title">Conveniently located in Ahmedabad</h2>
+    <div class="location-grid">
+      <div class="map-embed">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3670.5377591016436!2d72.51435387224784!3d23.077402268189456!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e9d11526c50b7%3A0x615ac354d4c246a6!2sCapital%20Lab%20Education!5e0!3m2!1sen!2sin!4v1780307353520!5m2!1sen!2sin"
+          width="100%" height="100%"
+          style="border:0; display:block;"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="Capital Lab Education — Grace Business Park, Sola, Ahmedabad">
+        </iframe>
+      </div>
+      <div class="location-details">
+        <h3>Grace Business Park</h3>
+        <p>201, Grace Business Park, Opp. Sagar Sangeeta 1, Nr. Saral Heights, Kargil Petrol Pump Road, Sola, Ahmedabad – 380060</p>
+        <ul class="contact-list">
+          <li>
+            <div class="contact-icon">
+              <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.73 17z"/></svg>
+            </div>
+            <div>
+              <div class="contact-label">Phone</div>
+              <div class="contact-val">+91 6355 258 396</div>
+            </div>
+          </li>
+          <li>
+            <div class="contact-icon">
+              <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <div>
+              <div class="contact-label">Email</div>
+              <div class="contact-val">info@capitallabedu.com</div>
+            </div>
+          </li>
+          <li>
+            <div class="contact-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div>
+              <div class="contact-label">Class timings</div>
+              <div class="contact-val">Mon – Sat, flexible batches</div>
+            </div>
+          </li>
+          <li>
+            <div class="contact-icon">
+              <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            </div>
+            <div>
+              <div class="contact-label">Serving students from</div>
+              <div class="contact-val">Ahmedabad & surrounding areas</div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<div class="cta-band">
+  <h2>Ready to start your CFA journey?</h2>
+  <p>Free counselling call · No commitment · Ahmedabad students only</p>
+  <div class="cta-band-btns">
+    <button class="btn-white" onclick="document.getElementById('contact-form').scrollIntoView({behavior:'smooth'})">Book my free call</button>
+    <button class="btn-outline-white" onclick="window.open('https://wa.me/916355258396?text=Hi%2C%20I%20want%20to%20know%20more%20about%20CFA%20coaching%20at%20Capital%20Lab','_blank')">Chat on WhatsApp</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+
+    <!-- Col 1: Brand -->
+    <div class="footer-brand">
+      <div class="nav-logo" style="margin-bottom:0">
+        <img src="logo.png" alt="Capital Lab Education" class="logo-img" onerror="this.style.display='none'">
+        <div class="logo-mark" style="display:none">CL</div>
+        <span class="logo-text">Capital <span>Lab</span> </span>
+      </div>
+      <p class="footer-tagline">Ahmedabad's specialist CFA &amp; US CMA coaching institute. Expert-led, small batches, offline + LMS.</p>
+    </div>
+
+    <!-- Col 2: Quick Links -->
+    <div>
+      <div class="footer-col-title">Quick Links</div>
+      <ul class="footer-nav-links">
+        <li><a href="#why">Why Capital Lab</a></li>
+        <li><a href="#programs">Our Programs</a></li>
+        <li><a href="#instructor">Instructors</a></li>
+        <li><a href="#testimonials">Reviews</a></li>
+        <li><a href="#contact-form">Book Free Call</a></li>
+      </ul>
+    </div>
+
+    <!-- Col 3: Contact -->
+    <div>
+      <div class="footer-col-title">Contact Us</div>
+      <ul class="footer-contact-list">
+        <li>
+          <div class="footer-contact-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <a href="mailto:info@capitallabedu.com">info@capitallabedu.com</a>
+        </li>
+        <li>
+          <div class="footer-contact-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 17z"/></svg>
+          </div>
+          <a href="tel:+916355258396">+91 6355 258 396</a>
+        </li>
+        <li>
+          <div class="footer-contact-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <a href="https://www.capitallabedu.com" target="_blank">capitallabedu.com</a>
+        </li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2025 Capital Lab Education. All rights reserved.</div>
+    <div class="footer-copy-right">CFA &amp; US CMA Coaching · Ahmedabad</div>
+  </div>
+</footer>
+
+<!-- MOBILE STICKY CTA BAR -->
+<div class="mobile-cta-bar">
+  <button class="btn-mob-call" onclick="document.getElementById('contact-form').scrollIntoView({behavior:'smooth'})">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.1a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.22h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 21.73 17z"/></svg>
+    Book free call
+  </button>
+  <button class="btn-mob-wa" onclick="window.open('https://wa.me/916355258396?text=Hi%2C%20I%20want%20to%20know%20more%20about%20CFA%20coaching%20at%20Capital%20Lab','_blank')">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+    WhatsApp
+  </button>
+</div>
+
+<script>
+  // ── PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE ──
+  var SHEET_URL = 'https://script.google.com/macros/s/AKfycbxxpE4_LIKsXmY4BVsVcssVLUbCAW9DeQFRMEOqN-78czmnovsrNh8IR4E2KZFKLrdAAA/exec';
+
+  function submitForm() {
+    var name  = document.getElementById('fname').value.trim();
+    var phone = document.getElementById('fphone').value.trim();
+    var email = document.getElementById('femail').value.trim();
+    var state = document.getElementById('fstate').value.trim();
+    var city  = document.getElementById('fcity').value.trim();
+    var prog  = document.getElementById('fprog').value;
+    var bg    = document.getElementById('fstream').value;
+    var avail = document.getElementById('favail').value;
+
+    if (!name)  { alert('Please enter your name.'); return; }
+    if (!phone) { alert('Please enter your WhatsApp number.'); return; }
+    if (!state) { alert('Please enter your state.'); return; }
+    if (!city)  { alert('Please enter your city.'); return; }
+    if (!avail) { alert('Please select your call availability.'); return; }
+
+    var btn = document.querySelector('.btn-primary');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    var payload = {
+      name: name, phone: phone, email: email,
+      state: state, city: city,
+      program: prog, background: bg, availability: avail
+    };
+
+    fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(function() {
+      document.getElementById('formBody').classList.add('hide');
+      document.getElementById('formSuccess').classList.add('show');
+    })
+    .catch(function() {
+      document.getElementById('formBody').classList.add('hide');
+      document.getElementById('formSuccess').classList.add('show');
+    });
+  }
+</script>
+
+</body>
+</html>

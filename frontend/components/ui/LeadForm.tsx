@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { X, ChevronDown, Loader2, CheckCircle } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CheckCircle, ChevronDown, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/axios";
 
@@ -12,11 +12,11 @@ interface LeadFormProps {
   defaultCourse?: string;
 }
 
-const courseOptions = ["CA Foundation", "CA Intermediate", "Both Courses"];
+const courseOptions = ["CMA US Program", "CFA Program", "Both Programs", "General Enquiry"];
 const timeOptions = [
-  "Morning (9 AM – 12 PM)",
-  "Afternoon (12 PM – 5 PM)",
-  "Evening (5 PM – 8 PM)",
+  "Morning (10 AM - 1 PM)",
+  "Afternoon (1 PM - 4 PM)",
+  "Evening (4 PM - 7:30 PM)",
 ];
 
 export default function LeadForm({ mode, isOpen, onClose, defaultCourse }: LeadFormProps) {
@@ -30,6 +30,13 @@ export default function LeadForm({ mode, isOpen, onClose, defaultCourse }: LeadF
   });
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    setForm((prev) => ({
+      ...prev,
+      courseInterest: defaultCourse ?? prev.courseInterest,
+    }));
+  }, [defaultCourse]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -85,7 +92,7 @@ export default function LeadForm({ mode, isOpen, onClose, defaultCourse }: LeadF
             required
             value={form.name}
             onChange={handleChange}
-            placeholder="Rahul Sharma"
+            placeholder="Your Name"
             className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/30 focus:border-brand-navy transition-colors"
           />
         </div>
@@ -98,7 +105,7 @@ export default function LeadForm({ mode, isOpen, onClose, defaultCourse }: LeadF
             required
             value={form.phone}
             onChange={handleChange}
-            placeholder="98765 43210"
+            placeholder="Phone Number"
             maxLength={10}
             className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/30 focus:border-brand-navy transition-colors"
           />
@@ -112,7 +119,7 @@ export default function LeadForm({ mode, isOpen, onClose, defaultCourse }: LeadF
           type="email"
           value={form.email}
           onChange={handleChange}
-          placeholder="rahul@example.com"
+          placeholder="Email Address"
           className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/30 focus:border-brand-navy transition-colors"
         />
       </div>
@@ -120,7 +127,7 @@ export default function LeadForm({ mode, isOpen, onClose, defaultCourse }: LeadF
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">
-            Course Interest <span className="text-red-500">*</span>
+            Interested In <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <select
@@ -130,14 +137,16 @@ export default function LeadForm({ mode, isOpen, onClose, defaultCourse }: LeadF
               onChange={handleChange}
               className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/30 focus:border-brand-navy appearance-none bg-white transition-colors"
             >
-              {courseOptions.map((o) => <option key={o}>{o}</option>)}
+              {courseOptions.map((option) => (
+                <option key={option}>{option}</option>
+              ))}
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           </div>
         </div>
         <div>
           <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">
-            Preferred Visit Time <span className="text-red-500">*</span>
+            Preferred Time <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <select
@@ -147,7 +156,9 @@ export default function LeadForm({ mode, isOpen, onClose, defaultCourse }: LeadF
               onChange={handleChange}
               className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/30 focus:border-brand-navy appearance-none bg-white transition-colors"
             >
-              {timeOptions.map((o) => <option key={o}>{o}</option>)}
+              {timeOptions.map((option) => (
+                <option key={option}>{option}</option>
+              ))}
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           </div>
@@ -161,7 +172,7 @@ export default function LeadForm({ mode, isOpen, onClose, defaultCourse }: LeadF
           value={form.message}
           onChange={handleChange}
           rows={3}
-          placeholder="Any specific questions or requirements..."
+          placeholder="Your message or questions..."
           className="w-full px-4 py-2.5 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/30 focus:border-brand-navy resize-none transition-colors"
         />
       </div>
@@ -172,9 +183,11 @@ export default function LeadForm({ mode, isOpen, onClose, defaultCourse }: LeadF
         className="w-full py-3 bg-brand-gold text-white font-semibold rounded-lg hover:bg-amber-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
       >
         {loading ? (
-          <><Loader2 className="w-4 h-4 animate-spin" /> Sending...</>
+          <>
+            <Loader2 className="w-4 h-4 animate-spin" /> Sending...
+          </>
         ) : (
-          "Book Free Consultation"
+          "Send Enquiry"
         )}
       </button>
     </form>
@@ -183,8 +196,8 @@ export default function LeadForm({ mode, isOpen, onClose, defaultCourse }: LeadF
   if (mode === "inline") {
     return (
       <div className="bg-white rounded-2xl p-6 shadow-soft">
-        <h3 className="text-xl font-bold text-brand-navy mb-1">Book a Free Counselling</h3>
-        <p className="text-gray-500 text-sm mb-5">Fill in your details and we&apos;ll call you back.</p>
+        <h3 className="text-xl font-bold text-brand-navy mb-1">Talk to an Advisor</h3>
+        <p className="text-gray-500 text-sm mb-5">Share your details and our team will guide you to the right program.</p>
         {formContent}
       </div>
     );
@@ -194,23 +207,15 @@ export default function LeadForm({ mode, isOpen, onClose, defaultCourse }: LeadF
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      {/* Dialog */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white rounded-t-2xl px-6 pt-6 pb-4 border-b border-gray-100">
           <div className="flex items-start justify-between">
             <div>
-              <h2 className="text-xl font-bold text-brand-navy">Book a Free Visit</h2>
+              <h2 className="text-xl font-bold text-brand-navy">Talk to an Advisor</h2>
               <p className="text-gray-500 text-sm mt-0.5">We&apos;ll contact you within 24 hours.</p>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-500"
-            >
+            <button onClick={onClose} className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-500">
               <X className="w-5 h-5" />
             </button>
           </div>

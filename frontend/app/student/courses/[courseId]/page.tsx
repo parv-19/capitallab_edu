@@ -7,6 +7,11 @@ import api from "@/lib/axios";
 
 interface Lesson { _id: string; title: string; sectionName: string; videoUrl: string; duration: string; description: string; order: number; resources: { name: string; _id: string }[]; }
 interface Progress { completedLessons: string[]; percentComplete: number; }
+interface CoursePlayerResponse {
+  course?: { title: string; instructor: string };
+  lessons?: Lesson[];
+  progress?: Progress;
+}
 
 const getEmbedUrl = (url: string) => {
   if (!url) return "";
@@ -17,17 +22,8 @@ const getEmbedUrl = (url: string) => {
   return url;
 };
 
-const mockCourse = {
-  title: "CA Foundation", instructor: "CA Priya Mehta",
-  lessons: [
-    { _id: "l1", sectionName: "Principles of Accounting", title: "Introduction to Accounting", duration: "45 min", videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", description: "Understand the basics of accounting principles.", order: 1, resources: [] },
-    { _id: "l2", sectionName: "Principles of Accounting", title: "Journal Entries & Ledger", duration: "60 min", videoUrl: "", description: "Learn to record transactions in journal and post to ledger.", order: 2, resources: [] },
-    { _id: "l3", sectionName: "Business Mathematics", title: "Ratio and Proportion", duration: "50 min", videoUrl: "", description: "Master ratio problems for the CA Foundation exam.", order: 3, resources: [] },
-  ],
-};
-
 export default function CoursePlayerPage({ params }: { params: { courseId: string } }) {
-  const [course, setCourse] = useState(mockCourse);
+  const [course, setCourse] = useState<{ title: string; instructor: string; lessons: Lesson[] }>({ title: "", instructor: "", lessons: [] });
   const [progress, setProgress] = useState<Progress>({ completedLessons: [], percentComplete: 0 });
   const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
   const [openSections, setOpenSections] = useState<Set<string>>(new Set());
@@ -35,11 +31,18 @@ export default function CoursePlayerPage({ params }: { params: { courseId: strin
   const [questions, setQuestions] = useState<{ question: string; askedAt: string }[]>([]);
 
   useEffect(() => {
-    api.get(`/student/courses/${params.courseId}`).then(r => {
-      if (r.data?.course) { setCourse(r.data.course); if (r.data.course.lessons?.[0]) setActiveLesson(r.data.course.lessons[0]); }
-      if (r.data?.progress) setProgress(r.data.progress);
+    api.get(`/student/courses/${params.courseId}`).then((r) => {
+      const payload = (r.data ?? {}) as CoursePlayerResponse;
+      const lessons = payload.lessons ?? [];
+      setCourse({
+        title: payload.course?.title ?? "",
+        instructor: payload.course?.instructor ?? "",
+        lessons,
+      });
+      setActiveLesson(lessons[0] ?? null);
+      setOpenSections(lessons[0]?.sectionName ? new Set([lessons[0].sectionName]) : new Set());
+      if (payload.progress) setProgress(payload.progress);
     }).catch(() => {});
-    if (course.lessons[0]) { setActiveLesson(course.lessons[0] as unknown as Lesson); setOpenSections(new Set([course.lessons[0].sectionName])); }
   }, [params.courseId]);
 
   const sections = [...new Set(course.lessons.map(l => l.sectionName))];
@@ -70,9 +73,9 @@ export default function CoursePlayerPage({ params }: { params: { courseId: strin
   const isCompleted = (id: string) => progress.completedLessons.includes(id);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 h-full">
+    <div className="flex h-full flex-col gap-4 lg:flex-row lg:gap-6">
       {/* Left Sidebar */}
-      <div className="lg:w-72 shrink-0">
+      <div className="shrink-0 lg:w-72">
         <div className="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden">
           <div className="p-5 border-b border-gray-100">
             <h2 className="font-bold text-brand-navy text-sm">{course.title}</h2>
@@ -83,7 +86,7 @@ export default function CoursePlayerPage({ params }: { params: { courseId: strin
               <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${progress.percentComplete ?? 0}%` }} />
             </div>
           </div>
-          <div className="overflow-y-auto max-h-[60vh]">
+          <div className="max-h-[40vh] overflow-y-auto lg:max-h-[60vh]">
             {sections.map(section => (
               <div key={section}>
                 <button onClick={() => toggleSection(section)} className="w-full flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors">
@@ -113,7 +116,7 @@ export default function CoursePlayerPage({ params }: { params: { courseId: strin
       </div>
 
       {/* Right Panel */}
-      <div className="flex-1 min-w-0 space-y-5">
+      <div className="min-w-0 flex-1 space-y-4 sm:space-y-5">
         {activeLesson ? (
           <>
             {/* Video */}
@@ -128,8 +131,8 @@ export default function CoursePlayerPage({ params }: { params: { courseId: strin
             )}
 
             {/* Info */}
-            <div className="bg-white rounded-2xl p-6 shadow-soft border border-gray-100">
-              <div className="flex items-start justify-between gap-4 mb-3">
+            <div className="bg-white rounded-2xl p-4 shadow-soft border border-gray-100 sm:p-6">
+              <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <h1 className="text-xl font-bold text-brand-navy">{activeLesson.title}</h1>
                 <label className="flex items-center gap-2 cursor-pointer shrink-0">
                   <input type="checkbox" checked={isCompleted(activeLesson._id)} onChange={() => !isCompleted(activeLesson._id) && markComplete(activeLesson._id)} className="w-4 h-4 accent-indigo-600" />
@@ -154,19 +157,19 @@ export default function CoursePlayerPage({ params }: { params: { courseId: strin
             </div>
 
             {/* Prev/Next */}
-            <div className="flex gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row">
               <button onClick={() => prevLesson && setActiveLesson(prevLesson as unknown as Lesson)} disabled={!prevLesson}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600 hover:border-brand-navy hover:text-brand-navy transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
                 <ChevronLeft className="w-4 h-4" /> Previous
               </button>
               <button onClick={() => nextLesson && setActiveLesson(nextLesson as unknown as Lesson)} disabled={!nextLesson}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed ml-auto">
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed sm:ml-auto">
                 Next <ChevronRight className="w-4 h-4" />
               </button>
             </div>
 
             {/* Q&A */}
-            <div className="bg-white rounded-2xl p-6 shadow-soft border border-gray-100">
+            <div className="bg-white rounded-2xl p-4 shadow-soft border border-gray-100 sm:p-6">
               <h3 className="font-bold text-brand-navy mb-4">Q&amp;A</h3>
               <div className="space-y-3 mb-4">
                 {questions.map((q, i) => (
@@ -176,11 +179,11 @@ export default function CoursePlayerPage({ params }: { params: { courseId: strin
                   </div>
                 ))}
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <textarea value={question} onChange={e => setQuestion(e.target.value)} rows={2} placeholder="Ask your instructor a question..."
                   className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 resize-none" />
                 <button onClick={submitQuestion} disabled={!question.trim()}
-                  className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 self-end">
+                  className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 self-stretch sm:self-end">
                   <Send className="w-4 h-4" />
                 </button>
               </div>

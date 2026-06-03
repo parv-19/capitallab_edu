@@ -23,10 +23,13 @@ interface DocumentRow {
   size: number;
   subject?: string;
   chapterName?: string;
-  status: "uploaded" | "processing" | "indexed" | "failed";
+  status: "uploaded" | "processing" | "completed" | "indexed" | "failed";
   totalChunks: number;
+  chunkCount?: number;
   processedForAI: boolean;
   chunksCount: number;
+  embeddingProvider?: string;
+  errorMessage?: string;
   processingError?: string;
   uploadedAt: string;
 }
@@ -63,6 +66,19 @@ export default function DocumentsPage({ params }: { params: { courseId: string }
     void loadDocuments();
   }, [params.courseId]);
 
+  useEffect(() => {
+    const hasProcessingDocuments = documents.some((document) => document.status === "processing");
+    if (!hasProcessingDocuments) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      void loadDocuments();
+    }, 4000);
+
+    return () => window.clearInterval(interval);
+  }, [documents, params.courseId]);
+
   const uploadFile = async (file: File) => {
     if (!form.subject.trim()) {
       toast.error("Subject is required.");
@@ -82,9 +98,11 @@ export default function DocumentsPage({ params }: { params: { courseId: string }
         payload,
         { headers: { "Content-Type": "multipart/form-data" } },
       );
-      setDocuments((current) => [response.data.document, ...current]);
-      toast.success(`${file.name} uploaded.`);
+      const uploadedDocument = response.data.document as DocumentRow;
+      setDocuments((current) => [uploadedDocument, ...current]);
+      toast.success(`${file.name} uploaded and queued for processing.`);
       setForm((current) => ({ ...current, title: "", chapterName: "" }));
+      void loadDocuments();
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Upload failed.");
     } finally {
@@ -111,8 +129,11 @@ export default function DocumentsPage({ params }: { params: { courseId: string }
       );
 
       toast.success(
-        `${mode === "reindex" ? "Re-indexed" : "Processed"} with ${response.data?.chunksStored ?? 0} chunks.`,
+        response.data?.alreadyRunning
+          ? "Document is already processing."
+          : `${mode === "reindex" ? "Re-index" : "Processing"} started in background.`,
       );
+      void loadDocuments();
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Processing failed.");
     } finally {
@@ -141,8 +162,8 @@ export default function DocumentsPage({ params }: { params: { courseId: string }
     if (document.status === "failed") {
       return { label: "failed", className: "bg-red-100 text-red-700", icon: AlertCircle };
     }
-    if (document.status === "indexed") {
-      return { label: "indexed", className: "bg-green-100 text-green-700", icon: CheckCircle };
+    if (document.status === "completed" || document.status === "indexed") {
+      return { label: "completed", className: "bg-green-100 text-green-700", icon: CheckCircle };
     }
     return { label: "uploaded", className: "bg-gray-100 text-gray-600", icon: FileText };
   };
@@ -211,7 +232,7 @@ export default function DocumentsPage({ params }: { params: { courseId: string }
         onDragLeave={() => setDraggingOver(false)}
         onDrop={onDrop}
         onClick={() => fileRef.current?.click()}
-        className={`cursor-pointer rounded-2xl border-2 border-dashed p-10 text-center transition-colors ${
+        className={`cursor-pointer rounded-2xl border-2 border-dashed p-6 text-center transition-colors sm:p-10 ${
           draggingOver
             ? "border-brand-gold bg-brand-gold/5"
             : "border-gray-200 bg-white hover:border-brand-navy/30"
@@ -220,7 +241,7 @@ export default function DocumentsPage({ params }: { params: { courseId: string }
         <input
           ref={fileRef}
           type="file"
-          accept=".pdf,.docx,.txt"
+          accept=".pdf,.docx,.txt,.md"
           className="hidden"
           onChange={async (event) => {
             const file = event.target.files?.[0];
@@ -241,13 +262,58 @@ export default function DocumentsPage({ params }: { params: { courseId: string }
               className={`mx-auto mb-3 h-10 w-10 ${draggingOver ? "text-brand-gold" : "text-gray-300"}`}
             />
             <p className="mb-1 font-semibold text-gray-700">Drop file here or click to upload</p>
-            <p className="text-sm text-gray-400">PDF, DOCX, or TXT. Metadata above will be saved with the file.</p>
+            <p className="text-sm text-gray-400">PDF, DOCX, TXT, or Markdown. Metadata above will be saved with the file.</p>
           </>
         )}
       </div>
 
       {documents.length > 0 ? (
         <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-soft">
+          <div className="divide-y divide-gray-100 md:hidden">
+            {documents.map((document) => {
+              const status = getStatusChip(document);
+              const StatusIcon = status.icon;
+
+              return (
+                <div key={document._id} className="space-y-3 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-semibold text-brand-navy">{document.title}</div>
+                      <div className="truncate text-xs text-gray-400">{document.originalFileName}</div>
+                    </div>
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${status.className}`}>
+                      <StatusIcon className={`h-3.5 w-3.5 ${busyIds.has(document._id) ? "animate-spin" : ""}`} />
+                      {status.label}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div><div className="text-gray-400">Subject</div><div className="text-gray-700">{document.subject || "-"}</div></div>
+                    <div><div className="text-gray-400">Chapter</div><div className="text-gray-700">{document.chapterName || "-"}</div></div>
+                    <div><div className="text-gray-400">Chunks</div><div className="text-gray-700">{document.chunkCount || document.totalChunks || document.chunksCount || 0}</div></div>
+                    <div><div className="text-gray-400">Embeddings</div><div className="text-gray-700">{document.embeddingProvider || "-"}</div></div>
+                  </div>
+                  {(document.errorMessage || document.processingError) ? (
+                    <p className="text-xs text-red-500">{document.errorMessage || document.processingError}</p>
+                  ) : null}
+                  <div className="flex flex-wrap gap-2">
+                    {document.status === "completed" || document.status === "indexed" ? (
+                      <button onClick={() => void processDocument(document._id, "reindex")} disabled={busyIds.has(document._id)} className="inline-flex items-center gap-1 rounded-lg bg-brand-gold/10 px-3 py-1.5 text-xs font-medium text-brand-gold disabled:opacity-60">
+                        <RefreshCcw className="h-3.5 w-3.5" /> Re-index
+                      </button>
+                    ) : (
+                      <button onClick={() => void processDocument(document._id, "process")} disabled={busyIds.has(document._id)} className="inline-flex items-center gap-1 rounded-lg bg-brand-gold/10 px-3 py-1.5 text-xs font-medium text-brand-gold disabled:opacity-60">
+                        <Zap className="h-3.5 w-3.5" /> Process
+                      </button>
+                    )}
+                    <button onClick={() => void deleteDocument(document._id)} className="rounded-lg border border-red-100 px-3 py-1.5 text-xs font-medium text-red-500">
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="hidden md:block">
           <div className="grid grid-cols-12 gap-4 border-b border-gray-100 px-6 py-4 text-xs font-semibold uppercase tracking-wide text-gray-400">
             <span className="col-span-3">Document</span>
             <span className="col-span-2">Subject</span>
@@ -279,15 +345,18 @@ export default function DocumentsPage({ params }: { params: { courseId: string }
                       <StatusIcon className={`h-3.5 w-3.5 ${busyIds.has(document._id) ? "animate-spin" : ""}`} />
                       {status.label}
                     </span>
-                    {document.processingError ? (
-                      <p className="mt-1 text-xs text-red-500">{document.processingError}</p>
+                    {document.errorMessage || document.processingError ? (
+                      <p className="mt-1 text-xs text-red-500">{document.errorMessage || document.processingError}</p>
+                    ) : null}
+                    {document.embeddingProvider ? (
+                      <p className="mt-1 text-xs text-gray-400">Embeddings: {document.embeddingProvider}</p>
                     ) : null}
                   </div>
                   <div className="col-span-1 text-sm text-gray-500">
-                    {document.totalChunks || document.chunksCount || 0}
+                    {document.chunkCount || document.totalChunks || document.chunksCount || 0}
                   </div>
                   <div className="col-span-2 flex items-center gap-2">
-                    {document.status === "indexed" ? (
+                    {document.status === "completed" || document.status === "indexed" ? (
                       <button
                         onClick={() => void processDocument(document._id, "reindex")}
                         disabled={busyIds.has(document._id)}
@@ -317,13 +386,14 @@ export default function DocumentsPage({ params }: { params: { courseId: string }
               );
             })}
           </div>
+          </div>
         </div>
       ) : (
         <div className="py-8 text-center text-sm text-gray-400">No documents uploaded yet.</div>
       )}
 
       <div className="rounded-2xl border border-brand-gold/20 bg-brand-gold/5 px-5 py-4 text-sm text-gray-600">
-        Only indexed documents are used by the syllabus tutor. If a file changes, re-index it so the chatbot uses the latest content.
+        Only completed documents are used by the syllabus tutor. If a file changes, re-index it so the chatbot uses the latest content.
       </div>
     </div>
   );

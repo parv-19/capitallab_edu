@@ -1,110 +1,240 @@
-# Capital Lab Education - Platform Documentation
+# Capital Lab Education
 
-This repository contains the complete source code for the Capital Lab Education platform, featuring a Next.js App Router frontend, a Node/Express backend, and a fully integrated RAG-based AI Chatbot powered by MongoDB Atlas Vector Search.
+Capital Lab Education is a monorepo for the platform website, student dashboard, admin dashboard, and backend APIs that power lead capture, course delivery, authentication, and the AI study assistant.
 
-## 🏗️ Architecture
+## Stack
 
-- **Frontend:** Next.js 14, React, Tailwind CSS, TypeScript
-- **Backend:** Node.js, Express.js, TypeScript
-- **Database:** MongoDB Atlas (Mongoose ODM)
-- **AI / LLM:** Anthropic Claude (claude-3-5-sonnet), OpenAI (text-embedding-3-small)
-- **Authentication:** Custom JWT (HttpOnly cookies)
+- Frontend: Next.js 14, React 18, TypeScript, Tailwind CSS
+- Backend: Node.js, Express, TypeScript, Mongoose
+- Database: MongoDB
+- AI/RAG: OpenAI, Anthropic, Groq, local embedding and LLM options
+- Auth: JWT access tokens with refresh flow and cookies
 
-## 🚀 Local Setup
+## Repository Structure
 
-### 1. Prerequisites
-- Node.js (v18 or higher)
-- A MongoDB Atlas Cluster (Free tier works)
-- OpenAI API Key
-- Anthropic API Key
-- A Gmail App Password (for Nodemailer)
+```text
+.
+|- frontend/   Next.js app for marketing pages, auth, student area, and admin area
+|- backend/    Express API, MongoDB models, auth, course management, RAG services
+|- Docs/       Project docs and reference material
+|- package.json
+```
 
-### 2. Backend Setup
+## Main Features
+
+- Public website with homepage, about, courses, and testimonials pages
+- Student flows for login, enrolled courses, profile, and AI chat
+- Admin flows for leads, students, testimonials, settings, courses, lessons, and documents
+- Backend APIs for auth, courses, leads, testimonials, admin, student, chat, and RAG
+- Document ingestion pipeline for AI-assisted study chat using vector search
+
+## Prerequisites
+
+- Node.js 18+
+- npm
+- MongoDB connection string
+- API keys depending on the providers you want to use
+- Optional Gmail app password for email flows
+
+## Install
+
+From the repo root:
+
 ```bash
-cd backend
 npm install
 ```
-Create a `.env` file in the `/backend` directory based on `.env.example`.
 
-**Start the backend server:**
-```bash
-npm run dev
-```
-The API will be available at `http://localhost:5000`.
+This repository uses npm workspaces for `frontend` and `backend`.
 
-### 3. Frontend Setup
-```bash
-cd frontend
-npm install
+## Environment Setup
+
+### Backend
+
+Create `backend/.env` from [backend/.env.example](/d:/capitallab/backend/.env.example).
+
+Important variables:
+
+```env
+NODE_ENV=development
+PORT=5000
+MONGODB_URI=
+JWT_SECRET=
+JWT_REFRESH_SECRET=
+FRONTEND_URL=http://localhost:3000
+
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+GROQ_API_KEY=
+
+LLM_PROVIDER=local
+LOCAL_LLM_MODEL=llama3.1
+LOCAL_LLM_BASE_URL=http://127.0.0.1:11434/v1
+OPENAI_LLM_MODEL=gpt-4o-mini
+ANTHROPIC_LLM_MODEL=claude-3-5-sonnet-latest
+GROQ_MODEL=llama-3.1-8b-instant
+
+EMBEDDING_PROVIDER=local
+LOCAL_EMBEDDING_MODEL=Xenova/all-MiniLM-L6-v2
+OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+VECTOR_INDEX_NAME=document_chunks_vector_index
 ```
-Create a `.env.local` file in the `/frontend` directory:
+
+Notes:
+
+- `FRONTEND_URL` must match the frontend origin for CORS.
+- You can run with local or hosted LLM and embedding providers.
+- Uploads are served from `backend/uploads`.
+
+### Frontend
+
+Create `frontend/.env.local` from [frontend/.env.example](/d:/capitallab/frontend/.env.example).
+
+Required variables:
+
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000/api
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-**Start the frontend server:**
+## Running Locally
+
+### Option 1: run each app separately
+
+Backend:
+
+```bash
+cd backend
+npm run dev
+```
+
+Frontend:
+
+```bash
+cd frontend
+npm run dev
+```
+
+### Option 2: use root workspace scripts
+
+Frontend:
+
 ```bash
 npm run dev
 ```
-The app will be available at `http://localhost:3000`.
 
----
+Backend:
 
-## 🤖 RAG Chatbot & Vector Search Setup
-
-To enable the AI Study Assistant, you **must** configure a Vector Search Index in your MongoDB Atlas cluster.
-
-1. Go to your MongoDB Atlas dashboard.
-2. Select your cluster and go to the **Search** tab.
-3. Click **Create Search Index** and choose the **JSON Editor**.
-4. Select your database (`capitallab`) and collection (`documentchunks`).
-5. Set the index name exactly to: `document_chunks_vector_index`
-6. Paste the following Atlas Search index definition:
-
-```json
-{
-  "mappings": {
-    "dynamic": false,
-    "fields": {
-      "embedding": {
-        "type": "knnVector",
-        "dimensions": 1536,
-        "similarity": "cosine"
-      },
-      "courseId": {
-        "type": "objectId"
-      },
-      "content": {
-        "type": "string"
-      }
-    }
-  }
-}
+```bash
+npm run dev:backend
 ```
 
-Why these fields are required:
+Helpful root scripts:
 
-- `embedding`: semantic vector similarity search
-- `courseId`: course-level filtering
-- `content`: keyword/full-text matching for hybrid retrieval
+```bash
+npm run dev
+npm run dev:frontend
+npm run dev:backend
+npm run build
+```
 
-Once the index finishes building, the RAG pipeline is ready! Upload documents via the Admin Dashboard, click "Process for AI", and then test the Chatbot in the Student Dashboard.
+Local URLs:
 
----
+- Frontend: `http://localhost:3000`
+- Backend API: `http://localhost:5000`
+- Health check: `http://localhost:5000/api/health`
 
-## 🌍 Production Deployment
+## Backend Scripts
 
-### Frontend (Vercel)
-The frontend is pre-configured with a `vercel.json` file to automatically rewrite API calls to the production backend and enforce strict security headers.
-1. Connect the repository to Vercel.
-2. Set the Environment Variables:
-   - `NEXT_PUBLIC_API_URL=https://api.yourdomain.com/api`
-   - `NEXT_PUBLIC_SITE_URL=https://yourdomain.com`
+From `backend/`:
 
-### Backend (Railway / Render)
-The backend is pre-configured with a `railway.json` file.
-1. Connect the `/backend` folder to Railway.
-2. Provide all environment variables from `.env.example` in the Railway dashboard.
-3. Set `PORT=5000` (or leave empty if Railway automatically binds).
-4. Ensure the `FRONTEND_URL` exactly matches your Vercel URL so CORS doesn't block requests.
+```bash
+npm run dev
+npm run build
+npm run start
+npm run test:rag-demo
+npm run test:rag-health
+```
+
+## Frontend Scripts
+
+From `frontend/`:
+
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+```
+
+## API Areas
+
+The backend currently mounts these route groups:
+
+- `/api/auth`
+- `/api/courses`
+- `/api/leads`
+- `/api/testimonials`
+- `/api/admin`
+- `/api/student`
+- `/api/rag`
+- chat routes under `/api`
+
+Entry point: [backend/src/index.ts](/d:/capitallab/backend/src/index.ts)
+
+## RAG and Vector Search
+
+To use the AI study assistant fully, configure a MongoDB Atlas vector index with the name:
+
+```text
+document_chunks_vector_index
+```
+
+Default embedding dimension in the sample env is:
+
+```text
+1536
+```
+
+The backend includes services for:
+
+- document parsing
+- chunking
+- embedding generation
+- vector storage
+- retrieval and answer generation
+
+Relevant files:
+
+- [backend/src/services/ragIngestion.service.ts](/d:/capitallab/backend/src/services/ragIngestion.service.ts)
+- [backend/src/services/ragRetrieval.ts](/d:/capitallab/backend/src/services/ragRetrieval.ts)
+- [backend/src/services/ragChat.service.ts](/d:/capitallab/backend/src/services/ragChat.service.ts)
+- [backend/src/config/rag.ts](/d:/capitallab/backend/src/config/rag.ts)
+
+## Frontend Areas
+
+The Next.js app includes:
+
+- public pages in [frontend/app](/d:/capitallab/frontend/app)
+- student dashboard routes under `frontend/app/student`
+- admin dashboard routes under `frontend/app/admin`
+- shared components in `frontend/components`
+- auth state in [frontend/contexts/AuthContext.tsx](/d:/capitallab/frontend/contexts/AuthContext.tsx)
+
+If you need page-level frontend details, see [frontend/README.md](/d:/capitallab/frontend/README.md).
+
+## Deployment Notes
+
+- Frontend includes `frontend/vercel.json`
+- Backend includes `backend/railway.json`
+- Set all environment variables in your hosting platform before deploying
+- Keep frontend `NEXT_PUBLIC_API_URL` and backend `FRONTEND_URL` aligned
+
+## Troubleshooting
+
+- If the frontend behaves oddly in dev, clear `frontend/.next` and restart `npm run dev`.
+- If auth requests fail, verify `NEXT_PUBLIC_API_URL`, backend status, and CORS config.
+- If AI answers are weak or empty, recheck provider keys, vector index name, and document ingestion.
+
+## Status
+
+The repo is set up as a working full-stack monorepo with separate frontend and backend apps, workspace scripts at the root, and AI/RAG support wired into the backend.

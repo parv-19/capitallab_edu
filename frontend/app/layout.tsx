@@ -1,27 +1,46 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 import { AuthProvider } from "@/contexts/AuthContext";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { companyInfo } from "@/lib/site-content";
+import { absoluteUrl, getBaseUrl } from "@/lib/seo";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  metadataBase: new URL(getBaseUrl()),
   title: {
-    default: "Capital Lab Education — Premier Coaching in Ahmedabad",
+    default: "Capital Lab Education - CMA US and CFA Coaching",
     template: "%s | Capital Lab Education",
   },
+  icons: {
+    icon: "/LOGO.PNG",
+    shortcut: "/LOGO.PNG",
+    apple: "/LOGO.PNG",
+  },
   description:
-    "Capital Lab Education offers expert CA coaching in Ahmedabad with 500+ students, 98% success rate, and personal attention from experienced faculty.",
-  keywords: ["CA coaching Ahmedabad", "CA Foundation", "CA Intermediate", "coaching classes"],
+    "Capital Lab Education offers expert coaching for CMA US and CFA with finance-focused instruction, small batches, and globally relevant preparation.",
+  keywords: [
+    "CMA US coaching",
+    "CFA coaching",
+    "finance certification classes",
+    "Ahmedabad finance coaching",
+    "Capital Lab Education",
+  ],
   openGraph: {
     type: "website",
     locale: "en_IN",
     url: "/",
-    siteName: "Capital Lab Education",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630 }],
+    siteName: companyInfo.name,
+    images: [{ url: absoluteUrl("/LOGO.PNG"), width: 1200, height: 1200, alt: companyInfo.name }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Capital Lab Education - CMA US and CFA Coaching",
+    description:
+      "Capital Lab Education offers expert coaching for CMA US and CFA with finance-focused instruction, small batches, and globally relevant preparation.",
+    images: [absoluteUrl("/LOGO.PNG")],
   },
   robots: {
     index: true,
@@ -35,7 +54,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <AuthProvider>
-          <LayoutShell>{children}</LayoutShell>
+          {children}
           <Toaster position="top-right" richColors />
           <Analytics />
           <SpeedInsights />
@@ -43,8 +62,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </body>
     </html>
   );
-}
-
-function LayoutShell({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
 }

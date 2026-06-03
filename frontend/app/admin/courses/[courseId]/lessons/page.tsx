@@ -78,7 +78,7 @@ export default function LessonsPage({ params }: { params: { courseId: string } }
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-brand-navy">Lesson Manager</h1>
           <p className="text-gray-400 text-sm mt-1">Drag rows to reorder. Changes save automatically.</p>
@@ -100,7 +100,7 @@ export default function LessonsPage({ params }: { params: { courseId: string } }
                 onDragStart={() => handleDragStart(lesson._id)}
                 onDragOver={e => handleDragOver(e, lesson._id)}
                 onDrop={handleDrop}
-                className={`flex items-center gap-4 px-5 py-3.5 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-colors ${dragging === lesson._id ? "opacity-40" : ""}`}>
+                className={`flex flex-col items-start gap-3 px-5 py-3.5 border-b border-gray-50 last:border-0 transition-colors hover:bg-gray-50 sm:flex-row sm:items-center ${dragging === lesson._id ? "opacity-40" : ""}`}>
                 <GripVertical className="w-4 h-4 text-gray-300 cursor-grab shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -109,7 +109,7 @@ export default function LessonsPage({ params }: { params: { courseId: string } }
                   </div>
                   <div className="text-xs text-gray-400 mt-0.5">{lesson.duration}{lesson.videoUrl ? ` · ${lesson.videoUrl.slice(0, 40)}...` : ""}</div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 self-end sm:self-auto">
                   <button onClick={() => openEdit(lesson)} className="p-1.5 rounded-lg hover:bg-brand-navy/5 text-gray-400 hover:text-brand-navy transition-colors">
                     <Pencil className="w-4 h-4" />
                   </button>
@@ -168,7 +168,7 @@ export default function LessonsPage({ params }: { params: { courseId: string } }
                 <input type="checkbox" checked={form.isFreePreview} onChange={e => setForm(f => ({ ...f, isFreePreview: e.target.checked }))} className="w-4 h-4 accent-brand-navy" />
                 <span className="text-sm text-gray-700">Free Preview (visible without enrollment)</span>
               </label>
-              <div className="flex gap-3 pt-2">
+              <div className="flex flex-col gap-3 pt-2 sm:flex-row">
                 <button type="button" onClick={() => setDialogOpen(false)} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-600">Cancel</button>
                 <button type="submit" disabled={saving} className="flex-1 py-2.5 rounded-xl bg-brand-navy text-white text-sm font-semibold hover:bg-brand-navyDark flex items-center justify-center gap-2 disabled:opacity-70">
                   {saving ? <><Loader2 className="w-4 h-4 animate-spin" />Saving...</> : editLesson ? "Update" : "Create Lesson"}

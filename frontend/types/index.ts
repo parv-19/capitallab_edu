@@ -63,11 +63,17 @@ export interface Testimonial {
 export interface CourseDocument {
   _id: string;
   name: string;
+  title?: string;
+  originalFileName?: string;
   filePath: string;
   fileType: string;
   size: number;
+  status?: "uploaded" | "processing" | "completed" | "indexed" | "failed";
   processedForAI: boolean;
+  chunkCount?: number;
   chunksCount: number;
+  embeddingProvider?: string;
+  errorMessage?: string;
 }
 
 export interface ChatMessage {

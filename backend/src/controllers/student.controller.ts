@@ -1,8 +1,8 @@
 import bcrypt from "bcryptjs";
 import type { Request, Response } from "express";
-import mongoose from "mongoose";
 
-import { runCFAChat, type RetrievedChunk } from "../config/masterPrompt";
+import pool from "../db/pool";
+import type { ProgressDoc } from "../models/Progress.model";
 import { ChatSession } from "../models/ChatSession.model";
 import { Course } from "../models/Course.model";
 import { Lesson } from "../models/Lesson.model";
@@ -10,35 +10,36 @@ import { LessonQuestion } from "../models/LessonQuestion.model";
 import { Progress } from "../models/Progress.model";
 import { Testimonial } from "../models/Testimonial.model";
 import { User } from "../models/User.model";
-import { retrieve } from "../services/ragRetrieval";
+import { answerSyllabusQuestion } from "../services/ragChat.service";
 import type { AuthedRequest } from "../types";
 import { asyncHandler } from "../utils/asyncHandler";
 
 // Dashboard
 export const getDashboard = asyncHandler(async (req: AuthedRequest, res: Response) => {
+  const userId = req.user?.userId ?? "";
   const [user, progresses] = await Promise.all([
-    User.findById(req.user?.userId).populate("enrollments", "title slug instructor duration"),
-    Progress.find({ userId: req.user?.userId }).sort({ updatedAt: -1 }),
-  ]);
+    userId ? User.findById(userId) : Promise.resolve(null),
+    userId ? Progress.find({ userId }).sort({ updatedAt: -1 }) : Promise.resolve<ProgressDoc[]>([]),
+  ]) as [any, ProgressDoc[]];
 
-  const enrolledCourses = ((user?.enrollments ?? []) as any[]).map((course) => {
-    const prog = progresses.find((p) => String(p.courseId) === String(course._id));
-    return {
-      _id: course._id,
-      title: course.title,
-      slug: course.slug,
-      instructor: course.instructor,
-      duration: course.duration,
-      progress: prog?.percentComplete ?? 0,
-      completedLessons: prog?.completedLessons?.length ?? 0,
-      totalLessons: 0,
-    };
-  });
+  let enrolledCourses: any[] = [];
+  if (user && user.enrollments.length > 0) {
+    const { rows: courseRows } = await pool.query(
+      `SELECT id, title, slug, instructor, duration FROM courses WHERE id = ANY($1::uuid[])`,
+      [user.enrollments],
+    );
+    enrolledCourses = courseRows.map((course: any) => {
+      const prog = progresses.find((p) => String(p.courseId) === String(course.id));
+      return {
+        _id: course.id, title: course.title, slug: course.slug, instructor: course.instructor,
+        duration: course.duration, progress: prog?.percentComplete ?? 0,
+        completedLessons: prog?.completedLessons?.length ?? 0, totalLessons: 0,
+      };
+    });
+  }
 
   const recentActivity = progresses.slice(0, 5).map((p) => ({
-    courseId: p.courseId,
-    lastAccessed: p.lastAccessed,
-    percentComplete: p.percentComplete,
+    courseId: p.courseId, lastAccessed: p.lastAccessed, percentComplete: p.percentComplete,
   }));
 
   res.json({
@@ -54,25 +55,27 @@ export const getDashboard = asyncHandler(async (req: AuthedRequest, res: Respons
 
 // My Courses
 export const getMyCourses = asyncHandler(async (req: AuthedRequest, res: Response) => {
-  const user = await User.findById(req.user?.userId).populate(
-    "enrollments",
-    "title slug instructor duration level status",
+  const user = req.user?.userId ? await User.findById(req.user.userId) : null;
+  if (!user || user.enrollments.length === 0) return res.json({ courses: [] });
+
+  const { rows } = await pool.query(
+    `SELECT id, title, slug, instructor, duration, level, status FROM courses WHERE id = ANY($1::uuid[])`,
+    [user.enrollments],
   );
-  res.json({ courses: user?.enrollments ?? [] });
+  res.json({ courses: rows.map((c: any) => ({ ...c, _id: c.id })) });
 });
 
 // Course Player
 export const getCoursePlayer = asyncHandler(async (req: AuthedRequest, res: Response) => {
-  const { courseId } = req.params;
-
-  const user = await User.findById(req.user?.userId);
-  const enrolled = user?.enrollments?.some((entry: any) => String(entry) === String(courseId)) ?? false;
+  const courseId = String(req.params.courseId ?? "");
+  const user = req.user?.userId ? await User.findById(req.user.userId) : null;
+  const enrolled = user?.enrollments?.includes(courseId) ?? false;
   if (!enrolled) return res.status(403).json({ message: "You are not enrolled in this course." });
 
   const [course, lessons, progress] = await Promise.all([
     Course.findById(courseId),
     Lesson.find({ courseId }).sort({ order: 1 }),
-    Progress.findOne({ courseId, userId: req.user?.userId }),
+    Progress.findOne({ courseId, userId: req.user?.userId ?? "" }),
   ]);
 
   res.json({ course, lessons, progress });
@@ -80,20 +83,21 @@ export const getCoursePlayer = asyncHandler(async (req: AuthedRequest, res: Resp
 
 // Mark Lesson Complete
 export const markLessonComplete = asyncHandler(async (req: AuthedRequest, res: Response) => {
-  const { courseId, lessonId } = req.params;
+  const courseId = String(req.params.courseId ?? "");
+  const lessonId = String(req.params.lessonId ?? "");
+  const userId = req.user?.userId ?? "";
   const lessonsCount = await Lesson.countDocuments({ courseId });
 
-  const progress =
-    (await Progress.findOne({ courseId, userId: req.user?.userId })) ||
-    (await Progress.create({ courseId, userId: req.user?.userId, completedLessons: [] }));
-
-  if (!progress.completedLessons.some((entry: any) => String(entry) === String(lessonId))) {
-    progress.completedLessons.push(new mongoose.Types.ObjectId(lessonId as string));
+  let progress = await Progress.findOne({ courseId, userId });
+  if (!progress) {
+    progress = await Progress.create({ courseId, userId, completedLessons: [] });
   }
 
-  progress.percentComplete = lessonsCount
-    ? Math.round((progress.completedLessons.length / lessonsCount) * 100)
-    : 0;
+  if (!progress.completedLessons.includes(lessonId)) {
+    progress.completedLessons.push(lessonId);
+  }
+
+  progress.percentComplete = lessonsCount ? Math.round((progress.completedLessons.length / lessonsCount) * 100) : 0;
   progress.lastAccessed = new Date();
   await progress.save();
 
@@ -103,39 +107,32 @@ export const markLessonComplete = asyncHandler(async (req: AuthedRequest, res: R
 // Lesson Q&A
 export const askLessonQuestion = asyncHandler(async (req: AuthedRequest, res: Response) => {
   const question = await LessonQuestion.create({
-    lessonId: req.params.lessonId,
-    userId: req.user?.userId,
+    lessonId: String(req.params.lessonId ?? ""),
+    userId: req.user?.userId ?? "",
     question: req.body.question,
   });
   res.status(201).json({ question });
 });
 
 export const listLessonQuestions = asyncHandler(async (req: AuthedRequest, res: Response) => {
-  const filter =
-    req.user?.role === "admin"
-      ? { lessonId: req.params.lessonId }
-      : { lessonId: req.params.lessonId, userId: req.user?.userId };
+  const lessonId = String(req.params.lessonId ?? "");
+  const filter = req.user?.role === "admin"
+    ? { lessonId }
+    : { lessonId, userId: req.user?.userId ?? "" };
   const questions = await LessonQuestion.find(filter).sort({ createdAt: -1 });
   res.json({ questions });
 });
 
 // Testimonials
 export const createTestimonial = asyncHandler(async (req: AuthedRequest, res: Response) => {
-  const user = await User.findById(req.user?.userId);
+  const user = req.user?.userId ? await User.findById(req.user.userId) : null;
   const { courseId, rating, review } = req.body as { courseId: string; rating: number; review: string };
 
-  if (!user?.enrollments.some((entry: any) => String(entry) === String(courseId))) {
+  if (!user?.enrollments.includes(courseId)) {
     return res.status(403).json({ message: "Enrollment required to leave a testimonial." });
   }
 
-  const testimonial = await Testimonial.create({
-    studentId: user._id,
-    studentName: user.name,
-    courseId,
-    rating,
-    review,
-  });
-
+  const testimonial = await Testimonial.create({ studentId: user.id, studentName: user.name, courseId, rating, review });
   res.status(201).json({ testimonial });
 });
 
@@ -146,27 +143,16 @@ export const updateProfile = asyncHandler(async (req: AuthedRequest, res: Respon
   if (req.body.phone) updateData.phone = req.body.phone;
   if (req.file) updateData.avatar = `/uploads/images/${req.file.filename}`;
 
-  const user = await User.findByIdAndUpdate(req.user?.userId, updateData, { new: true }).select(
-    "_id name email phone avatar enrollments role isBlocked",
-  );
-  res.json({ user });
+  const user = await User.findByIdAndUpdate(req.user?.userId ?? "", updateData, { new: true });
+  res.json({ user: user ? { _id: user.id, name: user.name, email: user.email, phone: user.phone, avatar: user.avatar, enrollments: user.enrollments, role: user.role, isBlocked: user.isBlocked } : null });
 });
 
 export const updatePassword = asyncHandler(async (req: AuthedRequest, res: Response) => {
-  const { currentPassword, newPassword } = req.body as {
-    currentPassword: string;
-    newPassword: string;
-  };
+  const { currentPassword, newPassword } = req.body as { currentPassword: string; newPassword: string };
+  if (!currentPassword || !newPassword) return res.status(400).json({ message: "currentPassword and newPassword are required." });
+  if (newPassword.length < 8) return res.status(400).json({ message: "New password must be at least 8 characters." });
 
-  if (!currentPassword || !newPassword) {
-    return res.status(400).json({ message: "currentPassword and newPassword are required." });
-  }
-
-  if (newPassword.length < 8) {
-    return res.status(400).json({ message: "New password must be at least 8 characters." });
-  }
-
-  const user = await User.findById(req.user?.userId);
+  const user = req.user?.userId ? await User.findById(req.user.userId) : null;
   if (!user) return res.status(404).json({ message: "User not found." });
 
   const valid = await bcrypt.compare(currentPassword, user.password);
@@ -178,66 +164,36 @@ export const updatePassword = asyncHandler(async (req: AuthedRequest, res: Respo
 });
 
 export const deleteProfile = asyncHandler(async (req: AuthedRequest, res: Response) => {
-  await User.findByIdAndDelete(req.user?.userId);
+  await User.findByIdAndDelete(req.user?.userId ?? "");
   res.json({ message: "Profile deleted successfully" });
 });
 
-// Chat Sessions
+// Chat Sessions (legacy)
 export const listChatSessions = asyncHandler(async (req: AuthedRequest, res: Response) => {
-  const sessions = await ChatSession.find({ userId: req.user?.userId })
-    .sort({ updatedAt: -1 })
-    .select("_id title courseIds createdAt updatedAt");
-  res.json({ sessions });
+  const sessions = await ChatSession.find({ userId: req.user?.userId }).sort({ updatedAt: -1 });
+  res.json({ sessions: sessions.map((s) => ({ _id: s.id, title: s.title, courseIds: s.courseIds, createdAt: s.createdAt, updatedAt: s.updatedAt })) });
 });
 
 export const createChatSession = asyncHandler(async (req: AuthedRequest, res: Response) => {
-  const session = await ChatSession.create({
-    userId: req.user?.userId,
-    courseIds: req.body.courseIds ?? [],
-    title: req.body.title ?? "New Chat",
-    messages: [],
-  });
+  const session = await ChatSession.create({ userId: req.user?.userId, courseIds: req.body.courseIds ?? [], title: req.body.title ?? "New Chat", messages: [] });
   res.status(201).json({ session });
 });
 
 // RAG Streaming Chat
 export const streamChatMessage = asyncHandler(async (req: AuthedRequest, res: Response) => {
-  const { message, courseIds = [] } = req.body as {
-    message: string;
-    courseIds: string[];
-  };
+  const { message, courseIds = [], subject, chapterName } = req.body as { message: string; courseIds: string[]; subject?: string; chapterName?: string };
+  if (!message?.trim()) return res.status(400).json({ message: "message is required." });
 
-  if (!message?.trim()) {
-    return res.status(400).json({ message: "message is required." });
-  }
+  const user = req.user?.userId ? await User.findById(req.user.userId) : null;
+  const allowedCourseIds = new Set<string>((user?.enrollments ?? []).map((e) => String(e)));
 
-  const user = await User.findById(req.user?.userId).select("enrollments");
-  const allowedCourseIds = new Set<string>(
-    (user?.enrollments ?? []).map((entry: any) => String(entry)),
-  );
+  const targetCourseIds = courseIds.length > 0 ? courseIds.filter((id) => allowedCourseIds.has(id)) : [...allowedCourseIds];
+  if (courseIds.length > 0 && targetCourseIds.length === 0) return res.status(403).json({ message: "You can only ask about courses you are enrolled in." });
 
-  const targetCourseIds: string[] =
-    courseIds.length > 0
-      ? courseIds.filter((id) => allowedCourseIds.has(id))
-      : [...allowedCourseIds];
+  const session = req.params.sessionId !== "temp" ? await ChatSession.findOne({ _id: req.params.sessionId, userId: req.user?.userId }) : null;
+  if (req.params.sessionId !== "temp" && !session) return res.status(404).json({ message: "Chat session not found." });
 
-  if (courseIds.length > 0 && targetCourseIds.length === 0) {
-    return res.status(403).json({ message: "You can only ask about courses you are enrolled in." });
-  }
-
-  const session =
-    req.params.sessionId !== "temp"
-      ? await ChatSession.findOne({ _id: req.params.sessionId, userId: req.user?.userId })
-      : null;
-
-  if (req.params.sessionId !== "temp" && !session) {
-    return res.status(404).json({ message: "Chat session not found." });
-  }
-
-  if (session) {
-    session.messages.push({ role: "user", content: message, timestamp: new Date() });
-    await session.save();
-  }
+  if (session) { session.messages.push({ role: "user", content: message, timestamp: new Date() }); await session.save(); }
 
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
@@ -245,48 +201,10 @@ export const streamChatMessage = asyncHandler(async (req: AuthedRequest, res: Re
   res.setHeader("X-Accel-Buffering", "no");
 
   let assistantResponse = "";
-
   try {
-    const conversationHistory =
-      session?.messages.slice(0, -1).slice(-6).map((entry: any) => ({
-        role: entry.role as "user" | "assistant",
-        content: entry.content,
-      })) ?? [];
-
-    const retrievedSets = await Promise.all(
-      targetCourseIds.map(async (courseId) => retrieve(message, courseId, 5)),
-    );
-
-    const dedupedChunks: RetrievedChunk[] = [];
-    const seen = new Set<string>();
-
-    for (const chunk of retrievedSets.flat().sort((a, b) => (b.score ?? 0) - (a.score ?? 0))) {
-      const key = `${chunk._id}-${chunk.metadata.page}-${chunk.metadata.section}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      dedupedChunks.push({
-        content: chunk.content,
-        score: chunk.score,
-        metadata: {
-          ...chunk.metadata,
-          courseId: String(chunk.metadata.courseId),
-        },
-      });
-      if (dedupedChunks.length >= 5) break;
-    }
-
-    if (
-      (!process.env.ANTHROPIC_API_KEY || process.env.ANTHROPIC_API_KEY.trim() === "") &&
-      (!process.env.GROQ_API_KEY || process.env.GROQ_API_KEY.trim() === "")
-    ) {
-      const errorMsg = "No supported LLM API key configured for the AI assistant.";
-      assistantResponse += errorMsg;
-      res.write(errorMsg);
-    } else {
-      const answer = await runCFAChat(message, dedupedChunks, conversationHistory);
-      assistantResponse += answer;
-      res.write(answer);
-    }
+    const result = await answerSyllabusQuestion({ userId: req.user?.userId, question: message, courseIds: targetCourseIds, subject, chapterName });
+    assistantResponse += result.answer;
+    res.write(result.answer);
   } catch (error) {
     console.error("Chat Error:", error);
     const errorMsg = "\n\n[An error occurred while generating the response. Please try again.]";
@@ -295,14 +213,8 @@ export const streamChatMessage = asyncHandler(async (req: AuthedRequest, res: Re
   }
 
   if (session) {
-    session.messages.push({
-      role: "assistant",
-      content: assistantResponse,
-      timestamp: new Date(),
-    });
-    if (session.title === "New Chat" && message.trim()) {
-      session.title = message.trim().slice(0, 60);
-    }
+    session.messages.push({ role: "assistant", content: assistantResponse, timestamp: new Date() });
+    if (session.title === "New Chat" && message.trim()) session.title = message.trim().slice(0, 60);
     await session.save();
   }
 

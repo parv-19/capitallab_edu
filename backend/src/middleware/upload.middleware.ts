@@ -2,6 +2,8 @@ import path from "path";
 import fs from "fs";
 import multer from "multer";
 
+import { MAX_UPLOAD_SIZE_MB } from "../config/rag";
+
 // Ensure upload directories exist
 const ensureDir = (dir: string) => {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
@@ -29,18 +31,19 @@ const documentFilter = (
     "application/pdf",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "text/plain",
+    "text/markdown",
   ];
   if (allowed.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("Only PDF, DOCX, and TXT files are allowed."));
+    cb(new Error("Only PDF, DOCX, TXT, and Markdown files are allowed."));
   }
 };
 
 export const uploadDocument = multer({
   storage: documentStorage,
   fileFilter: documentFilter,
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20 MB
+  limits: { fileSize: MAX_UPLOAD_SIZE_MB * 1024 * 1024 },
 }).single("file");
 
 // ─── Thumbnail / Avatar Upload Storage ─────────────────────────────

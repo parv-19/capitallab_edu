@@ -21,7 +21,7 @@ const mockLeads: Lead[] = [
 ];
 
 export default function LeadsPage() {
-  const [leads, setLeads] = useState<Lead[]>(mockLeads);
+  const [leads, setLeads] = useState<Lead[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
@@ -29,7 +29,7 @@ export default function LeadsPage() {
   const [savingNote, setSavingNote] = useState(false);
 
   useEffect(() => {
-    api.get("/admin/leads").then(r => { if (r.data?.leads?.length) setLeads(r.data.leads); }).catch(() => {});
+    api.get("/admin/leads").then(r => { setLeads(r.data?.leads ?? []); }).catch(() => {});
   }, []);
 
   const filtered = leads.filter(l => {
@@ -97,7 +97,37 @@ export default function LeadsPage() {
 
       {/* Table */}
       <div className="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="md:hidden divide-y divide-gray-100">
+          {filtered.map((lead, i) => (
+            <div key={lead._id} className="p-4 space-y-3" onClick={() => setSelectedLead(lead)}>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-sm font-semibold text-brand-navy">{lead.name}</div>
+                  <div className="text-xs text-gray-500">{lead.phone}</div>
+                </div>
+                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${STATUS_COLORS[lead.status]}`}>{lead.status.replace("_", " ")}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <div className="text-gray-400">Course</div>
+                  <div className="text-gray-700">{lead.courseInterest}</div>
+                </div>
+                <div>
+                  <div className="text-gray-400">Preferred</div>
+                  <div className="text-gray-700">{lead.preferredTime}</div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-xs text-gray-400">{new Date(lead.createdAt).toLocaleDateString("en-IN")}</div>
+                <button onClick={(e) => { e.stopPropagation(); setSelectedLead(lead); }} className="text-xs font-medium text-brand-navy">
+                  Open details
+                </button>
+              </div>
+            </div>
+          ))}
+          {filtered.length === 0 && <div className="text-center py-12 text-gray-400">No leads found.</div>}
+        </div>
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 text-gray-400 text-xs uppercase tracking-wide">
@@ -153,7 +183,7 @@ export default function LeadsPage() {
       {selectedLead && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div className="absolute inset-0 bg-black/30" onClick={() => setSelectedLead(null)} />
-          <div className="relative bg-white w-full max-w-md shadow-2xl flex flex-col overflow-y-auto">
+          <div className="relative bg-white w-full max-w-md shadow-2xl flex flex-col overflow-y-auto sm:max-w-md">
             <div className="px-6 py-5 border-b border-gray-100 flex items-start justify-between sticky top-0 bg-white">
               <div>
                 <h2 className="text-lg font-bold text-brand-navy">{selectedLead.name}</h2>
@@ -162,7 +192,7 @@ export default function LeadsPage() {
               <button onClick={() => setSelectedLead(null)} className="text-gray-400 hover:text-gray-700 p-1"><X className="w-5 h-5" /></button>
             </div>
             <div className="flex-1 px-6 py-5 space-y-5">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {[["Course", selectedLead.courseInterest], ["Time", selectedLead.preferredTime], ["Email", selectedLead.email || "—"], ["Date", new Date(selectedLead.createdAt).toLocaleDateString("en-IN")]].map(([k, v]) => (
                   <div key={k} className="bg-gray-50 rounded-xl p-3">
                     <div className="text-xs text-gray-400 mb-0.5">{k}</div>
