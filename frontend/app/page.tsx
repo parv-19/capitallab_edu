@@ -69,10 +69,7 @@ function transformLandingMarkup(markup: string) {
       '<button class="popup-submit">Send Enquiry &#8594;</button>',
       '<button class="popup-submit" type="button">Send Enquiry &#8594;</button>',
     )
-    .replace(
-      '  <!-- POPUP MODAL -->',
-      '  <div id="publicReviewFormMount"></div>\n\n  <!-- POPUP MODAL -->',
-    );
+    .replace('  <!-- POPUP MODAL -->', '  <!-- POPUP MODAL -->');
 }
 
 const getLandingContent = cache(async () => {
