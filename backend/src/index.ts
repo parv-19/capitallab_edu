@@ -17,10 +17,28 @@ import testimonialRoutes from "./routes/testimonial.routes";
 
 const app = express();
 const port = Number(process.env.PORT ?? 5000);
+const configuredOrigins = (process.env.FRONTEND_URL ?? "http://localhost:3000")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const vercelPreviewPattern = /^https:\/\/.*\.vercel\.app$/;
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL ?? "http://localhost:3000",
+    origin: (origin, callback) => {
+      if (!origin) {
+        callback(null, true);
+        return;
+      }
+
+      if (configuredOrigins.includes(origin) || vercelPreviewPattern.test(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`Origin ${origin} not allowed by CORS`));
+    },
     credentials: true,
   }),
 );

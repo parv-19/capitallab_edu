@@ -100,6 +100,7 @@ export default function SignupPage() {
             <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Full Name *</label>
             <input
               required
+              autoComplete="name"
               value={form.name}
               onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
               placeholder="Your Name"
@@ -111,6 +112,7 @@ export default function SignupPage() {
             <input
               type="email"
               required
+              autoComplete="email"
               value={form.email}
               onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
               placeholder="you@example.com"
@@ -123,6 +125,7 @@ export default function SignupPage() {
               <input
                 type={showPw ? "text" : "password"}
                 required
+                autoComplete="new-password"
                 value={form.password}
                 onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
                 placeholder="Min 8 characters"
@@ -146,6 +149,7 @@ export default function SignupPage() {
               <input
                 type="password"
                 required
+                autoComplete="new-password"
                 value={form.confirmPassword}
                 onChange={(e) => setForm((prev) => ({ ...prev, confirmPassword: e.target.value }))}
                 placeholder="Repeat password"
@@ -159,6 +163,7 @@ export default function SignupPage() {
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide">Phone (Optional)</label>
             <input
+              autoComplete="tel"
               value={form.phone}
               onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))}
               placeholder="Phone Number"

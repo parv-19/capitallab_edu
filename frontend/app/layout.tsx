@@ -3,8 +3,6 @@ import "./globals.css";
 import "katex/dist/katex.min.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Toaster } from "sonner";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { companyInfo } from "@/lib/site-content";
 import { absoluteUrl, getBaseUrl } from "@/lib/seo";
 
@@ -56,8 +54,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <AuthProvider>
           {children}
           <Toaster position="top-right" richColors />
-          <Analytics />
-          <SpeedInsights />
         </AuthProvider>
       </body>
     </html>
