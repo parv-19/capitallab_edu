@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import api from "@/lib/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Testimonial } from "@/types";
+import PublicReviewForm from "@/components/testimonials/PublicReviewForm";
 
 type MarketingTestimonial = Pick<Testimonial, "studentName" | "review" | "designation"> & {
   rating?: number;
@@ -78,11 +80,14 @@ interface ApprovedLandingPageProps {
 
 export default function ApprovedLandingPage({ styles, markup, testimonials = fallbackTestimonials }: ApprovedLandingPageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [reviewMount, setReviewMount] = useState<HTMLElement | null>(null);
   const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     const root = containerRef.current;
     if (!root) return;
+
+    setReviewMount(root.querySelector<HTMLElement>("#publicReviewFormMount"));
 
     const cleanupFns: Array<() => void> = [];
     const hamburger = root.querySelector<HTMLElement>("#hamburger");
@@ -511,6 +516,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     <>
       <style dangerouslySetInnerHTML={{ __html: styles }} />
       <div ref={containerRef} dangerouslySetInnerHTML={{ __html: markup }} />
+      {reviewMount ? createPortal(<PublicReviewForm />, reviewMount) : null}
     </>
   );
 }

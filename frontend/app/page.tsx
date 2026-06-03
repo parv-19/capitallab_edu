@@ -68,6 +68,10 @@ function transformLandingMarkup(markup: string) {
     .replace(
       '<button class="popup-submit">Send Enquiry &#8594;</button>',
       '<button class="popup-submit" type="button">Send Enquiry &#8594;</button>',
+    )
+    .replace(
+      '  <!-- POPUP MODAL -->',
+      '  <div id="publicReviewFormMount"></div>\n\n  <!-- POPUP MODAL -->',
     );
 }
 
