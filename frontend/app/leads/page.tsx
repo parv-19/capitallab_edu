@@ -3,6 +3,7 @@ import { readFile } from "fs/promises";
 import path from "path";
 import LeadsLandingPage from "@/components/home/LeadsLandingPage";
 import { buildMetadata } from "@/lib/seo";
+import { getApprovedTestimonials } from "@/lib/server/testimonials";
 
 export const revalidate = 3600;
 
@@ -70,5 +71,6 @@ export const metadata = buildMetadata({
 
 export default async function LeadsPage() {
   const { styles, markup } = await getLeadsContent();
-  return <LeadsLandingPage styles={styles} markup={markup} />;
+  const testimonials = await getApprovedTestimonials(3);
+  return <LeadsLandingPage styles={styles} markup={markup} testimonials={testimonials} />;
 }

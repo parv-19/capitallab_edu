@@ -6,6 +6,7 @@ export interface TestimonialDoc {
   _id: string;
   studentId?: string | null;
   studentName?: string | null;
+  designation?: string | null;
   courseId?: string | null;
   rating: number;
   review: string;
@@ -29,11 +30,12 @@ export const Testimonial = {
 
   async create(data: Record<string, any>): Promise<TestimonialDoc> {
     const { rows } = await pool.query(
-      `INSERT INTO testimonials (student_id,student_name,course_id,rating,review,status,featured)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+      `INSERT INTO testimonials (student_id,student_name,designation,course_id,rating,review,status,featured)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
       [
         data.studentId ?? null,
         data.studentName ?? null,
+        data.designation ?? null,
         data.courseId ?? null,
         data.rating,
         data.review,

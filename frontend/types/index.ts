@@ -52,6 +52,7 @@ export interface Testimonial {
   _id: string;
   studentId: string;
   studentName: string;
+  designation?: string;
   rating: number;
   review: string;
   featured: boolean;

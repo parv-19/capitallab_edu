@@ -4,6 +4,7 @@ import { readFile } from "fs/promises";
 import path from "path";
 import ApprovedLandingPage from "@/components/home/ApprovedLandingPage";
 import { buildMetadata, getOrganizationSchema, getWebsiteSchema } from "@/lib/seo";
+import { getApprovedTestimonials } from "@/lib/server/testimonials";
 
 export const revalidate = 3600;
 
@@ -87,6 +88,7 @@ const getLandingContent = cache(async () => {
 
 export default async function HomePage() {
   const { styles, markup } = await getLandingContent();
+  const testimonials = await getApprovedTestimonials(8);
   const structuredData = [getOrganizationSchema(), getWebsiteSchema()];
 
   return (
@@ -98,7 +100,7 @@ export default async function HomePage() {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
         />
       ))}
-      <ApprovedLandingPage styles={styles} markup={markup} />
+      <ApprovedLandingPage styles={styles} markup={markup} testimonials={testimonials} />
     </>
   );
 }

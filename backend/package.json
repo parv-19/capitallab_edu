@@ -7,6 +7,7 @@
     "dev": "nodemon --watch src --exec ts-node src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
+    "seed:testimonials": "node -r ts-node/register scripts/seed-testimonials.ts",
     "python:install": "python -m pip install -r python/requirements.txt",
     "test:rag-demo": "node scratch/run-live-demo.js",
     "test:rag-health": "node -r ts-node/register scripts/rag-health-check.ts"

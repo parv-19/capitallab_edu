@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import api from "@/lib/axios";
+import type { Testimonial } from "@/types";
 
 const SHEET_URL =
   "https://script.google.com/macros/s/AKfycbxxpE4_LIKsXmY4BVsVcssVLUbCAW9DeQFRMEOqN-78czmnovsrNh8IR4E2KZFKLrdAAA/exec";
@@ -10,9 +11,19 @@ const SHEET_URL =
 interface LeadsLandingPageProps {
   styles: string;
   markup: string;
+  testimonials?: Testimonial[];
 }
 
-export default function LeadsLandingPage({ styles, markup }: LeadsLandingPageProps) {
+function initials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part.charAt(0))
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+export default function LeadsLandingPage({ styles, markup, testimonials = [] }: LeadsLandingPageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -34,6 +45,26 @@ export default function LeadsLandingPage({ styles, markup }: LeadsLandingPagePro
       link.addEventListener("click", handleHomeRedirect);
       cleanupFns.push(() => link.removeEventListener("click", handleHomeRedirect));
     });
+
+    const testimonialGrid = root.querySelector<HTMLElement>(".testi-grid");
+    if (testimonialGrid && testimonials.length > 0) {
+      testimonialGrid.innerHTML = testimonials
+        .slice(0, 3)
+        .map(
+          (testimonial) => `<div class="testi-card">
+            <div class="testi-stars">${"★".repeat(Math.max(0, Math.min(5, testimonial.rating || 5)))}</div>
+            <p class="testi-text">"${testimonial.review}"</p>
+            <div class="testi-author">
+              <div class="testi-avatar">${initials(testimonial.studentName)}</div>
+              <div>
+                <div class="testi-name">${testimonial.studentName}</div>
+                <div class="testi-meta">${testimonial.designation ?? "Capital Lab Education Student"}</div>
+              </div>
+            </div>
+          </div>`,
+        )
+        .join("");
+    }
 
     const submitBtn = root.querySelector<HTMLButtonElement>("[data-leads-submit]");
     if (submitBtn) {
@@ -115,7 +146,7 @@ export default function LeadsLandingPage({ styles, markup }: LeadsLandingPagePro
     }
 
     return () => cleanupFns.forEach((fn) => fn());
-  }, []);
+  }, [testimonials]);
 
   return (
     <>

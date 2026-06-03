@@ -245,6 +245,7 @@ CREATE TABLE IF NOT EXISTS testimonials (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   student_id   UUID REFERENCES users(id) ON DELETE SET NULL,
   student_name TEXT,
+  designation  TEXT,
   course_id    UUID REFERENCES courses(id) ON DELETE SET NULL,
   rating       INTEGER CHECK (rating BETWEEN 1 AND 5),
   review       TEXT,

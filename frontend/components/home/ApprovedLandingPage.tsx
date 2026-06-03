@@ -4,32 +4,38 @@ import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import api from "@/lib/axios";
 import { useAuth } from "@/contexts/AuthContext";
+import type { Testimonial } from "@/types";
 
-const dynamicTestimonials = [
+const fallbackTestimonials = [
   {
-    name: "Moksh",
-    role: "Capital Lab Education Student",
-    text: "Your teaching method was great. The lecture were fun and also very helpful in remembering the concept. There was no boredom in your lecture and there was a personal connection which all the students studying with you felt in the class. You were more than a teacher. A friend and a mentor.",
+    studentName: "Moksh",
+    designation: "Capital Lab Education Student",
+    review:
+      "Your teaching method was great. The lecture were fun and also very helpful in remembering the concept. There was no boredom in your lecture and there was a personal connection which all the students studying with you felt in the class. You were more than a teacher. A friend and a mentor.",
   },
   {
-    name: "Dhriti Pandey",
-    role: "Capital Lab Education Student",
-    text: "I wanted to express how much I've enjoyed being in your class. Your teaching has been truly great Sir. I always felt comfortable asking questions and you explained everything so clearly, specially with those helpful examples and Excel sheets which really boosted my understanding of the topics. I appreciate how you made the classroom such a welcoming space for learning and discussion. Thank you for creating such a positive learning environment.",
+    studentName: "Dhriti Pandey",
+    designation: "Capital Lab Education Student",
+    review:
+      "I wanted to express how much I've enjoyed being in your class. Your teaching has been truly great Sir. I always felt comfortable asking questions and you explained everything so clearly, specially with those helpful examples and Excel sheets which really boosted my understanding of the topics. I appreciate how you made the classroom such a welcoming space for learning and discussion. Thank you for creating such a positive learning environment.",
   },
   {
-    name: "Tamanna",
-    role: "US CMA Student",
-    text: "I am extremely satisfied with the depth of knowledge and exceptional teaching style. The way of explaining concepts is very clear and accurate, which makes even difficult topics easy to understand. I really appreciate the efforts put into each session and guidance in my US CMA preparation.",
+    studentName: "Tamanna",
+    designation: "US CMA Student",
+    review:
+      "I am extremely satisfied with the depth of knowledge and exceptional teaching style. The way of explaining concepts is very clear and accurate, which makes even difficult topics easy to understand. I really appreciate the efforts put into each session and guidance in my US CMA preparation.",
   },
   {
-    name: "Poorva",
-    role: "Capital Lab Education Student",
-    text: "Your teaching method was really really great and helpful. Helped a lot in clearing certain concepts, was able to understand it all very easily. You created a very positive and comfortable learning environment. Truly a great experience!",
+    studentName: "Poorva",
+    designation: "Capital Lab Education Student",
+    review:
+      "Your teaching method was really really great and helpful. Helped a lot in clearing certain concepts, was able to understand it all very easily. You created a very positive and comfortable learning environment. Truly a great experience!",
   },
   {
-    name: "Mudrika",
-    role: "Capital Lab Education Student",
-    text: "It was great learning with you. You made stuff easy to understand for everybody. Your fun and friendly energy made finance feel easy. A really wonderful mentor and tutor!",
+    studentName: "Mudrika",
+    designation: "Capital Lab Education Student",
+    review:
+      "It was great learning with you. You made stuff easy to understand for everybody. Your fun and friendly energy made finance feel easy. A really wonderful mentor and tutor!",
   },
 ];
 
@@ -58,9 +64,10 @@ function validatePhone(phone: string) {
 interface ApprovedLandingPageProps {
   styles: string;
   markup: string;
+  testimonials?: Testimonial[];
 }
 
-export default function ApprovedLandingPage({ styles, markup }: ApprovedLandingPageProps) {
+export default function ApprovedLandingPage({ styles, markup, testimonials = fallbackTestimonials }: ApprovedLandingPageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { isAuthenticated, user } = useAuth();
 
@@ -182,16 +189,16 @@ export default function ApprovedLandingPage({ styles, markup }: ApprovedLandingP
     const testimonialsCarousel = root.querySelector<HTMLElement>("#testimonialsCarousel");
 
     if (testimonialsTrack && testimonialPrev && testimonialNext && testimonialDots && testimonialsCarousel) {
-      testimonialsTrack.innerHTML = dynamicTestimonials
+      testimonialsTrack.innerHTML = testimonials
         .map(
           (item) => `<article class="testimonial-card">
             <div class="testimonial-quote">"</div>
-            <p class="testimonial-text">${item.text}</p>
+            <p class="testimonial-text">${item.review}</p>
             <div class="testimonial-footer">
-              <div class="testimonial-avatar">${initials(item.name)}</div>
+              <div class="testimonial-avatar">${initials(item.studentName)}</div>
               <div>
-                <div class="testimonial-author">${item.name}</div>
-                <div class="testimonial-role">${item.role}</div>
+                <div class="testimonial-author">${item.studentName}</div>
+                <div class="testimonial-role">${item.designation ?? "Capital Lab Education Student"}</div>
               </div>
             </div>
           </article>`,
@@ -203,7 +210,7 @@ export default function ApprovedLandingPage({ styles, markup }: ApprovedLandingP
       let touchStartX = 0;
 
       const getCardsPerView = () => (window.innerWidth <= 768 ? 1 : 2);
-      const getMaxIndex = () => Math.max(0, dynamicTestimonials.length - getCardsPerView());
+      const getMaxIndex = () => Math.max(0, testimonials.length - getCardsPerView());
 
       const renderDots = () => {
         const pages = getMaxIndex() + 1;

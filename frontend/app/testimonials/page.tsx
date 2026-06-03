@@ -1,8 +1,8 @@
 import { Star } from "lucide-react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { testimonials } from "@/lib/site-content";
 import { buildMetadata } from "@/lib/seo";
+import { getApprovedTestimonials } from "@/lib/server/testimonials";
 
 export const metadata = buildMetadata({
   title: "Student Testimonials",
@@ -12,7 +12,9 @@ export const metadata = buildMetadata({
   keywords: ["Capital Lab testimonials", "CFA student reviews", "CMA US coaching feedback"],
 });
 
-export default function TestimonialsPage() {
+export default async function TestimonialsPage() {
+  const testimonials = await getApprovedTestimonials();
+
   return (
     <>
       <Navbar />
@@ -48,7 +50,9 @@ export default function TestimonialsPage() {
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-brand-navy">{testimonial.studentName}</div>
-                    <div className="text-xs text-brand-gold">{testimonial.courseName}</div>
+                    <div className="text-xs text-brand-gold">
+                      {testimonial.designation ?? testimonial.courseName ?? "Capital Lab Education Student"}
+                    </div>
                   </div>
                 </div>
                 <div className="mb-3 flex gap-0.5">
