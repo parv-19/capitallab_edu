@@ -77,8 +77,11 @@ export default function ApprovedLandingPage({ styles, markup }: ApprovedLandingP
     const popupSelect = popupOverlay?.querySelector<HTMLSelectElement>("select");
     const authLinks = Array.from(root.querySelectorAll<HTMLAnchorElement>("[data-auth-link]"));
 
-    const setBodyOverflow = (value: string) => {
-      document.body.style.overflow = value;
+    const setBodyScrollLock = (locked: boolean) => {
+      document.documentElement.style.overflowX = "hidden";
+      document.body.style.overflowX = "hidden";
+      document.documentElement.style.overflowY = locked ? "hidden" : "auto";
+      document.body.style.overflowY = locked ? "hidden" : "auto";
     };
 
     const closeMobileNav = () => {
@@ -86,7 +89,7 @@ export default function ApprovedLandingPage({ styles, markup }: ApprovedLandingP
       mobileNav?.classList.remove("open");
       hamburger?.setAttribute("aria-expanded", "false");
       if (!popupOverlay?.classList.contains("active")) {
-        setBodyOverflow("");
+        setBodyScrollLock(false);
       }
     };
 
@@ -96,13 +99,13 @@ export default function ApprovedLandingPage({ styles, markup }: ApprovedLandingP
       if (popupSelect) {
         popupSelect.value = interest;
       }
-      setBodyOverflow("hidden");
+      setBodyScrollLock(true);
     };
 
     const closePopup = () => {
       popupOverlay?.classList.remove("active");
       if (!mobileNav?.classList.contains("open")) {
-        setBodyOverflow("");
+        setBodyScrollLock(false);
       }
     };
 
@@ -122,7 +125,7 @@ export default function ApprovedLandingPage({ styles, markup }: ApprovedLandingP
         const isOpen = mobileNav.classList.toggle("open");
         hamburger.classList.toggle("open");
         hamburger.setAttribute("aria-expanded", isOpen ? "true" : "false");
-        setBodyOverflow(isOpen ? "hidden" : popupOverlay?.classList.contains("active") ? "hidden" : "");
+        setBodyScrollLock(isOpen || Boolean(popupOverlay?.classList.contains("active")));
       };
 
       hamburger.addEventListener("click", handleHamburger);
@@ -484,7 +487,7 @@ export default function ApprovedLandingPage({ styles, markup }: ApprovedLandingP
 
     return () => {
       cleanupFns.forEach((cleanup) => cleanup());
-      setBodyOverflow("");
+      setBodyScrollLock(false);
     };
   }, [isAuthenticated, user]);
 
