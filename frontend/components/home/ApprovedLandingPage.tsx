@@ -146,7 +146,8 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     syncAuthLinks();
 
     if (hamburger && mobileNav) {
-      const handleHamburger = () => {
+      const handleHamburger = (event?: Event) => {
+        event?.preventDefault();
         const isOpen = mobileNav.classList.toggle("open");
         hamburger.classList.toggle("open");
         hamburger.setAttribute("aria-expanded", isOpen ? "true" : "false");
@@ -155,12 +156,21 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       };
 
       hamburger.addEventListener("click", handleHamburger);
+      hamburger.addEventListener("touchend", handleHamburger, { passive: false });
       cleanupFns.push(() => hamburger.removeEventListener("click", handleHamburger));
+      cleanupFns.push(() => hamburger.removeEventListener("touchend", handleHamburger));
     }
 
     if (mobileNavClose) {
-      mobileNavClose.addEventListener("click", closeMobileNav);
-      cleanupFns.push(() => mobileNavClose.removeEventListener("click", closeMobileNav));
+      const handleMobileNavClose = (event?: Event) => {
+        event?.preventDefault();
+        closeMobileNav();
+      };
+
+      mobileNavClose.addEventListener("click", handleMobileNavClose);
+      mobileNavClose.addEventListener("touchend", handleMobileNavClose, { passive: false });
+      cleanupFns.push(() => mobileNavClose.removeEventListener("click", handleMobileNavClose));
+      cleanupFns.push(() => mobileNavClose.removeEventListener("touchend", handleMobileNavClose));
     }
 
     const aboutSection = root.querySelector("#about-us");
