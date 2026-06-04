@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import api from "@/lib/axios";
 import { useAuth } from "@/contexts/AuthContext";
+import { companyInfo } from "@/lib/site-content";
 import type { Testimonial } from "@/types";
 import FloatingReviewWidget from "@/components/testimonials/FloatingReviewWidget";
 
@@ -69,6 +70,11 @@ function getClosestInterest(label: string | null) {
 
 function validatePhone(phone: string) {
   return /^\d{10}$/.test(phone);
+}
+
+function shouldOpenWhatsapp(label: string) {
+  const normalizedLabel = label.trim().toLowerCase();
+  return normalizedLabel === "talk to an advisor" || normalizedLabel === "talk to advisor" || normalizedLabel === "talk to instructor";
 }
 
 interface ApprovedLandingPageProps {
@@ -444,8 +450,17 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       const anchor = target.closest<HTMLAnchorElement>("a[href^='#']");
 
       if (trigger) {
-        event.preventDefault();
         const label = trigger.textContent?.trim() ?? "";
+        if (shouldOpenWhatsapp(label)) {
+          event.preventDefault();
+          window.open(companyInfo.whatsappHref, "_blank", "noopener,noreferrer");
+          if (trigger.classList.contains("mobile-cta")) {
+            closeMobileNav();
+          }
+          return;
+        }
+
+        event.preventDefault();
         openPopup(getClosestInterest(label));
         if (trigger.classList.contains("mobile-cta")) {
           closeMobileNav();
