@@ -94,6 +94,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     const cleanupFns: Array<() => void> = [];
     const hamburger = root.querySelector<HTMLElement>("#hamburger");
     const mobileNav = root.querySelector<HTMLElement>("#mobileNav");
+    const mobileNavClose = root.querySelector<HTMLButtonElement>("#mobileNavClose");
     const popupOverlay = root.querySelector<HTMLElement>("#contactPopup");
     const popupClose = root.querySelector<HTMLElement>("#popupClose");
     const popupSkip = root.querySelector<HTMLElement>("#popupSkip");
@@ -155,6 +156,11 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
       hamburger.addEventListener("click", handleHamburger);
       cleanupFns.push(() => hamburger.removeEventListener("click", handleHamburger));
+    }
+
+    if (mobileNavClose) {
+      mobileNavClose.addEventListener("click", closeMobileNav);
+      cleanupFns.push(() => mobileNavClose.removeEventListener("click", closeMobileNav));
     }
 
     const aboutSection = root.querySelector("#about-us");
