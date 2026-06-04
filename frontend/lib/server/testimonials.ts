@@ -16,7 +16,7 @@ export async function getApprovedTestimonials(limit?: number) {
 
   try {
     const response = await fetch(url.toString(), {
-      next: { revalidate: 300 },
+      next: { revalidate: 300, tags: ["approved-testimonials"] },
     });
 
     if (!response.ok) {

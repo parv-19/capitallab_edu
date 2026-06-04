@@ -111,6 +111,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       hamburger?.classList.remove("open");
       mobileNav?.classList.remove("open");
       hamburger?.setAttribute("aria-expanded", "false");
+      mobileNav?.setAttribute("aria-hidden", "true");
       if (!popupOverlay?.classList.contains("active")) {
         setBodyScrollLock(false);
       }
@@ -148,6 +149,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         const isOpen = mobileNav.classList.toggle("open");
         hamburger.classList.toggle("open");
         hamburger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        mobileNav.setAttribute("aria-hidden", isOpen ? "false" : "true");
         setBodyScrollLock(isOpen || Boolean(popupOverlay?.classList.contains("active")));
       };
 

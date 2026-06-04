@@ -27,9 +27,23 @@ export default function TestimonialsAdminPage() {
 
   const filtered = testimonials.filter((t) => t.status === activeTab);
 
+  const refreshPublicTestimonials = async () => {
+    try {
+      await fetch("/api/revalidate-testimonials", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+    } catch {
+      // Keep admin approval successful even if cache refresh fails.
+    }
+  };
+
   const approve = async (id: string) => {
     try {
       await api.patch(`/admin/testimonials/${id}/approve`);
+      await refreshPublicTestimonials();
       setTestimonials((prev) => prev.map((t) => (t._id === id ? { ...t, status: "approved" } : t)));
       toast.success("Testimonial approved.");
     } catch {

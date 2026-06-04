@@ -46,6 +46,14 @@ function transformLandingMarkup(markup: string) {
       '$1<a href="/login" class="mobile-login" data-auth-link onclick="closeMobileNav()">Login</a>\n    $2',
     )
     .replace(
+      '<button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">',
+      '<button class="hamburger" id="hamburger" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobileNav">',
+    )
+    .replace(
+      '<div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile navigation">',
+      '<div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile navigation" aria-hidden="true">',
+    )
+    .replace(
       '<button class="btn-primary">Explore Our Programs</button>',
       '<button class="btn-primary" data-scroll-target="#cfa-program">Explore Our Programs</button>',
     )
@@ -78,7 +86,7 @@ const getLandingContent = cache(async () => {
     html,
     "<style>",
     "</style>",
-  )}\nhtml,body{overflow-y:auto!important;scrollbar-gutter:stable;scrollbar-width:auto}.page{overflow-x:hidden}.page::-webkit-scrollbar,html::-webkit-scrollbar,body::-webkit-scrollbar{width:12px}.page::-webkit-scrollbar-track,html::-webkit-scrollbar-track,body::-webkit-scrollbar-track{background:#e5e7eb}.page::-webkit-scrollbar-thumb,html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb{background:#94a3b8;border-radius:999px;border:2px solid #e5e7eb}.page::-webkit-scrollbar-thumb:hover,html::-webkit-scrollbar-thumb:hover,body::-webkit-scrollbar-thumb:hover{background:#64748b}.nav-links{gap:20px}.nav-links a{display:inline-flex;align-items:center;justify-content:center}.nav-login{margin-left:8px;min-width:92px;border:1px solid rgba(255,255,255,0.36);color:var(--white)!important;padding:8px 18px;border-radius:4px;font-size:14px;font-weight:600;letter-spacing:.3px;line-height:1;transition:background .2s,color .2s,border-color .2s;display:inline-flex;align-items:center;justify-content:center}.nav-login:hover{background:rgba(255,255,255,0.1);color:var(--gold)!important;border-color:rgba(201,168,76,0.55)}.nav-cta{margin-left:2px;min-width:110px;text-align:center}.mobile-login{margin-top:16px;border-radius:4px;font-family:'Source Sans 3',sans-serif!important;font-size:16px!important;font-weight:700!important;width:auto!important;padding:14px 40px!important;color:var(--white)!important;border:1px solid rgba(255,255,255,0.26)}.mobile-login:hover{background:rgba(255,255,255,0.08);color:var(--gold)!important}`;
+  )}\nhtml,body{overflow-y:auto!important;scrollbar-gutter:auto;scrollbar-width:thin}.page{overflow-x:hidden}.page::-webkit-scrollbar,html::-webkit-scrollbar,body::-webkit-scrollbar{width:0;background:transparent}.page::-webkit-scrollbar-track,html::-webkit-scrollbar-track,body::-webkit-scrollbar-track{background:transparent}.page::-webkit-scrollbar-thumb,html::-webkit-scrollbar-thumb,body::-webkit-scrollbar-thumb{background:rgba(148,163,184,.45);border-radius:999px;border:0}.page::-webkit-scrollbar-thumb:hover,html::-webkit-scrollbar-thumb:hover,body::-webkit-scrollbar-thumb:hover{background:rgba(100,116,139,.65)}.nav-links{gap:20px}.nav-links a{display:inline-flex;align-items:center;justify-content:center}.nav-login{margin-left:8px;min-width:92px;border:1px solid rgba(255,255,255,0.36);color:var(--white)!important;padding:8px 18px;border-radius:4px;font-size:14px;font-weight:600;letter-spacing:.3px;line-height:1;transition:background .2s,color .2s,border-color .2s;display:inline-flex;align-items:center;justify-content:center}.nav-login:hover{background:rgba(255,255,255,0.1);color:var(--gold)!important;border-color:rgba(201,168,76,0.55)}.nav-cta{margin-left:2px;min-width:110px;text-align:center}.mobile-login{margin-top:16px;border-radius:4px;font-family:'Source Sans 3',sans-serif!important;font-size:16px!important;font-weight:700!important;width:auto!important;padding:14px 40px!important;color:var(--white)!important;border:1px solid rgba(255,255,255,0.26)}.mobile-login:hover{background:rgba(255,255,255,0.08);color:var(--gold)!important}.mobile-nav{visibility:hidden;pointer-events:none;padding:96px 20px 32px;justify-content:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch}.mobile-nav.open{visibility:visible;pointer-events:auto}.hamburger{min-width:44px;min-height:44px;align-items:center}.hamburger span{width:26px}.mobile-nav a{max-width:100%}`;
   const body = extractSection(html, "<body>", "<script>");
 
   return {
