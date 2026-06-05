@@ -136,8 +136,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
     const cleanupFns: Array<() => void> = [];
     const isPhoneViewport = () => window.matchMedia("(max-width: 768px)").matches;
-    const isPhoneLikeDevice = () =>
-      isPhoneViewport() && (window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0);
     const hamburger = root.querySelector<HTMLElement>("#hamburger");
     const mobileNav = root.querySelector<HTMLElement>("#mobileNav");
     const mobileNavLinks = Array.from(root.querySelectorAll<HTMLAnchorElement>("#mobileNav a"));
@@ -182,52 +180,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     };
 
     const mobileNavClose = root.querySelector<HTMLButtonElement>("#mobileNavClose");
-
-    const attachPressHandler = (el: HTMLElement, handler: () => void) => {
-      let skipClickUntil = 0;
-      el.style.touchAction = "manipulation";
-
-      const onPointerUp = (event: PointerEvent) => {
-        if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
-        if (!isPhoneLikeDevice()) return;
-        skipClickUntil = window.performance.now() + 500;
-        handler();
-      };
-
-      const onClick = () => {
-        if (window.performance.now() < skipClickUntil) return;
-        handler();
-      };
-
-      el.addEventListener("pointerup", onPointerUp);
-      el.addEventListener("click", onClick);
-
-      return () => {
-        el.removeEventListener("pointerup", onPointerUp);
-        el.removeEventListener("click", onClick);
-      };
-    };
-
-    if (hamburger && mobileNav) {
-      const handleHamburgerClick = () => {
-        const willOpen = !mobileNav.classList.contains("open");
-        hamburger.classList.toggle("open", willOpen);
-        mobileNav.classList.toggle("open", willOpen);
-        hamburger.setAttribute("aria-expanded", willOpen ? "true" : "false");
-        mobileNav.setAttribute("aria-hidden", willOpen ? "false" : "true");
-        setBodyScrollLock(willOpen);
-      };
-
-      cleanupFns.push(attachPressHandler(hamburger, handleHamburgerClick));
-    }
-
-    if (mobileNavClose) {
-      cleanupFns.push(attachPressHandler(mobileNavClose, closeMobileNav));
-    }
-
-    mobileNavLinks.forEach((link) => {
-      cleanupFns.push(attachPressHandler(link, closeMobileNav));
-    });
 
     const syncAuthLinks = () => {
       const href = isAuthenticated ? user?.role === "admin" ? "/admin" : "/student" : "/login";
@@ -520,21 +472,9 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
     const inlineLeadForm = root.querySelector<HTMLElement>("[data-inline-lead-form]");
     const inlineSubmit = inlineLeadForm?.querySelector<HTMLButtonElement>(".submit-btn");
-    if (inlineLeadForm && inlineSubmit) {
-      const handleInlineSubmit = () => {
-        void submitLead(inlineLeadForm);
-      };
-      cleanupFns.push(attachPressHandler(inlineSubmit, handleInlineSubmit));
-    }
 
     const popupLeadForm = root.querySelector<HTMLElement>("[data-popup-lead-form]");
     const popupSubmit = popupLeadForm?.querySelector<HTMLButtonElement>(".popup-submit");
-    if (popupLeadForm && popupSubmit) {
-      const handlePopupSubmit = () => {
-        void submitLead(popupLeadForm, true);
-      };
-      cleanupFns.push(attachPressHandler(popupSubmit, handlePopupSubmit));
-    }
 
     const handleRootClick = (event: Event) => {
       const target = event.target as HTMLElement;
@@ -542,8 +482,42 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       const trigger = target.closest<HTMLElement>(
         ".nav-cta-trigger, .btn-outline, .program-cta-link, .nav-cta, .mobile-cta",
       );
+      const hamburgerButton = target.closest<HTMLElement>("#hamburger");
+      const mobileCloseButton = target.closest<HTMLElement>("#mobileNavClose");
+      const inlineSubmitButton = target.closest<HTMLElement>(".submit-btn");
+      const popupSubmitButton = target.closest<HTMLElement>(".popup-submit");
+      const mobileNavLink = target.closest<HTMLAnchorElement>("#mobileNav a");
       const scrollButton = target.closest<HTMLElement>("[data-scroll-target]");
       const anchor = target.closest<HTMLAnchorElement>("a[href^='#']");
+
+      if (hamburgerButton && hamburger && mobileNav) {
+        event.preventDefault();
+        const willOpen = !mobileNav.classList.contains("open");
+        hamburger.classList.toggle("open", willOpen);
+        mobileNav.classList.toggle("open", willOpen);
+        hamburger.setAttribute("aria-expanded", willOpen ? "true" : "false");
+        mobileNav.setAttribute("aria-hidden", willOpen ? "false" : "true");
+        setBodyScrollLock(willOpen);
+        return;
+      }
+
+      if (mobileCloseButton) {
+        event.preventDefault();
+        closeMobileNav();
+        return;
+      }
+
+      if (inlineSubmitButton && inlineLeadForm && inlineSubmit && inlineSubmitButton === inlineSubmit) {
+        event.preventDefault();
+        void submitLead(inlineLeadForm);
+        return;
+      }
+
+      if (popupSubmitButton && popupLeadForm && popupSubmit && popupSubmitButton === popupSubmit) {
+        event.preventDefault();
+        void submitLead(popupLeadForm, true);
+        return;
+      }
 
       if (accordionTrigger) {
         event.preventDefault();
@@ -610,7 +584,9 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         if (!href || href === "#") return;
         event.preventDefault();
         root.querySelector(href)?.scrollIntoView({ behavior: "smooth", block: "start" });
-        closeMobileNav();
+        if (mobileNavLink) {
+          closeMobileNav();
+        }
       }
     };
 
