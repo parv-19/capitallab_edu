@@ -135,6 +135,9 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     if (!root) return;
 
     const cleanupFns: Array<() => void> = [];
+    const isPhoneViewport = () => window.matchMedia("(max-width: 768px)").matches;
+    const supportsTouchInput = () =>
+      window.matchMedia("(pointer: coarse)").matches || "ontouchstart" in window || navigator.maxTouchPoints > 0;
     const hamburger = root.querySelector<HTMLElement>("#hamburger");
     const mobileNav = root.querySelector<HTMLElement>("#mobileNav");
     const mobileNavLinks = Array.from(root.querySelectorAll<HTMLAnchorElement>("#mobileNav a"));
@@ -147,8 +150,9 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     const setBodyScrollLock = (locked: boolean) => {
       document.documentElement.style.overflowX = "hidden";
       document.body.style.overflowX = "hidden";
-      document.documentElement.style.overflowY = locked ? "hidden" : "auto";
-      document.body.style.overflowY = locked ? "hidden" : "auto";
+      const shouldLock = locked && isPhoneViewport();
+      document.documentElement.style.overflowY = shouldLock ? "hidden" : "auto";
+      document.body.style.overflowY = shouldLock ? "hidden" : "auto";
     };
 
     const closeMobileNav = () => {
@@ -183,6 +187,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       let pendingTap = false;
 
       const onTouchEnd = (e: TouchEvent) => {
+        if (!supportsTouchInput()) return;
         e.preventDefault();
         pendingTap = true;
         handler();
@@ -515,8 +520,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       const handleInlineSubmit = () => {
         void submitLead(inlineLeadForm);
       };
-      inlineSubmit.addEventListener("click", handleInlineSubmit);
-      cleanupFns.push(() => inlineSubmit.removeEventListener("click", handleInlineSubmit));
+      cleanupFns.push(attachTapHandler(inlineSubmit, handleInlineSubmit));
     }
 
     const popupLeadForm = root.querySelector<HTMLElement>("[data-popup-lead-form]");
@@ -525,8 +529,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       const handlePopupSubmit = () => {
         void submitLead(popupLeadForm, true);
       };
-      popupSubmit.addEventListener("click", handlePopupSubmit);
-      cleanupFns.push(() => popupSubmit.removeEventListener("click", handlePopupSubmit));
+      cleanupFns.push(attachTapHandler(popupSubmit, handlePopupSubmit));
     }
 
     const handleRootClick = (event: Event) => {
