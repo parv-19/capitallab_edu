@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import api from "@/lib/axios";
 import type { Testimonial } from "@/types";
@@ -25,6 +26,7 @@ function initials(name: string) {
 
 export default function LeadsLandingPage({ styles, markup, testimonials = [] }: LeadsLandingPageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const root = containerRef.current;
@@ -345,11 +347,7 @@ export default function LeadsLandingPage({ styles, markup, testimonials = [] }: 
           api.post("/leads", backendPayload).catch(() => null),
         ]);
 
-        const formBody = root.querySelector<HTMLElement>("#formBody");
-        const formSuccess = root.querySelector<HTMLElement>("#formSuccess");
-        formBody?.classList.add("hide");
-        formSuccess?.classList.add("show");
-        toast.success("Booked! We'll call you within 2 hours.");
+        router.push("/thank-you");
       };
 
       const submitClickHandler = () => void handleSubmit();
