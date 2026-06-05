@@ -138,7 +138,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     const isPhoneViewport = () => window.matchMedia("(max-width: 768px)").matches;
     const hamburger = root.querySelector<HTMLElement>("#hamburger");
     const mobileNav = root.querySelector<HTMLElement>("#mobileNav");
-    const mobileNavLinks = Array.from(root.querySelectorAll<HTMLAnchorElement>("#mobileNav a"));
     const popupOverlay = root.querySelector<HTMLElement>("#contactPopup");
     const popupClose = root.querySelector<HTMLElement>("#popupClose");
     const popupSkip = root.querySelector<HTMLElement>("#popupSkip");
@@ -178,8 +177,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         setBodyScrollLock(false);
       }
     };
-
-    const mobileNavClose = root.querySelector<HTMLButtonElement>("#mobileNavClose");
 
     const syncAuthLinks = () => {
       const href = isAuthenticated ? user?.role === "admin" ? "/admin" : "/student" : "/login";
@@ -479,31 +476,27 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     const handleRootClick = (event: Event) => {
       const target = event.target as HTMLElement;
       const accordionTrigger = target.closest<HTMLElement>(".program-accordion-trigger");
+      const mobileNavTrigger = target.closest<HTMLElement>("#hamburger, #mobileNavClose, #mobileNav a");
       const trigger = target.closest<HTMLElement>(
         ".nav-cta-trigger, .btn-outline, .program-cta-link, .nav-cta, .mobile-cta",
       );
-      const hamburgerButton = target.closest<HTMLElement>("#hamburger");
-      const mobileCloseButton = target.closest<HTMLElement>("#mobileNavClose");
       const inlineSubmitButton = target.closest<HTMLElement>(".submit-btn");
       const popupSubmitButton = target.closest<HTMLElement>(".popup-submit");
-      const mobileNavLink = target.closest<HTMLAnchorElement>("#mobileNav a");
       const scrollButton = target.closest<HTMLElement>("[data-scroll-target]");
       const anchor = target.closest<HTMLAnchorElement>("a[href^='#']");
 
-      if (hamburgerButton && hamburger && mobileNav) {
+      if (mobileNavTrigger && mobileNav) {
         event.preventDefault();
-        const willOpen = !mobileNav.classList.contains("open");
-        hamburger.classList.toggle("open", willOpen);
-        mobileNav.classList.toggle("open", willOpen);
-        hamburger.setAttribute("aria-expanded", willOpen ? "true" : "false");
-        mobileNav.setAttribute("aria-hidden", willOpen ? "false" : "true");
-        setBodyScrollLock(willOpen);
-        return;
-      }
-
-      if (mobileCloseButton) {
-        event.preventDefault();
-        closeMobileNav();
+        if (mobileNavTrigger.id === "hamburger" && hamburger) {
+          const willOpen = !mobileNav.classList.contains("open");
+          hamburger.classList.toggle("open", willOpen);
+          mobileNav.classList.toggle("open", willOpen);
+          hamburger.setAttribute("aria-expanded", willOpen ? "true" : "false");
+          mobileNav.setAttribute("aria-hidden", willOpen ? "false" : "true");
+          setBodyScrollLock(willOpen);
+        } else {
+          closeMobileNav();
+        }
         return;
       }
 
@@ -584,7 +577,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         if (!href || href === "#") return;
         event.preventDefault();
         root.querySelector(href)?.scrollIntoView({ behavior: "smooth", block: "start" });
-        if (mobileNavLink) {
+        if (target.closest("#mobileNav")) {
           closeMobileNav();
         }
       }
