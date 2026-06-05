@@ -83,6 +83,39 @@ function shouldOpenWhatsapp(label: string) {
   );
 }
 
+function normalizeLabel(label: string | null | undefined) {
+  return (label ?? "").trim().toLowerCase();
+}
+
+function getCourseContext(element: HTMLElement | null) {
+  const section = element?.closest<HTMLElement>("#cfa-program, #cma-program");
+  if (section?.id === "cfa-program") {
+    return {
+      leadCourse: "CFA — Chartered Financial Analyst",
+      interest: "CFA Program",
+      whatsappText: "Hi, I want to inquire about the CFA program at Capital Lab Education.",
+    };
+  }
+  if (section?.id === "cma-program") {
+    return {
+      leadCourse: "US CMA — Certified Management Accountant",
+      interest: "CMA US Program",
+      whatsappText: "Hi, I want to inquire about the US CMA program at Capital Lab Education.",
+    };
+  }
+  return {
+    leadCourse: "Help me decide",
+    interest: "General Enquiry",
+    whatsappText: "Hi, I want to inquire about your programs at Capital Lab Education.",
+  };
+}
+
+function buildWhatsappHref(message: string) {
+  const base = new URL(companyInfo.whatsappHref);
+  base.searchParams.set("text", message);
+  return base.toString();
+}
+
 interface ApprovedLandingPageProps {
   styles: string;
   markup: string;
@@ -159,6 +192,24 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       mobileNav.setAttribute("aria-hidden", isOpen ? "false" : "true");
       setBodyScrollLock(isOpen || Boolean(popupOverlay?.classList.contains("active")));
     };
+
+    if (hamburger) {
+      const handleHamburgerClick = (event: Event) => {
+        event.preventDefault();
+        toggleMobileNav();
+      };
+      hamburger.addEventListener("click", handleHamburgerClick);
+      cleanupFns.push(() => hamburger.removeEventListener("click", handleHamburgerClick));
+    }
+
+    if (mobileNavClose) {
+      const handleMobileNavClose = (event: Event) => {
+        event.preventDefault();
+        closeMobileNav();
+      };
+      mobileNavClose.addEventListener("click", handleMobileNavClose);
+      cleanupFns.push(() => mobileNavClose.removeEventListener("click", handleMobileNavClose));
+    }
 
     const aboutSection = root.querySelector("#about-us");
     if (aboutSection) {
@@ -308,6 +359,16 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         startAutoSlide();
       };
 
+      const handleTestimonialPrevClick = (event?: Event) => {
+        event?.preventDefault();
+        goToPrevSlide();
+      };
+
+      const handleTestimonialNextClick = (event?: Event) => {
+        event?.preventDefault();
+        goToNextSlide();
+      };
+
       const handleResize = () => updateSlider();
       const handleTouchStart = (event: TouchEvent) => {
         stopAutoSlide();
@@ -322,8 +383,8 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         startAutoSlide();
       };
 
-      testimonialPrev.onclick = goToPrevSlide;
-      testimonialNext.onclick = goToNextSlide;
+      testimonialPrev.addEventListener("click", handleTestimonialPrevClick);
+      testimonialNext.addEventListener("click", handleTestimonialNextClick);
       testimonialDots.addEventListener("click", handleDotsClick);
       window.addEventListener("resize", handleResize);
       testimonialsCarousel.addEventListener("mouseenter", stopAutoSlide);
@@ -335,8 +396,8 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       startAutoSlide();
 
       cleanupFns.push(() => {
-        testimonialPrev.onclick = null;
-        testimonialNext.onclick = null;
+        testimonialPrev.removeEventListener("click", handleTestimonialPrevClick);
+        testimonialNext.removeEventListener("click", handleTestimonialNextClick);
         testimonialDots.removeEventListener("click", handleDotsClick);
         window.removeEventListener("resize", handleResize);
         testimonialsCarousel.removeEventListener("mouseenter", stopAutoSlide);
@@ -437,24 +498,10 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
     const handleRootClick = (event: Event) => {
       const target = event.target as HTMLElement;
-      const hamburgerTrigger = target.closest<HTMLElement>("#hamburger");
-      const mobileCloseTrigger = target.closest<HTMLElement>("#mobileNavClose");
       const accordionTrigger = target.closest<HTMLElement>(".program-accordion-trigger");
       const trigger = target.closest<HTMLElement>(".nav-cta-trigger, .btn-outline, .program-cta-link, .nav-cta");
       const scrollButton = target.closest<HTMLElement>("[data-scroll-target]");
       const anchor = target.closest<HTMLAnchorElement>("a[href^='#']");
-
-      if (hamburgerTrigger) {
-        event.preventDefault();
-        toggleMobileNav();
-        return;
-      }
-
-      if (mobileCloseTrigger) {
-        event.preventDefault();
-        closeMobileNav();
-        return;
-      }
 
       if (accordionTrigger) {
         event.preventDefault();
@@ -472,9 +519,27 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
       if (trigger) {
         const label = trigger.textContent?.trim() ?? "";
+        const normalizedLabel = normalizeLabel(label);
+        const courseContext = getCourseContext(trigger);
+
+        if (normalizedLabel === "enroll now") {
+          event.preventDefault();
+          window.location.href = `/leads?course=${encodeURIComponent(courseContext.leadCourse)}`;
+          if (trigger.classList.contains("mobile-cta")) {
+            closeMobileNav();
+          }
+          return;
+        }
+
+        if (normalizedLabel === "start your cma journey") {
+          event.preventDefault();
+          window.open(buildWhatsappHref(courseContext.whatsappText), "_blank", "noopener,noreferrer");
+          return;
+        }
+
         if (shouldOpenWhatsapp(label)) {
           event.preventDefault();
-          window.open(companyInfo.whatsappHref, "_blank", "noopener,noreferrer");
+          window.open(buildWhatsappHref(courseContext.whatsappText), "_blank", "noopener,noreferrer");
           if (trigger.classList.contains("mobile-cta")) {
             closeMobileNav();
           }
@@ -482,7 +547,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         }
 
         event.preventDefault();
-        openPopup(getClosestInterest(label));
+        openPopup(courseContext.interest || getClosestInterest(label));
         if (trigger.classList.contains("mobile-cta")) {
           closeMobileNav();
         }

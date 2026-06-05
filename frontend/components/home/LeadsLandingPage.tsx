@@ -86,6 +86,18 @@ export default function LeadsLandingPage({ styles, markup, testimonials = [] }: 
       cleanupFns.push(() => link.removeEventListener("click", closeMobileNav));
     });
 
+    const searchParams = new URLSearchParams(window.location.search);
+    const requestedCourse = searchParams.get("course")?.trim();
+    if (requestedCourse) {
+      const programSelect = root.querySelector<HTMLSelectElement>("#fprog");
+      const matchingOption = Array.from(programSelect?.options ?? []).find(
+        (option) => option.text.trim().toLowerCase() === requestedCourse.toLowerCase(),
+      );
+      if (programSelect && matchingOption) {
+        programSelect.value = matchingOption.text;
+      }
+    }
+
     const testimonialGrid = root.querySelector<HTMLElement>(".testi-grid");
     if (testimonialGrid && testimonials.length > 0) {
       testimonialGrid.innerHTML = testimonials
