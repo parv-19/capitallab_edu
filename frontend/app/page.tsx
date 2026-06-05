@@ -33,6 +33,19 @@ function extractSection(source: string, startTag: string, endTag: string) {
 }
 
 function transformLandingMarkup(markup: string) {
+  const hamburgerAction =
+    "var h=document.getElementById('hamburger');var n=document.getElementById('mobileNav');if(!h||!n)return;var open=!n.classList.contains('open');n.classList.toggle('open',open);h.classList.toggle('open',open);h.setAttribute('aria-expanded',open?'true':'false');n.setAttribute('aria-hidden',open?'false':'true');document.documentElement.style.overflowX='hidden';document.body.style.overflowX='hidden';document.documentElement.style.overflowY=open?'hidden':'auto';document.body.style.overflowY=open?'hidden':'auto';";
+  const closeNavAction =
+    "var h=document.getElementById('hamburger');var n=document.getElementById('mobileNav');if(!h||!n)return;n.classList.remove('open');h.classList.remove('open');h.setAttribute('aria-expanded','false');n.setAttribute('aria-hidden','true');document.documentElement.style.overflowX='hidden';document.body.style.overflowX='hidden';document.documentElement.style.overflowY='auto';document.body.style.overflowY='auto';";
+  const touchGuardPrefix =
+    "event.preventDefault();event.stopPropagation();this.dataset.tap='1';setTimeout(function(el){el.dataset.tap='';},350,this);";
+  const clickGuardPrefix =
+    "event.preventDefault();event.stopPropagation();if(this.dataset.tap==='1'){this.dataset.tap='';return;}";
+  const testimonialAction = (direction: "prev" | "next") =>
+    `${clickGuardPrefix}var track=document.getElementById('testimonialsTrack');var prev=document.getElementById('testimonialPrev');var next=document.getElementById('testimonialNext');var dots=document.getElementById('testimonialDots');if(!track||!prev||!next||!dots)return;var cards=track.querySelectorAll('.testimonial-card');if(!cards.length)return;var perView=window.innerWidth<=768?1:(cards.length<=2?1:2);var max=Math.max(0,cards.length-perView);var current=Number(track.dataset.index||'0');current=${direction === "next" ? "(current>=max?0:current+1)" : "(current<=0?max:current-1)"};cards.forEach(function(card){card.style.flex='0 0 '+(perView===1?'100%':'calc(50% - 12px)');});var gap=window.innerWidth<=768?20:24;var slideWidth=cards[0].getBoundingClientRect().width+gap;track.style.transform='translateX(' + (-current*slideWidth) + 'px)';prev.disabled=max===0;next.disabled=max===0;dots.querySelectorAll('.testimonial-dot').forEach(function(dot,i){dot.classList.toggle('active',i===current);});track.dataset.index=String(current);`;
+  const testimonialTouchAction = (direction: "prev" | "next") =>
+    `${touchGuardPrefix}${testimonialAction(direction).replace(clickGuardPrefix, "")}`;
+
   return markup
     .replace(/src="LOGO\.PNG"/g, 'src="/LOGO.PNG"')
     .replace(/src="instructor_harsh\.jpg"/g, 'src="/instructur_harsh_new.jpeg"')
@@ -47,11 +60,11 @@ function transformLandingMarkup(markup: string) {
     )
     .replace(
       '<button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">',
-      '<button class="hamburger" id="hamburger" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobileNav" onclick="window.__capitalLabToggleMobileNav && window.__capitalLabToggleMobileNav(event)">',
+      `<button class="hamburger" id="hamburger" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobileNav" onclick="${clickGuardPrefix}${hamburgerAction}" ontouchend="${touchGuardPrefix}${hamburgerAction}">`,
     )
     .replace(
       '<div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile navigation">',
-      '<div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile navigation" aria-hidden="true">\n    <button class="mobile-nav-close" id="mobileNavClose" type="button" aria-label="Close menu" onclick="window.__capitalLabCloseMobileNav && window.__capitalLabCloseMobileNav(event)">&times;</button>',
+      `<div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile navigation" aria-hidden="true">\n    <button class="mobile-nav-close" id="mobileNavClose" type="button" aria-label="Close menu" onclick="${clickGuardPrefix}${closeNavAction}" ontouchend="${touchGuardPrefix}${closeNavAction}">&times;</button>`,
     )
     .replace(
       '<button class="btn-primary">Explore Our Programs</button>',
@@ -76,6 +89,14 @@ function transformLandingMarkup(markup: string) {
     .replace(
       '<button class="popup-submit">Send Enquiry &#8594;</button>',
       '<button class="popup-submit" type="button">Send Enquiry &#8594;</button>',
+    )
+    .replace(
+      '<button class="testimonial-btn" id="testimonialPrev" type="button" aria-label="Previous testimonial">&#8249;</button>',
+      `<button class="testimonial-btn" id="testimonialPrev" type="button" aria-label="Previous testimonial" onclick="${testimonialAction("prev")}" ontouchend="${testimonialTouchAction("prev")}">&#8249;</button>`,
+    )
+    .replace(
+      '<button class="testimonial-btn" id="testimonialNext" type="button" aria-label="Next testimonial">&#8250;</button>',
+      `<button class="testimonial-btn" id="testimonialNext" type="button" aria-label="Next testimonial" onclick="${testimonialAction("next")}" ontouchend="${testimonialTouchAction("next")}">&#8250;</button>`,
     )
     .replace('  <!-- POPUP MODAL -->', '  <!-- POPUP MODAL -->');
 }

@@ -184,32 +184,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
     syncAuthLinks();
 
-    const toggleMobileNav = () => {
-      if (!hamburger || !mobileNav) return;
-      const isOpen = mobileNav.classList.toggle("open");
-      hamburger.classList.toggle("open");
-      hamburger.setAttribute("aria-expanded", isOpen ? "true" : "false");
-      mobileNav.setAttribute("aria-hidden", isOpen ? "false" : "true");
-      setBodyScrollLock(isOpen || Boolean(popupOverlay?.classList.contains("active")));
-    };
-
-    const windowWithMobileNavHandlers = window as typeof window & {
-      __capitalLabToggleMobileNav?: (event?: Event) => void;
-      __capitalLabCloseMobileNav?: (event?: Event) => void;
-    };
-
-    windowWithMobileNavHandlers.__capitalLabToggleMobileNav = (event?: Event) => {
-      event?.preventDefault();
-      event?.stopPropagation();
-      toggleMobileNav();
-    };
-
-    windowWithMobileNavHandlers.__capitalLabCloseMobileNav = (event?: Event) => {
-      event?.preventDefault();
-      event?.stopPropagation();
-      closeMobileNav();
-    };
-
     const aboutSection = root.querySelector("#about-us");
     if (aboutSection) {
       const introBody = aboutSection.querySelector(".section-body");
@@ -319,6 +293,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         const gap = window.innerWidth <= 768 ? 20 : 24;
         const slideWidth = card.getBoundingClientRect().width + gap;
         testimonialsTrack.style.transform = `translateX(${-currentIndex * slideWidth}px)`;
+        testimonialsTrack.dataset.index = String(currentIndex);
         testimonialPrev.disabled = getMaxIndex() === 0;
         testimonialNext.disabled = getMaxIndex() === 0;
         renderDots();
@@ -367,18 +342,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         startAutoSlide();
       };
 
-      const handleTestimonialPrevClick = (event?: Event) => {
-        event?.preventDefault();
-        event?.stopPropagation();
-        goToPrevSlide();
-      };
-
-      const handleTestimonialNextClick = (event?: Event) => {
-        event?.preventDefault();
-        event?.stopPropagation();
-        goToNextSlide();
-      };
-
       const handleResize = () => updateSlider();
       const handleTouchStart = (event: TouchEvent) => {
         stopAutoSlide();
@@ -393,8 +356,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         startAutoSlide();
       };
 
-      testimonialPrev.addEventListener("click", handleTestimonialPrevClick);
-      testimonialNext.addEventListener("click", handleTestimonialNextClick);
       testimonialDots.addEventListener("click", handleDotsClick);
       window.addEventListener("resize", handleResize);
       testimonialsCarousel.addEventListener("mouseenter", stopAutoSlide);
@@ -406,8 +367,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       startAutoSlide();
 
       cleanupFns.push(() => {
-        testimonialPrev.removeEventListener("click", handleTestimonialPrevClick);
-        testimonialNext.removeEventListener("click", handleTestimonialNextClick);
         testimonialDots.removeEventListener("click", handleDotsClick);
         window.removeEventListener("resize", handleResize);
         testimonialsCarousel.removeEventListener("mouseenter", stopAutoSlide);
@@ -615,8 +574,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
     return () => {
       cleanupFns.forEach((cleanup) => cleanup());
-      delete windowWithMobileNavHandlers.__capitalLabToggleMobileNav;
-      delete windowWithMobileNavHandlers.__capitalLabCloseMobileNav;
       setBodyScrollLock(false);
     };
   }, [isAuthenticated, user]);
