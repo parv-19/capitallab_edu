@@ -193,6 +193,23 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       setBodyScrollLock(isOpen || Boolean(popupOverlay?.classList.contains("active")));
     };
 
+    const windowWithMobileNavHandlers = window as typeof window & {
+      __capitalLabToggleMobileNav?: (event?: Event) => void;
+      __capitalLabCloseMobileNav?: (event?: Event) => void;
+    };
+
+    windowWithMobileNavHandlers.__capitalLabToggleMobileNav = (event?: Event) => {
+      event?.preventDefault();
+      event?.stopPropagation();
+      toggleMobileNav();
+    };
+
+    windowWithMobileNavHandlers.__capitalLabCloseMobileNav = (event?: Event) => {
+      event?.preventDefault();
+      event?.stopPropagation();
+      closeMobileNav();
+    };
+
     if (hamburger) {
       const handleHamburgerClick = (event: Event) => {
         event.preventDefault();
@@ -650,6 +667,8 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
     return () => {
       cleanupFns.forEach((cleanup) => cleanup());
+      delete windowWithMobileNavHandlers.__capitalLabToggleMobileNav;
+      delete windowWithMobileNavHandlers.__capitalLabCloseMobileNav;
       setBodyScrollLock(false);
     };
   }, [isAuthenticated, user]);

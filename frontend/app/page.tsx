@@ -47,11 +47,11 @@ function transformLandingMarkup(markup: string) {
     )
     .replace(
       '<button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">',
-      '<button class="hamburger" id="hamburger" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobileNav">',
+      '<button class="hamburger" id="hamburger" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobileNav" onclick="window.__capitalLabToggleMobileNav && window.__capitalLabToggleMobileNav(event)">',
     )
     .replace(
       '<div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile navigation">',
-      '<div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile navigation" aria-hidden="true">\n    <button class="mobile-nav-close" id="mobileNavClose" type="button" aria-label="Close menu">&times;</button>',
+      '<div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile navigation" aria-hidden="true">\n    <button class="mobile-nav-close" id="mobileNavClose" type="button" aria-label="Close menu" onclick="window.__capitalLabCloseMobileNav && window.__capitalLabCloseMobileNav(event)">&times;</button>',
     )
     .replace(
       '<button class="btn-primary">Explore Our Programs</button>',
