@@ -74,7 +74,13 @@ function validatePhone(phone: string) {
 
 function shouldOpenWhatsapp(label: string) {
   const normalizedLabel = label.trim().toLowerCase();
-  return normalizedLabel === "talk to an advisor" || normalizedLabel === "talk to advisor" || normalizedLabel === "talk to instructor";
+  return (
+    normalizedLabel === "talk to an advisor" ||
+    normalizedLabel === "talk to advisor" ||
+    normalizedLabel === "talk to instructor" ||
+    normalizedLabel === "talk to counsellor" ||
+    normalizedLabel === "talk to counselor"
+  );
 }
 
 interface ApprovedLandingPageProps {
@@ -145,33 +151,14 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
     syncAuthLinks();
 
-    if (hamburger && mobileNav) {
-      const handleHamburger = (event?: Event) => {
-        event?.preventDefault();
-        const isOpen = mobileNav.classList.toggle("open");
-        hamburger.classList.toggle("open");
-        hamburger.setAttribute("aria-expanded", isOpen ? "true" : "false");
-        mobileNav.setAttribute("aria-hidden", isOpen ? "false" : "true");
-        setBodyScrollLock(isOpen || Boolean(popupOverlay?.classList.contains("active")));
-      };
-
-      hamburger.addEventListener("click", handleHamburger);
-      hamburger.addEventListener("touchend", handleHamburger, { passive: false });
-      cleanupFns.push(() => hamburger.removeEventListener("click", handleHamburger));
-      cleanupFns.push(() => hamburger.removeEventListener("touchend", handleHamburger));
-    }
-
-    if (mobileNavClose) {
-      const handleMobileNavClose = (event?: Event) => {
-        event?.preventDefault();
-        closeMobileNav();
-      };
-
-      mobileNavClose.addEventListener("click", handleMobileNavClose);
-      mobileNavClose.addEventListener("touchend", handleMobileNavClose, { passive: false });
-      cleanupFns.push(() => mobileNavClose.removeEventListener("click", handleMobileNavClose));
-      cleanupFns.push(() => mobileNavClose.removeEventListener("touchend", handleMobileNavClose));
-    }
+    const toggleMobileNav = () => {
+      if (!hamburger || !mobileNav) return;
+      const isOpen = mobileNav.classList.toggle("open");
+      hamburger.classList.toggle("open");
+      hamburger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      mobileNav.setAttribute("aria-hidden", isOpen ? "false" : "true");
+      setBodyScrollLock(isOpen || Boolean(popupOverlay?.classList.contains("active")));
+    };
 
     const aboutSection = root.querySelector("#about-us");
     if (aboutSection) {
@@ -303,12 +290,12 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         autoSlideTimer = setInterval(nextSlide, 4500);
       };
 
-      const handlePrev = () => {
+      const goToPrevSlide = () => {
         prevSlide();
         startAutoSlide();
       };
 
-      const handleNext = () => {
+      const goToNextSlide = () => {
         nextSlide();
         startAutoSlide();
       };
@@ -335,8 +322,8 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         startAutoSlide();
       };
 
-      testimonialPrev.addEventListener("click", handlePrev);
-      testimonialNext.addEventListener("click", handleNext);
+      testimonialPrev.onclick = goToPrevSlide;
+      testimonialNext.onclick = goToNextSlide;
       testimonialDots.addEventListener("click", handleDotsClick);
       window.addEventListener("resize", handleResize);
       testimonialsCarousel.addEventListener("mouseenter", stopAutoSlide);
@@ -348,8 +335,8 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       startAutoSlide();
 
       cleanupFns.push(() => {
-        testimonialPrev.removeEventListener("click", handlePrev);
-        testimonialNext.removeEventListener("click", handleNext);
+        testimonialPrev.onclick = null;
+        testimonialNext.onclick = null;
         testimonialDots.removeEventListener("click", handleDotsClick);
         window.removeEventListener("resize", handleResize);
         testimonialsCarousel.removeEventListener("mouseenter", stopAutoSlide);
@@ -450,10 +437,24 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
     const handleRootClick = (event: Event) => {
       const target = event.target as HTMLElement;
+      const hamburgerTrigger = target.closest<HTMLElement>("#hamburger");
+      const mobileCloseTrigger = target.closest<HTMLElement>("#mobileNavClose");
       const accordionTrigger = target.closest<HTMLElement>(".program-accordion-trigger");
       const trigger = target.closest<HTMLElement>(".nav-cta-trigger, .btn-outline, .program-cta-link, .nav-cta");
       const scrollButton = target.closest<HTMLElement>("[data-scroll-target]");
       const anchor = target.closest<HTMLAnchorElement>("a[href^='#']");
+
+      if (hamburgerTrigger) {
+        event.preventDefault();
+        toggleMobileNav();
+        return;
+      }
+
+      if (mobileCloseTrigger) {
+        event.preventDefault();
+        closeMobileNav();
+        return;
+      }
 
       if (accordionTrigger) {
         event.preventDefault();
