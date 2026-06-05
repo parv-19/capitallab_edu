@@ -72,6 +72,10 @@ function validatePhone(phone: string) {
   return /^\d{10}$/.test(phone);
 }
 
+function validateEmail(email: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
 function shouldOpenWhatsapp(label: string) {
   const normalizedLabel = label.trim().toLowerCase();
   return (
@@ -133,7 +137,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     const cleanupFns: Array<() => void> = [];
     const hamburger = root.querySelector<HTMLElement>("#hamburger");
     const mobileNav = root.querySelector<HTMLElement>("#mobileNav");
-    const mobileNavClose = root.querySelector<HTMLButtonElement>("#mobileNavClose");
     const mobileNavLinks = Array.from(root.querySelectorAll<HTMLAnchorElement>("#mobileNav a"));
     const popupOverlay = root.querySelector<HTMLElement>("#contactPopup");
     const popupClose = root.querySelector<HTMLElement>("#popupClose");
@@ -175,7 +178,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     };
 
     if (hamburger && mobileNav) {
-      let lastHamburgerTouchAt = 0;
       const handleHamburgerClick = () => {
         const willOpen = !mobileNav.classList.contains("open");
         hamburger.classList.toggle("open", willOpen);
@@ -183,14 +185,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         hamburger.setAttribute("aria-expanded", willOpen ? "true" : "false");
         mobileNav.setAttribute("aria-hidden", willOpen ? "false" : "true");
         setBodyScrollLock(willOpen);
-      };
-      const handleHamburgerTouchEnd = () => {
-        lastHamburgerTouchAt = Date.now();
-        handleHamburgerClick();
-      };
-      const handleHamburgerPress = () => {
-        if (Date.now() - lastHamburgerTouchAt < 500) return;
-        handleHamburgerClick();
       };
 
       const windowWithNavHelpers = window as Window & {
@@ -201,31 +195,10 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       windowWithNavHelpers.__capitalLabToggleMobileNav = handleHamburgerClick;
       windowWithNavHelpers.__capitalLabCloseMobileNav = closeMobileNav;
 
-      hamburger.addEventListener("click", handleHamburgerPress);
-      hamburger.addEventListener("touchend", handleHamburgerTouchEnd, { passive: true });
-      cleanupFns.push(() => hamburger.removeEventListener("click", handleHamburgerPress));
-      cleanupFns.push(() => hamburger.removeEventListener("touchend", handleHamburgerTouchEnd));
       cleanupFns.push(() => {
         delete windowWithNavHelpers.__capitalLabToggleMobileNav;
         delete windowWithNavHelpers.__capitalLabCloseMobileNav;
       });
-    }
-
-    if (mobileNavClose) {
-      let lastCloseTouchAt = 0;
-      const handleCloseTouchEnd = () => {
-        lastCloseTouchAt = Date.now();
-        closeMobileNav();
-      };
-      const handleClosePress = () => {
-        if (Date.now() - lastCloseTouchAt < 500) return;
-        closeMobileNav();
-      };
-
-      mobileNavClose.addEventListener("click", handleClosePress);
-      mobileNavClose.addEventListener("touchend", handleCloseTouchEnd, { passive: true });
-      cleanupFns.push(() => mobileNavClose.removeEventListener("click", handleClosePress));
-      cleanupFns.push(() => mobileNavClose.removeEventListener("touchend", handleCloseTouchEnd));
     }
 
     mobileNavLinks.forEach((link) => {
@@ -481,14 +454,25 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         toast.error("Please enter your name.");
         return;
       }
+      if (payload.email && !validateEmail(payload.email)) {
+        toast.error("Please enter a valid email address.");
+        return;
+      }
       if (!validatePhone(phone)) {
         toast.error("Please enter a valid 10-digit phone number.");
         return;
       }
 
+      const submitBtn = scope.querySelector<HTMLButtonElement>(".submit-btn, .popup-submit");
+      const originalText = submitBtn?.textContent ?? "";
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Sending...";
+      }
+
       try {
         await api.post("/leads", payload);
-        toast.success("We'll reach out to you shortly!");
+        toast.success("Thank you! We'll reach out to you shortly.");
         inputs.forEach((field) => {
           if (field.tagName === "SELECT") {
             field.value = "General Enquiry";
@@ -496,12 +480,14 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
             field.value = "";
           }
         });
-        if (courseSelect) {
-          courseSelect.value = payload.courseInterest;
-        }
         if (closeAfterSubmit) closePopup();
       } catch {
         toast.error("Something went wrong. Please try again.");
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalText;
+        }
       }
     };
 
