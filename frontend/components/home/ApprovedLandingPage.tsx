@@ -144,10 +144,12 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     const popupSelect = popupOverlay?.querySelector<HTMLSelectElement>("select");
     const authLinks = Array.from(root.querySelectorAll<HTMLAnchorElement>("[data-auth-link]"));
 
-    const setBodyScrollLock = (locked: boolean) => {
+    const syncBodyScrollLock = () => {
       document.documentElement.style.overflowX = "hidden";
       document.body.style.overflowX = "hidden";
-      const shouldLock = locked && isPhoneViewport();
+      const shouldLock =
+        isPhoneViewport() &&
+        (mobileNav?.classList.contains("open") === true || popupOverlay?.classList.contains("active") === true);
       document.documentElement.style.overflowY = shouldLock ? "hidden" : "auto";
       document.body.style.overflowY = shouldLock ? "hidden" : "auto";
     };
@@ -157,9 +159,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       mobileNav?.classList.remove("open");
       hamburger?.setAttribute("aria-expanded", "false");
       mobileNav?.setAttribute("aria-hidden", "true");
-      if (!popupOverlay?.classList.contains("active")) {
-        setBodyScrollLock(false);
-      }
+      syncBodyScrollLock();
     };
 
     const openPopup = (interest = "General Enquiry") => {
@@ -168,14 +168,12 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       if (popupSelect) {
         popupSelect.value = interest;
       }
-      setBodyScrollLock(true);
+      syncBodyScrollLock();
     };
 
     const closePopup = () => {
       popupOverlay?.classList.remove("active");
-      if (!mobileNav?.classList.contains("open")) {
-        setBodyScrollLock(false);
-      }
+      syncBodyScrollLock();
     };
 
     const syncAuthLinks = () => {
@@ -474,7 +472,15 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     const popupSubmit = popupLeadForm?.querySelector<HTMLButtonElement>(".popup-submit");
 
     const handleRootClick = (event: Event) => {
-      const target = event.target as HTMLElement;
+      const eventTarget = event.target;
+      const target =
+        eventTarget instanceof HTMLElement
+          ? eventTarget
+          : eventTarget instanceof Node
+            ? eventTarget.parentElement
+            : null;
+      if (!target) return;
+
       const accordionTrigger = target.closest<HTMLElement>(".program-accordion-trigger");
       const mobileNavTrigger = target.closest<HTMLElement>("#hamburger, #mobileNavClose, #mobileNav a");
       const trigger = target.closest<HTMLElement>(
@@ -493,7 +499,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
           mobileNav.classList.toggle("open", willOpen);
           hamburger.setAttribute("aria-expanded", willOpen ? "true" : "false");
           mobileNav.setAttribute("aria-hidden", willOpen ? "false" : "true");
-          setBodyScrollLock(willOpen);
+          syncBodyScrollLock();
         } else {
           closeMobileNav();
         }
@@ -611,12 +617,17 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     document.addEventListener("keydown", handleKeyDown);
     cleanupFns.push(() => document.removeEventListener("keydown", handleKeyDown));
 
-    const popupTimer = window.setTimeout(() => openPopup(), 2000);
+    const popupTimer = window.setTimeout(() => {
+      if (!mobileNav?.classList.contains("open")) {
+        openPopup();
+      }
+    }, 5000);
     cleanupFns.push(() => window.clearTimeout(popupTimer));
 
     return () => {
       cleanupFns.forEach((cleanup) => cleanup());
-      setBodyScrollLock(false);
+      document.documentElement.style.overflowY = "auto";
+      document.body.style.overflowY = "auto";
     };
   }, [isAuthenticated, user]);
 
