@@ -98,6 +98,10 @@ function transformLandingMarkup(markup: string) {
       '<button class="testimonial-btn" id="testimonialNext" type="button" aria-label="Next testimonial">&#8250;</button>',
       `<button class="testimonial-btn" id="testimonialNext" type="button" aria-label="Next testimonial" onclick="${testimonialAction("next")}" ontouchend="${testimonialTouchAction("next")}">&#8250;</button>`,
     )
+    .replace(
+      /<div class="testimonials-track" id="testimonialsTrack">[\s\S]*?<\/div>\s*<div class="testimonial-controls">/,
+      '<div class="testimonials-track" id="testimonialsTrack"></div>\n      <div class="testimonial-controls">',
+    )
     .replace('  <!-- POPUP MODAL -->', '  <!-- POPUP MODAL -->');
 }
 
