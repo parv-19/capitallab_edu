@@ -63,6 +63,30 @@ export default function LeadsLandingPage({ styles, markup, testimonials = [] }: 
       setScrollLock(false);
     };
 
+    const attachTapHandler = (el: HTMLElement, handler: () => void) => {
+      let pendingTap = false;
+
+      const onTouchEnd = (e: TouchEvent) => {
+        e.preventDefault();
+        pendingTap = true;
+        handler();
+        setTimeout(() => { pendingTap = false; }, 400);
+      };
+
+      const onClick = () => {
+        if (pendingTap) return;
+        handler();
+      };
+
+      el.addEventListener("touchend", onTouchEnd, { passive: false });
+      el.addEventListener("click", onClick);
+
+      return () => {
+        el.removeEventListener("touchend", onTouchEnd);
+        el.removeEventListener("click", onClick);
+      };
+    };
+
     if (menuButton && mobileNav) {
       const handleMenuClick = () => {
         const willOpen = !mobileNav.classList.contains("open");
@@ -72,18 +96,15 @@ export default function LeadsLandingPage({ styles, markup, testimonials = [] }: 
         setScrollLock(willOpen);
       };
 
-      menuButton.addEventListener("click", handleMenuClick);
-      cleanupFns.push(() => menuButton.removeEventListener("click", handleMenuClick));
+      cleanupFns.push(attachTapHandler(menuButton, handleMenuClick));
     }
 
     if (mobileNavClose) {
-      mobileNavClose.addEventListener("click", closeMobileNav);
-      cleanupFns.push(() => mobileNavClose.removeEventListener("click", closeMobileNav));
+      cleanupFns.push(attachTapHandler(mobileNavClose, closeMobileNav));
     }
 
     mobileNavLinks.forEach((link) => {
-      link.addEventListener("click", closeMobileNav);
-      cleanupFns.push(() => link.removeEventListener("click", closeMobileNav));
+      cleanupFns.push(attachTapHandler(link, closeMobileNav));
     });
 
     const searchParams = new URLSearchParams(window.location.search);
