@@ -26,7 +26,7 @@ export default function FloatingReviewWidget() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="fixed bottom-5 right-5 z-[80] inline-flex items-center gap-3 rounded-full bg-brand-navy px-4 py-3 text-sm font-semibold text-white shadow-2xl transition hover:-translate-y-0.5 hover:bg-brand-navy/95 sm:bottom-6 sm:right-6"
+        className="fixed bottom-5 left-4 z-[80] inline-flex items-center gap-3 rounded-full bg-brand-navy px-4 py-3 text-sm font-semibold text-white shadow-2xl transition hover:-translate-y-0.5 hover:bg-brand-navy/95 sm:bottom-6 sm:left-auto sm:right-6"
         aria-label="Open review form"
       >
         <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-brand-gold text-brand-navy">

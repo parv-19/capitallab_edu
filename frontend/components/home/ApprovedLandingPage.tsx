@@ -175,6 +175,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     };
 
     if (hamburger && mobileNav) {
+      let lastHamburgerTouchAt = 0;
       const handleHamburgerClick = () => {
         const willOpen = !mobileNav.classList.contains("open");
         hamburger.classList.toggle("open", willOpen);
@@ -183,14 +184,48 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         mobileNav.setAttribute("aria-hidden", willOpen ? "false" : "true");
         setBodyScrollLock(willOpen);
       };
+      const handleHamburgerTouchEnd = () => {
+        lastHamburgerTouchAt = Date.now();
+        handleHamburgerClick();
+      };
+      const handleHamburgerPress = () => {
+        if (Date.now() - lastHamburgerTouchAt < 500) return;
+        handleHamburgerClick();
+      };
 
-      hamburger.addEventListener("click", handleHamburgerClick);
-      cleanupFns.push(() => hamburger.removeEventListener("click", handleHamburgerClick));
+      const windowWithNavHelpers = window as Window & {
+        __capitalLabToggleMobileNav?: () => void;
+        __capitalLabCloseMobileNav?: () => void;
+      };
+
+      windowWithNavHelpers.__capitalLabToggleMobileNav = handleHamburgerClick;
+      windowWithNavHelpers.__capitalLabCloseMobileNav = closeMobileNav;
+
+      hamburger.addEventListener("click", handleHamburgerPress);
+      hamburger.addEventListener("touchend", handleHamburgerTouchEnd, { passive: true });
+      cleanupFns.push(() => hamburger.removeEventListener("click", handleHamburgerPress));
+      cleanupFns.push(() => hamburger.removeEventListener("touchend", handleHamburgerTouchEnd));
+      cleanupFns.push(() => {
+        delete windowWithNavHelpers.__capitalLabToggleMobileNav;
+        delete windowWithNavHelpers.__capitalLabCloseMobileNav;
+      });
     }
 
     if (mobileNavClose) {
-      mobileNavClose.addEventListener("click", closeMobileNav);
-      cleanupFns.push(() => mobileNavClose.removeEventListener("click", closeMobileNav));
+      let lastCloseTouchAt = 0;
+      const handleCloseTouchEnd = () => {
+        lastCloseTouchAt = Date.now();
+        closeMobileNav();
+      };
+      const handleClosePress = () => {
+        if (Date.now() - lastCloseTouchAt < 500) return;
+        closeMobileNav();
+      };
+
+      mobileNavClose.addEventListener("click", handleClosePress);
+      mobileNavClose.addEventListener("touchend", handleCloseTouchEnd, { passive: true });
+      cleanupFns.push(() => mobileNavClose.removeEventListener("click", handleClosePress));
+      cleanupFns.push(() => mobileNavClose.removeEventListener("touchend", handleCloseTouchEnd));
     }
 
     mobileNavLinks.forEach((link) => {

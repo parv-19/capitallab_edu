@@ -73,6 +73,10 @@ function transformLandingMarkup(markup: string, testimonials: MarketingTestimoni
     "event.preventDefault();event.stopPropagation();this.dataset.tap='1';setTimeout(function(el){el.dataset.tap='';},350,this);";
   const clickGuardPrefix =
     "event.preventDefault();event.stopPropagation();if(this.dataset.tap==='1'){this.dataset.tap='';return;}";
+  const toggleNavAction = `${clickGuardPrefix}window.__capitalLabToggleMobileNav&&window.__capitalLabToggleMobileNav();`;
+  const closeNavAction = `${clickGuardPrefix}window.__capitalLabCloseMobileNav&&window.__capitalLabCloseMobileNav();`;
+  const touchToggleNavAction = `${touchGuardPrefix}window.__capitalLabToggleMobileNav&&window.__capitalLabToggleMobileNav();`;
+  const touchCloseNavAction = `${touchGuardPrefix}window.__capitalLabCloseMobileNav&&window.__capitalLabCloseMobileNav();`;
   const testimonialAction = (direction: "prev" | "next") =>
     `${clickGuardPrefix}var track=document.getElementById('testimonialsTrack');var prev=document.getElementById('testimonialPrev');var next=document.getElementById('testimonialNext');var dots=document.getElementById('testimonialDots');if(!track||!prev||!next||!dots)return;var cards=track.querySelectorAll('.testimonial-card');if(!cards.length)return;var perView=window.innerWidth<=768?1:(cards.length<=2?1:2);var max=Math.max(0,cards.length-perView);var current=Number(track.dataset.index||'0');current=${direction === "next" ? "(current>=max?0:current+1)" : "(current<=0?max:current-1)"};cards.forEach(function(card){card.style.flex='0 0 '+(perView===1?'100%':'calc(50% - 12px)');});var gap=window.innerWidth<=768?20:24;var slideWidth=cards[0].getBoundingClientRect().width+gap;track.style.transform='translateX(' + (-current*slideWidth) + 'px)';prev.disabled=max===0;next.disabled=max===0;dots.querySelectorAll('.testimonial-dot').forEach(function(dot,i){dot.classList.toggle('active',i===current);});track.dataset.index=String(current);`;
   const testimonialTouchAction = (direction: "prev" | "next") =>
@@ -93,11 +97,11 @@ function transformLandingMarkup(markup: string, testimonials: MarketingTestimoni
     .replace(/ onclick="closeMobileNav\(\)"/g, "")
     .replace(
       '<button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">',
-      '<button class="hamburger" id="hamburger" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobileNav">',
+      `<button class="hamburger" id="hamburger" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobileNav" onclick="${toggleNavAction}" ontouchend="${touchToggleNavAction}">`,
     )
     .replace(
       '<div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile navigation">',
-      '<div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile navigation" aria-hidden="true">\n    <button class="mobile-nav-close" id="mobileNavClose" type="button" aria-label="Close menu">&times;</button>',
+      `<div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile navigation" aria-hidden="true">\n    <button class="mobile-nav-close" id="mobileNavClose" type="button" aria-label="Close menu" onclick="${closeNavAction}" ontouchend="${touchCloseNavAction}">&times;</button>`,
     )
     .replace(
       '<button class="btn-primary">Explore Our Programs</button>',
