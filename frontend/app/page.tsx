@@ -4,7 +4,7 @@ import { readFile } from "fs/promises";
 import path from "path";
 import ApprovedLandingPage from "@/components/home/ApprovedLandingPage";
 import { buildMetadata, getOrganizationSchema, getWebsiteSchema } from "@/lib/seo";
-import { getApprovedTestimonials } from "@/lib/server/testimonials";
+import { getApprovedTestimonials, type MarketingTestimonial } from "@/lib/server/testimonials";
 
 export const revalidate = 3600;
 
@@ -32,7 +32,43 @@ function extractSection(source: string, startTag: string, endTag: string) {
   return source.slice(start + startTag.length, end);
 }
 
-function transformLandingMarkup(markup: string) {
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part.charAt(0))
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
+function buildTestimonialMarkup(testimonials: MarketingTestimonial[]) {
+  return testimonials
+    .map(
+      (item) => `<article class="testimonial-card">
+            <div class="testimonial-quote">"</div>
+            <p class="testimonial-text">${escapeHtml(item.review)}</p>
+            <div class="testimonial-footer">
+              <div class="testimonial-avatar">${escapeHtml(initials(item.studentName))}</div>
+              <div>
+                <div class="testimonial-author">${escapeHtml(item.studentName)}</div>
+                <div class="testimonial-role">${escapeHtml(item.designation ?? "Capital Lab Education Student")}</div>
+              </div>
+            </div>
+          </article>`,
+    )
+    .join("");
+}
+
+function transformLandingMarkup(markup: string, testimonials: MarketingTestimonial[]) {
   const hamburgerAction =
     "var h=document.getElementById('hamburger');var n=document.getElementById('mobileNav');if(!h||!n)return;var open=!n.classList.contains('open');n.classList.toggle('open',open);h.classList.toggle('open',open);h.setAttribute('aria-expanded',open?'true':'false');n.setAttribute('aria-hidden',open?'false':'true');document.documentElement.style.overflowX='hidden';document.body.style.overflowX='hidden';document.documentElement.style.overflowY=open?'hidden':'auto';document.body.style.overflowY=open?'hidden':'auto';";
   const closeNavAction =
@@ -100,13 +136,14 @@ function transformLandingMarkup(markup: string) {
     )
     .replace(
       /<div class="testimonials-track" id="testimonialsTrack">[\s\S]*?<\/div>\s*<div class="testimonial-controls">/,
-      '<div class="testimonials-track" id="testimonialsTrack"></div>\n      <div class="testimonial-controls">',
+      `<div class="testimonials-track" id="testimonialsTrack">${buildTestimonialMarkup(testimonials)}</div>\n      <div class="testimonial-controls">`,
     )
     .replace('  <!-- POPUP MODAL -->', '  <!-- POPUP MODAL -->');
 }
 
 const getLandingContent = cache(async () => {
   const html = await readFile(path.join(process.cwd(), "index.html"), "utf-8");
+  const testimonials = await getApprovedTestimonials();
   const styles = `${extractSection(
     html,
     "<style>",
@@ -116,13 +153,13 @@ const getLandingContent = cache(async () => {
 
   return {
     styles,
-    markup: transformLandingMarkup(body),
+    markup: transformLandingMarkup(body, testimonials),
+    testimonials,
   };
 });
 
 export default async function HomePage() {
-  const { styles, markup } = await getLandingContent();
-  const testimonials = await getApprovedTestimonials();
+  const { styles, markup, testimonials } = await getLandingContent();
   const structuredData = [getOrganizationSchema(), getWebsiteSchema()];
 
   return (
