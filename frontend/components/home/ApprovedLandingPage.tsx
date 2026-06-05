@@ -321,7 +321,10 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       let autoSlideTimer: ReturnType<typeof setInterval> | null = null;
       let touchStartX = 0;
 
-      const getCardsPerView = () => (window.innerWidth <= 768 ? 1 : 2);
+      const getCardsPerView = () => {
+        if (window.innerWidth <= 768) return 1;
+        return testimonials.length <= 2 ? 1 : 2;
+      };
       const getMaxIndex = () => Math.max(0, testimonials.length - getCardsPerView());
 
       const renderDots = () => {
@@ -346,6 +349,12 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       const updateSlider = () => {
         const card = testimonialsTrack.querySelector<HTMLElement>(".testimonial-card");
         if (!card) return;
+
+        const cardsPerView = getCardsPerView();
+        const cardBasis = cardsPerView === 1 ? "100%" : "calc(50% - 12px)";
+        testimonialsTrack.querySelectorAll<HTMLElement>(".testimonial-card").forEach((testimonialCard) => {
+          testimonialCard.style.flex = `0 0 ${cardBasis}`;
+        });
 
         currentIndex = Math.max(0, Math.min(currentIndex, getMaxIndex()));
         const gap = window.innerWidth <= 768 ? 20 : 24;
