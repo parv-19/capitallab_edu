@@ -136,8 +136,8 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
     const cleanupFns: Array<() => void> = [];
     const isPhoneViewport = () => window.matchMedia("(max-width: 768px)").matches;
-    const supportsTouchInput = () =>
-      window.matchMedia("(pointer: coarse)").matches || "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    const isPhoneLikeDevice = () =>
+      isPhoneViewport() && (window.matchMedia("(pointer: coarse)").matches || navigator.maxTouchPoints > 0);
     const hamburger = root.querySelector<HTMLElement>("#hamburger");
     const mobileNav = root.querySelector<HTMLElement>("#mobileNav");
     const mobileNavLinks = Array.from(root.querySelectorAll<HTMLAnchorElement>("#mobileNav a"));
@@ -183,27 +183,27 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
     const mobileNavClose = root.querySelector<HTMLButtonElement>("#mobileNavClose");
 
-    const attachTapHandler = (el: HTMLElement, handler: () => void) => {
-      let pendingTap = false;
+    const attachPressHandler = (el: HTMLElement, handler: () => void) => {
+      let skipClickUntil = 0;
+      el.style.touchAction = "manipulation";
 
-      const onTouchEnd = (e: TouchEvent) => {
-        if (!supportsTouchInput()) return;
-        e.preventDefault();
-        pendingTap = true;
+      const onPointerUp = (event: PointerEvent) => {
+        if (event.pointerType !== "touch" && event.pointerType !== "pen") return;
+        if (!isPhoneLikeDevice()) return;
+        skipClickUntil = window.performance.now() + 500;
         handler();
-        setTimeout(() => { pendingTap = false; }, 400);
       };
 
       const onClick = () => {
-        if (pendingTap) return;
+        if (window.performance.now() < skipClickUntil) return;
         handler();
       };
 
-      el.addEventListener("touchend", onTouchEnd, { passive: false });
+      el.addEventListener("pointerup", onPointerUp);
       el.addEventListener("click", onClick);
 
       return () => {
-        el.removeEventListener("touchend", onTouchEnd);
+        el.removeEventListener("pointerup", onPointerUp);
         el.removeEventListener("click", onClick);
       };
     };
@@ -218,15 +218,15 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         setBodyScrollLock(willOpen);
       };
 
-      cleanupFns.push(attachTapHandler(hamburger, handleHamburgerClick));
+      cleanupFns.push(attachPressHandler(hamburger, handleHamburgerClick));
     }
 
     if (mobileNavClose) {
-      cleanupFns.push(attachTapHandler(mobileNavClose, closeMobileNav));
+      cleanupFns.push(attachPressHandler(mobileNavClose, closeMobileNav));
     }
 
     mobileNavLinks.forEach((link) => {
-      cleanupFns.push(attachTapHandler(link, closeMobileNav));
+      cleanupFns.push(attachPressHandler(link, closeMobileNav));
     });
 
     const syncAuthLinks = () => {
@@ -454,6 +454,10 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         .forEach((content) => {
           content.style.maxHeight = `${content.scrollHeight}px`;
         });
+
+      if (!isPhoneViewport()) {
+        closeMobileNav();
+      }
     };
     window.addEventListener("resize", resizeAccordions);
     cleanupFns.push(() => window.removeEventListener("resize", resizeAccordions));
@@ -520,7 +524,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       const handleInlineSubmit = () => {
         void submitLead(inlineLeadForm);
       };
-      cleanupFns.push(attachTapHandler(inlineSubmit, handleInlineSubmit));
+      cleanupFns.push(attachPressHandler(inlineSubmit, handleInlineSubmit));
     }
 
     const popupLeadForm = root.querySelector<HTMLElement>("[data-popup-lead-form]");
@@ -529,7 +533,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       const handlePopupSubmit = () => {
         void submitLead(popupLeadForm, true);
       };
-      cleanupFns.push(attachTapHandler(popupSubmit, handlePopupSubmit));
+      cleanupFns.push(attachPressHandler(popupSubmit, handlePopupSubmit));
     }
 
     const handleRootClick = (event: Event) => {
