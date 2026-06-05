@@ -6,6 +6,8 @@ export interface MarketingTestimonial extends Testimonial {
 }
 
 export async function getApprovedTestimonials(limit?: number) {
+  const approvedFallback = fallbackTestimonials.filter((testimonial) => testimonial.status === "approved");
+  const pickFallback = () => approvedFallback.slice(0, limit || approvedFallback.length);
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000/api";
   const url = new URL(`${apiBaseUrl.replace(/\/$/, "")}/testimonials`);
   url.searchParams.set("status", "approved");
@@ -23,9 +25,9 @@ export async function getApprovedTestimonials(limit?: number) {
       throw new Error(`Failed to fetch testimonials: ${response.status}`);
     }
 
-    return (await response.json()) as MarketingTestimonial[];
+    const testimonials = (await response.json()) as MarketingTestimonial[];
+    return testimonials.length > 0 ? testimonials : pickFallback();
   } catch {
-    const approvedFallback = fallbackTestimonials.filter((testimonial) => testimonial.status === "approved");
-    return approvedFallback.slice(0, limit || approvedFallback.length);
+    return pickFallback();
   }
 }
