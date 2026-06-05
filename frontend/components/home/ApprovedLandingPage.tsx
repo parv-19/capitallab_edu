@@ -482,7 +482,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       if (!target) return;
 
       const accordionTrigger = target.closest<HTMLElement>(".program-accordion-trigger");
-      const mobileNavTrigger = target.closest<HTMLElement>("#hamburger, #mobileNavClose, #mobileNav a");
+      const mobileNavTrigger = target.closest<HTMLElement>("#hamburger, #mobileNavClose");
       const trigger = target.closest<HTMLElement>(
         ".nav-cta-trigger, .btn-outline, .program-cta-link, .nav-cta, .mobile-cta",
       );
