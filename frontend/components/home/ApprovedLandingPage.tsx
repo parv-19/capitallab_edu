@@ -169,20 +169,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       window.scrollTo({ top, behavior: "smooth" });
     };
 
-    // Direct handlers on mobile nav section links — more reliable than event delegation
-    Array.from(root.querySelectorAll<HTMLAnchorElement>("#mobileNav a[href^='#']")).forEach((link) => {
-      const href = link.getAttribute("href");
-      if (!href || href === "#") return;
-      const handler = (event: Event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        closeMobileNav();
-        setTimeout(() => scrollToSection(href), 100);
-      };
-      link.addEventListener("click", handler);
-      cleanupFns.push(() => link.removeEventListener("click", handler));
-    });
-
     const openPopup = (interest = "General Enquiry") => {
       if (!popupOverlay || mobileNav?.classList.contains("open")) return;
       popupOverlay.classList.add("active");
@@ -603,7 +589,12 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         const href = anchor.getAttribute("href");
         if (!href || href === "#") return;
         event.preventDefault();
-        scrollToSection(href);
+        if (target.closest("#mobileNav")) {
+          closeMobileNav();
+          setTimeout(() => scrollToSection(href), 100);
+        } else {
+          scrollToSection(href);
+        }
       }
     };
 
