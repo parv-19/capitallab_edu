@@ -134,6 +134,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     const hamburger = root.querySelector<HTMLElement>("#hamburger");
     const mobileNav = root.querySelector<HTMLElement>("#mobileNav");
     const mobileNavClose = root.querySelector<HTMLButtonElement>("#mobileNavClose");
+    const mobileNavLinks = Array.from(root.querySelectorAll<HTMLAnchorElement>("#mobileNav a"));
     const popupOverlay = root.querySelector<HTMLElement>("#contactPopup");
     const popupClose = root.querySelector<HTMLElement>("#popupClose");
     const popupSkip = root.querySelector<HTMLElement>("#popupSkip");
@@ -172,6 +173,30 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         setBodyScrollLock(false);
       }
     };
+
+    if (hamburger && mobileNav) {
+      const handleHamburgerClick = () => {
+        const willOpen = !mobileNav.classList.contains("open");
+        hamburger.classList.toggle("open", willOpen);
+        mobileNav.classList.toggle("open", willOpen);
+        hamburger.setAttribute("aria-expanded", willOpen ? "true" : "false");
+        mobileNav.setAttribute("aria-hidden", willOpen ? "false" : "true");
+        setBodyScrollLock(willOpen);
+      };
+
+      hamburger.addEventListener("click", handleHamburgerClick);
+      cleanupFns.push(() => hamburger.removeEventListener("click", handleHamburgerClick));
+    }
+
+    if (mobileNavClose) {
+      mobileNavClose.addEventListener("click", closeMobileNav);
+      cleanupFns.push(() => mobileNavClose.removeEventListener("click", closeMobileNav));
+    }
+
+    mobileNavLinks.forEach((link) => {
+      link.addEventListener("click", closeMobileNav);
+      cleanupFns.push(() => link.removeEventListener("click", closeMobileNav));
+    });
 
     const syncAuthLinks = () => {
       const href = isAuthenticated ? user?.role === "admin" ? "/admin" : "/student" : "/login";
@@ -468,7 +493,9 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     const handleRootClick = (event: Event) => {
       const target = event.target as HTMLElement;
       const accordionTrigger = target.closest<HTMLElement>(".program-accordion-trigger");
-      const trigger = target.closest<HTMLElement>(".nav-cta-trigger, .btn-outline, .program-cta-link, .nav-cta");
+      const trigger = target.closest<HTMLElement>(
+        ".nav-cta-trigger, .btn-outline, .program-cta-link, .nav-cta, .mobile-cta",
+      );
       const scrollButton = target.closest<HTMLElement>("[data-scroll-target]");
       const anchor = target.closest<HTMLAnchorElement>("a[href^='#']");
 

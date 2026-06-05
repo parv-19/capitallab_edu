@@ -69,10 +69,6 @@ function buildTestimonialMarkup(testimonials: MarketingTestimonial[]) {
 }
 
 function transformLandingMarkup(markup: string, testimonials: MarketingTestimonial[]) {
-  const hamburgerAction =
-    "var h=document.getElementById('hamburger');var n=document.getElementById('mobileNav');if(!h||!n)return;var open=!n.classList.contains('open');n.classList.toggle('open',open);h.classList.toggle('open',open);h.setAttribute('aria-expanded',open?'true':'false');n.setAttribute('aria-hidden',open?'false':'true');document.documentElement.style.overflowX='hidden';document.body.style.overflowX='hidden';document.documentElement.style.overflowY=open?'hidden':'auto';document.body.style.overflowY=open?'hidden':'auto';";
-  const closeNavAction =
-    "var h=document.getElementById('hamburger');var n=document.getElementById('mobileNav');if(!h||!n)return;n.classList.remove('open');h.classList.remove('open');h.setAttribute('aria-expanded','false');n.setAttribute('aria-hidden','true');document.documentElement.style.overflowX='hidden';document.body.style.overflowX='hidden';document.documentElement.style.overflowY='auto';document.body.style.overflowY='auto';";
   const touchGuardPrefix =
     "event.preventDefault();event.stopPropagation();this.dataset.tap='1';setTimeout(function(el){el.dataset.tap='';},350,this);";
   const clickGuardPrefix =
@@ -92,15 +88,16 @@ function transformLandingMarkup(markup: string, testimonials: MarketingTestimoni
     )
     .replace(
       /(<a href="#testimonials" onclick="closeMobileNav\(\)">Testimonials<\/a>\s*)(<a href="\/leads" class="nav-leads" onclick="closeMobileNav\(\)">Book Free Call<\/a>\s*)(<a href="#" class="mobile-cta" onclick="closeMobileNav\(\)">Enroll Now<\/a>)/,
-      '$1<a href="/login" class="mobile-login" data-auth-link onclick="closeMobileNav()">Login</a>\n    $2',
+      '$1<a href="/login" class="mobile-login" data-auth-link>Login</a>\n    $2',
     )
+    .replace(/ onclick="closeMobileNav\(\)"/g, "")
     .replace(
       '<button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">',
-      `<button class="hamburger" id="hamburger" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobileNav" onclick="${clickGuardPrefix}${hamburgerAction}" ontouchend="${touchGuardPrefix}${hamburgerAction}">`,
+      '<button class="hamburger" id="hamburger" type="button" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobileNav">',
     )
     .replace(
       '<div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile navigation">',
-      `<div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile navigation" aria-hidden="true">\n    <button class="mobile-nav-close" id="mobileNavClose" type="button" aria-label="Close menu" onclick="${clickGuardPrefix}${closeNavAction}" ontouchend="${touchGuardPrefix}${closeNavAction}">&times;</button>`,
+      '<div class="mobile-nav" id="mobileNav" role="navigation" aria-label="Mobile navigation" aria-hidden="true">\n    <button class="mobile-nav-close" id="mobileNavClose" type="button" aria-label="Close menu">&times;</button>',
     )
     .replace(
       '<button class="btn-primary">Explore Our Programs</button>',
