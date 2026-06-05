@@ -162,6 +162,27 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       syncBodyScrollLock();
     };
 
+    const scrollToSection = (href: string) => {
+      const el = root.querySelector(href);
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({ top, behavior: "smooth" });
+    };
+
+    // Direct handlers on mobile nav section links — more reliable than event delegation
+    Array.from(root.querySelectorAll<HTMLAnchorElement>("#mobileNav a[href^='#']")).forEach((link) => {
+      const href = link.getAttribute("href");
+      if (!href || href === "#") return;
+      const handler = (event: Event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        closeMobileNav();
+        setTimeout(() => scrollToSection(href), 100);
+      };
+      link.addEventListener("click", handler);
+      cleanupFns.push(() => link.removeEventListener("click", handler));
+    });
+
     const openPopup = (interest = "General Enquiry") => {
       if (!popupOverlay || mobileNav?.classList.contains("open")) return;
       popupOverlay.classList.add("active");
@@ -582,15 +603,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         const href = anchor.getAttribute("href");
         if (!href || href === "#") return;
         event.preventDefault();
-        const isInMobileNav = !!target.closest("#mobileNav");
-        if (isInMobileNav) {
-          closeMobileNav();
-          setTimeout(() => {
-            root.querySelector(href)?.scrollIntoView({ behavior: "smooth", block: "start" });
-          }, 50);
-        } else {
-          root.querySelector(href)?.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
+        scrollToSection(href);
       }
     };
 
