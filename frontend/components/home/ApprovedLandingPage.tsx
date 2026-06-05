@@ -177,6 +177,8 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       }
     };
 
+    const mobileNavClose = root.querySelector<HTMLButtonElement>("#mobileNavClose");
+
     if (hamburger && mobileNav) {
       const handleHamburgerClick = () => {
         const willOpen = !mobileNav.classList.contains("open");
@@ -187,18 +189,13 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         setBodyScrollLock(willOpen);
       };
 
-      const windowWithNavHelpers = window as Window & {
-        __capitalLabToggleMobileNav?: () => void;
-        __capitalLabCloseMobileNav?: () => void;
-      };
+      hamburger.addEventListener("click", handleHamburgerClick);
+      cleanupFns.push(() => hamburger.removeEventListener("click", handleHamburgerClick));
+    }
 
-      windowWithNavHelpers.__capitalLabToggleMobileNav = handleHamburgerClick;
-      windowWithNavHelpers.__capitalLabCloseMobileNav = closeMobileNav;
-
-      cleanupFns.push(() => {
-        delete windowWithNavHelpers.__capitalLabToggleMobileNav;
-        delete windowWithNavHelpers.__capitalLabCloseMobileNav;
-      });
+    if (mobileNavClose) {
+      mobileNavClose.addEventListener("click", closeMobileNav);
+      cleanupFns.push(() => mobileNavClose.removeEventListener("click", closeMobileNav));
     }
 
     mobileNavLinks.forEach((link) => {
