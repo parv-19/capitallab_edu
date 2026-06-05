@@ -196,18 +196,24 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     if (hamburger) {
       const handleHamburgerClick = (event: Event) => {
         event.preventDefault();
+        event.stopPropagation();
         toggleMobileNav();
       };
+      hamburger.addEventListener("pointerdown", handleHamburgerClick);
       hamburger.addEventListener("click", handleHamburgerClick);
+      cleanupFns.push(() => hamburger.removeEventListener("pointerdown", handleHamburgerClick));
       cleanupFns.push(() => hamburger.removeEventListener("click", handleHamburgerClick));
     }
 
     if (mobileNavClose) {
       const handleMobileNavClose = (event: Event) => {
         event.preventDefault();
+        event.stopPropagation();
         closeMobileNav();
       };
+      mobileNavClose.addEventListener("pointerdown", handleMobileNavClose);
       mobileNavClose.addEventListener("click", handleMobileNavClose);
+      cleanupFns.push(() => mobileNavClose.removeEventListener("pointerdown", handleMobileNavClose));
       cleanupFns.push(() => mobileNavClose.removeEventListener("click", handleMobileNavClose));
     }
 
@@ -361,11 +367,13 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
       const handleTestimonialPrevClick = (event?: Event) => {
         event?.preventDefault();
+        event?.stopPropagation();
         goToPrevSlide();
       };
 
       const handleTestimonialNextClick = (event?: Event) => {
         event?.preventDefault();
+        event?.stopPropagation();
         goToNextSlide();
       };
 
@@ -383,7 +391,9 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         startAutoSlide();
       };
 
+      testimonialPrev.addEventListener("pointerdown", handleTestimonialPrevClick);
       testimonialPrev.addEventListener("click", handleTestimonialPrevClick);
+      testimonialNext.addEventListener("pointerdown", handleTestimonialNextClick);
       testimonialNext.addEventListener("click", handleTestimonialNextClick);
       testimonialDots.addEventListener("click", handleDotsClick);
       window.addEventListener("resize", handleResize);
@@ -396,7 +406,9 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       startAutoSlide();
 
       cleanupFns.push(() => {
+        testimonialPrev.removeEventListener("pointerdown", handleTestimonialPrevClick);
         testimonialPrev.removeEventListener("click", handleTestimonialPrevClick);
+        testimonialNext.removeEventListener("pointerdown", handleTestimonialNextClick);
         testimonialNext.removeEventListener("click", handleTestimonialNextClick);
         testimonialDots.removeEventListener("click", handleDotsClick);
         window.removeEventListener("resize", handleResize);
