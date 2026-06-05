@@ -582,9 +582,14 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         const href = anchor.getAttribute("href");
         if (!href || href === "#") return;
         event.preventDefault();
-        root.querySelector(href)?.scrollIntoView({ behavior: "smooth", block: "start" });
-        if (target.closest("#mobileNav")) {
+        const isInMobileNav = !!target.closest("#mobileNav");
+        if (isInMobileNav) {
           closeMobileNav();
+          setTimeout(() => {
+            root.querySelector(href)?.scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 50);
+        } else {
+          root.querySelector(href)?.scrollIntoView({ behavior: "smooth", block: "start" });
         }
       }
     };
