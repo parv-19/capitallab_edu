@@ -118,7 +118,7 @@ const getLandingContent = cache(async () => {
 
 export default async function HomePage() {
   const { styles, markup } = await getLandingContent();
-  const testimonials = await getApprovedTestimonials(8);
+  const testimonials = await getApprovedTestimonials();
   const structuredData = [getOrganizationSchema(), getWebsiteSchema()];
 
   return (
