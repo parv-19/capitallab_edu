@@ -360,31 +360,18 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       });
     }
 
+    const syncAccordionItem = (item: HTMLElement, isOpen: boolean) => {
+      const trigger = item.querySelector<HTMLElement>(".program-accordion-trigger");
+      const content = item.querySelector<HTMLElement>(".program-accordion-content");
+      if (!trigger || !content) return;
+      item.classList.toggle("active", isOpen);
+      trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      content.style.maxHeight = isOpen ? `${content.scrollHeight}px` : "0px";
+    };
+
     root.querySelectorAll<HTMLElement>(".program-accordion").forEach((accordion) => {
-      const items = Array.from(accordion.querySelectorAll<HTMLElement>(".program-accordion-item"));
-
-      const syncItem = (item: HTMLElement, isOpen: boolean) => {
-        const trigger = item.querySelector<HTMLElement>(".program-accordion-trigger");
-        const content = item.querySelector<HTMLElement>(".program-accordion-content");
-        if (!trigger || !content) return;
-        item.classList.toggle("active", isOpen);
-        trigger.setAttribute("aria-expanded", isOpen ? "true" : "false");
-        content.style.maxHeight = isOpen ? `${content.scrollHeight}px` : "0px";
-      };
-
-      items.forEach((item) => {
-        const trigger = item.querySelector<HTMLElement>(".program-accordion-trigger");
-        syncItem(item, item.classList.contains("active"));
-        if (!trigger) return;
-
-        const handleTrigger = () => {
-          const shouldOpen = !item.classList.contains("active");
-          items.forEach((other) => syncItem(other, false));
-          syncItem(item, shouldOpen);
-        };
-
-        trigger.addEventListener("click", handleTrigger);
-        cleanupFns.push(() => trigger.removeEventListener("click", handleTrigger));
+      accordion.querySelectorAll<HTMLElement>(".program-accordion-item").forEach((item) => {
+        syncAccordionItem(item, item.classList.contains("active"));
       });
     });
 
@@ -463,9 +450,24 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
     const handleRootClick = (event: Event) => {
       const target = event.target as HTMLElement;
+      const accordionTrigger = target.closest<HTMLElement>(".program-accordion-trigger");
       const trigger = target.closest<HTMLElement>(".nav-cta-trigger, .btn-outline, .program-cta-link, .nav-cta");
       const scrollButton = target.closest<HTMLElement>("[data-scroll-target]");
       const anchor = target.closest<HTMLAnchorElement>("a[href^='#']");
+
+      if (accordionTrigger) {
+        event.preventDefault();
+        const item = accordionTrigger.closest<HTMLElement>(".program-accordion-item");
+        const accordion = accordionTrigger.closest<HTMLElement>(".program-accordion");
+        if (!item || !accordion) return;
+
+        const shouldOpen = !item.classList.contains("active");
+        accordion.querySelectorAll<HTMLElement>(".program-accordion-item").forEach((other) => {
+          syncAccordionItem(other, false);
+        });
+        syncAccordionItem(item, shouldOpen);
+        return;
+      }
 
       if (trigger) {
         const label = trigger.textContent?.trim() ?? "";
