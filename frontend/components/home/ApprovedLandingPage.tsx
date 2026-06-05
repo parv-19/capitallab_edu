@@ -213,6 +213,27 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       cleanupFns.push(() => mobileNavClose.removeEventListener("click", handleMobileNavClose));
     }
 
+    const handlePriorityControlClick = (event: Event) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+
+      if (target.closest("#hamburger")) {
+        event.preventDefault();
+        event.stopPropagation();
+        toggleMobileNav();
+        return;
+      }
+
+      if (target.closest("#mobileNavClose")) {
+        event.preventDefault();
+        event.stopPropagation();
+        closeMobileNav();
+      }
+    };
+
+    document.addEventListener("click", handlePriorityControlClick, true);
+    cleanupFns.push(() => document.removeEventListener("click", handlePriorityControlClick, true));
+
     const aboutSection = root.querySelector("#about-us");
     if (aboutSection) {
       const introBody = aboutSection.querySelector(".section-body");
@@ -373,6 +394,24 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         goToNextSlide();
       };
 
+      const handlePriorityTestimonialClick = (event: Event) => {
+        const target = event.target as HTMLElement | null;
+        if (!target) return;
+
+        if (target.closest("#testimonialPrev")) {
+          event.preventDefault();
+          event.stopPropagation();
+          goToPrevSlide();
+          return;
+        }
+
+        if (target.closest("#testimonialNext")) {
+          event.preventDefault();
+          event.stopPropagation();
+          goToNextSlide();
+        }
+      };
+
       const handleResize = () => updateSlider();
       const handleTouchStart = (event: TouchEvent) => {
         stopAutoSlide();
@@ -395,6 +434,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       testimonialsCarousel.addEventListener("mouseleave", startAutoSlide);
       testimonialsCarousel.addEventListener("touchstart", handleTouchStart, { passive: true });
       testimonialsCarousel.addEventListener("touchend", handleTouchEnd, { passive: true });
+      document.addEventListener("click", handlePriorityTestimonialClick, true);
 
       updateSlider();
       startAutoSlide();
@@ -408,6 +448,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         testimonialsCarousel.removeEventListener("mouseleave", startAutoSlide);
         testimonialsCarousel.removeEventListener("touchstart", handleTouchStart);
         testimonialsCarousel.removeEventListener("touchend", handleTouchEnd);
+        document.removeEventListener("click", handlePriorityTestimonialClick, true);
         stopAutoSlide();
       });
     }
