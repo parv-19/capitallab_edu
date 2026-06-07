@@ -255,6 +255,9 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
     if (hamburger && mobileNav) {
       const handleHamburgerTap = () => {
+        if (popupOverlay?.classList.contains("active")) {
+          closePopup();
+        }
         const willOpen = !mobileNav.classList.contains("open");
         hamburger.classList.toggle("open", willOpen);
         mobileNav.classList.toggle("open", willOpen);
