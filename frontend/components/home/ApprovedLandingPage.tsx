@@ -138,6 +138,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     const isPhoneViewport = () => window.matchMedia("(max-width: 768px)").matches;
     const hamburger = root.querySelector<HTMLElement>("#hamburger");
     const mobileNav = root.querySelector<HTMLElement>("#mobileNav");
+    const mobileNavClose = root.querySelector<HTMLButtonElement>("#mobileNavClose");
     const popupOverlay = root.querySelector<HTMLElement>("#contactPopup");
     const popupClose = root.querySelector<HTMLElement>("#popupClose");
     const popupSkip = root.querySelector<HTMLElement>("#popupSkip");
@@ -182,6 +183,92 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       popupOverlay?.classList.remove("active");
       syncBodyScrollLock();
     };
+
+    const attachTapHandler = (el: HTMLElement, handler: () => void) => {
+      let pendingTap = false;
+
+      const onTouchEnd = (event: TouchEvent) => {
+        event.preventDefault();
+        pendingTap = true;
+        handler();
+        window.setTimeout(() => {
+          pendingTap = false;
+        }, 400);
+      };
+
+      const onClick = (event: MouseEvent) => {
+        if (pendingTap) {
+          event.preventDefault();
+          pendingTap = false;
+          return;
+        }
+        handler();
+      };
+
+      el.addEventListener("touchend", onTouchEnd, { passive: false });
+      el.addEventListener("click", onClick);
+
+      return () => {
+        el.removeEventListener("touchend", onTouchEnd);
+        el.removeEventListener("click", onClick);
+      };
+    };
+
+    const attachSubmitTapHandler = (button: HTMLButtonElement, form: HTMLFormElement) => {
+      let pendingTap = false;
+
+      const requestSubmit = () => {
+        if (button.disabled || form.dataset.submitting === "true") return;
+        if (typeof form.requestSubmit === "function") {
+          form.requestSubmit();
+          return;
+        }
+        form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+      };
+
+      const onTouchEnd = (event: TouchEvent) => {
+        event.preventDefault();
+        pendingTap = true;
+        requestSubmit();
+        window.setTimeout(() => {
+          pendingTap = false;
+        }, 400);
+      };
+
+      const onClick = (event: MouseEvent) => {
+        event.preventDefault();
+        if (pendingTap) {
+          pendingTap = false;
+          return;
+        }
+        requestSubmit();
+      };
+
+      button.addEventListener("touchend", onTouchEnd, { passive: false });
+      button.addEventListener("click", onClick);
+
+      return () => {
+        button.removeEventListener("touchend", onTouchEnd);
+        button.removeEventListener("click", onClick);
+      };
+    };
+
+    if (hamburger && mobileNav) {
+      const handleHamburgerTap = () => {
+        const willOpen = !mobileNav.classList.contains("open");
+        hamburger.classList.toggle("open", willOpen);
+        mobileNav.classList.toggle("open", willOpen);
+        hamburger.setAttribute("aria-expanded", willOpen ? "true" : "false");
+        mobileNav.setAttribute("aria-hidden", willOpen ? "false" : "true");
+        syncBodyScrollLock();
+      };
+
+      cleanupFns.push(attachTapHandler(hamburger, handleHamburgerTap));
+    }
+
+    if (mobileNavClose) {
+      cleanupFns.push(attachTapHandler(mobileNavClose, closeMobileNav));
+    }
 
     const syncAuthLinks = () => {
       const href = isAuthenticated ? user?.role === "admin" ? "/admin" : "/student" : "/login";
@@ -416,7 +503,12 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     window.addEventListener("resize", resizeAccordions);
     cleanupFns.push(() => window.removeEventListener("resize", resizeAccordions));
 
-    const submitLead = async (scope: ParentNode, closeAfterSubmit = false) => {
+    const submitLead = async (event: Event, scope: ParentNode, closeAfterSubmit = false) => {
+      event.preventDefault();
+
+      const form = scope instanceof HTMLFormElement ? scope : null;
+      if (form?.dataset.submitting === "true") return;
+
       const inputs = scope.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(
         "input, textarea, select",
       );
@@ -447,6 +539,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       const submitBtn = scope.querySelector<HTMLButtonElement>(".submit-btn, .popup-submit");
       const originalText = submitBtn?.textContent ?? "";
       if (submitBtn) {
+        form?.setAttribute("data-submitting", "true");
         submitBtn.disabled = true;
         submitBtn.textContent = "Sending...";
       }
@@ -469,14 +562,35 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
           submitBtn.disabled = false;
           submitBtn.textContent = originalText;
         }
+        form?.removeAttribute("data-submitting");
       }
     };
 
-    const inlineLeadForm = root.querySelector<HTMLElement>("[data-inline-lead-form]");
+    const inlineLeadForm = root.querySelector<HTMLFormElement>("[data-inline-lead-form]");
     const inlineSubmit = inlineLeadForm?.querySelector<HTMLButtonElement>(".submit-btn");
+    if (inlineLeadForm) {
+      const handleInlineSubmit = (event: SubmitEvent) => {
+        void submitLead(event, inlineLeadForm);
+      };
+      inlineLeadForm.addEventListener("submit", handleInlineSubmit);
+      cleanupFns.push(() => inlineLeadForm.removeEventListener("submit", handleInlineSubmit));
+    }
+    if (inlineLeadForm && inlineSubmit) {
+      cleanupFns.push(attachSubmitTapHandler(inlineSubmit, inlineLeadForm));
+    }
 
-    const popupLeadForm = root.querySelector<HTMLElement>("[data-popup-lead-form]");
+    const popupLeadForm = root.querySelector<HTMLFormElement>("[data-popup-lead-form]");
     const popupSubmit = popupLeadForm?.querySelector<HTMLButtonElement>(".popup-submit");
+    if (popupLeadForm) {
+      const handlePopupSubmit = (event: SubmitEvent) => {
+        void submitLead(event, popupLeadForm, true);
+      };
+      popupLeadForm.addEventListener("submit", handlePopupSubmit);
+      cleanupFns.push(() => popupLeadForm.removeEventListener("submit", handlePopupSubmit));
+    }
+    if (popupLeadForm && popupSubmit) {
+      cleanupFns.push(attachSubmitTapHandler(popupSubmit, popupLeadForm));
+    }
 
     const handleRootClick = (event: Event) => {
       const eventTarget = event.target;
@@ -489,41 +603,11 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       if (!target) return;
 
       const accordionTrigger = target.closest<HTMLElement>(".program-accordion-trigger");
-      const mobileNavTrigger = target.closest<HTMLElement>("#hamburger, #mobileNavClose");
       const trigger = target.closest<HTMLElement>(
         ".nav-cta-trigger, .btn-outline, .program-cta-link, .nav-cta, .mobile-cta",
       );
-      const inlineSubmitButton = target.closest<HTMLElement>(".submit-btn");
-      const popupSubmitButton = target.closest<HTMLElement>(".popup-submit");
       const scrollButton = target.closest<HTMLElement>("[data-scroll-target]");
       const anchor = target.closest<HTMLAnchorElement>("a[href^='#']");
-
-      if (mobileNavTrigger && mobileNav) {
-        event.preventDefault();
-        if (mobileNavTrigger.id === "hamburger" && hamburger) {
-          const willOpen = !mobileNav.classList.contains("open");
-          hamburger.classList.toggle("open", willOpen);
-          mobileNav.classList.toggle("open", willOpen);
-          hamburger.setAttribute("aria-expanded", willOpen ? "true" : "false");
-          mobileNav.setAttribute("aria-hidden", willOpen ? "false" : "true");
-          syncBodyScrollLock();
-        } else {
-          closeMobileNav();
-        }
-        return;
-      }
-
-      if (inlineSubmitButton && inlineLeadForm && inlineSubmit && inlineSubmitButton === inlineSubmit) {
-        event.preventDefault();
-        void submitLead(inlineLeadForm);
-        return;
-      }
-
-      if (popupSubmitButton && popupLeadForm && popupSubmit && popupSubmitButton === popupSubmit) {
-        event.preventDefault();
-        void submitLead(popupLeadForm, true);
-        return;
-      }
 
       if (accordionTrigger) {
         event.preventDefault();
