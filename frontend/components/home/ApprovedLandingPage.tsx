@@ -145,14 +145,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     const popupSkip = root.querySelector<HTMLElement>("#popupSkip");
     const popupSelect = popupOverlay?.querySelector<HTMLSelectElement>("select");
     const authLinks = Array.from(root.querySelectorAll<HTMLAnchorElement>("[data-auth-link]"));
-    const autoPopupStorageKey = "capital-lab-home-popup-shown";
     let hasAutoPopupBeenShown = false;
-
-    try {
-      hasAutoPopupBeenShown = window.sessionStorage.getItem(autoPopupStorageKey) === "1";
-    } catch {
-      hasAutoPopupBeenShown = false;
-    }
 
     const setViewportScrollLock = (locked: boolean) => {
       document.documentElement.style.overflowX = "hidden";
@@ -224,11 +217,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
     const markAutoPopupShown = () => {
       hasAutoPopupBeenShown = true;
-      try {
-        window.sessionStorage.setItem(autoPopupStorageKey, "1");
-      } catch {
-        // Ignore storage failures and continue without persistence.
-      }
     };
 
     const attachTapHandler = (el: HTMLElement, handler: () => void) => {
