@@ -135,6 +135,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     if (!root) return;
 
     const cleanupFns: Array<() => void> = [];
+    let popupHideTimer: ReturnType<typeof setTimeout> | null = null;
     const isPhoneViewport = () => window.matchMedia("(max-width: 768px)").matches;
     const hamburger = root.querySelector<HTMLElement>("#hamburger");
     const mobileNav = root.querySelector<HTMLElement>("#mobileNav");
@@ -144,15 +145,52 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     const popupSkip = root.querySelector<HTMLElement>("#popupSkip");
     const popupSelect = popupOverlay?.querySelector<HTMLSelectElement>("select");
     const authLinks = Array.from(root.querySelectorAll<HTMLAnchorElement>("[data-auth-link]"));
+    const autoPopupStorageKey = "capital-lab-home-popup-shown";
+    let hasAutoPopupBeenShown = false;
 
-    const syncBodyScrollLock = () => {
+    try {
+      hasAutoPopupBeenShown = window.sessionStorage.getItem(autoPopupStorageKey) === "1";
+    } catch {
+      hasAutoPopupBeenShown = false;
+    }
+
+    const setViewportScrollLock = (locked: boolean) => {
       document.documentElement.style.overflowX = "hidden";
       document.body.style.overflowX = "hidden";
+      document.documentElement.style.setProperty("overflow-y", locked ? "hidden" : "auto", "important");
+      document.body.style.setProperty("overflow-y", locked ? "hidden" : "auto", "important");
+      document.documentElement.style.setProperty("overscroll-behavior", locked ? "none" : "auto");
+      document.body.style.setProperty("overscroll-behavior", locked ? "none" : "auto");
+    };
+
+    const syncBodyScrollLock = () => {
       const shouldLock =
         isPhoneViewport() &&
         (mobileNav?.classList.contains("open") === true || popupOverlay?.classList.contains("active") === true);
-      document.documentElement.style.overflowY = shouldLock ? "hidden" : "auto";
-      document.body.style.overflowY = shouldLock ? "hidden" : "auto";
+      setViewportScrollLock(shouldLock);
+    };
+
+    const syncPopupVisibility = (isOpen: boolean) => {
+      if (!popupOverlay) return;
+
+      if (popupHideTimer) {
+        clearTimeout(popupHideTimer);
+        popupHideTimer = null;
+      }
+
+      popupOverlay.setAttribute("aria-hidden", isOpen ? "false" : "true");
+
+      if (isOpen) {
+        popupOverlay.hidden = false;
+        popupOverlay.classList.add("active");
+        return;
+      }
+
+      popupOverlay.classList.remove("active");
+      popupHideTimer = setTimeout(() => {
+        popupOverlay.hidden = true;
+        popupHideTimer = null;
+      }, 350);
     };
 
     const closeMobileNav = () => {
@@ -172,7 +210,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
     const openPopup = (interest = "General Enquiry") => {
       if (!popupOverlay || mobileNav?.classList.contains("open")) return;
-      popupOverlay.classList.add("active");
+      syncPopupVisibility(true);
       if (popupSelect) {
         popupSelect.value = interest;
       }
@@ -180,8 +218,17 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     };
 
     const closePopup = () => {
-      popupOverlay?.classList.remove("active");
+      syncPopupVisibility(false);
       syncBodyScrollLock();
+    };
+
+    const markAutoPopupShown = () => {
+      hasAutoPopupBeenShown = true;
+      try {
+        window.sessionStorage.setItem(autoPopupStorageKey, "1");
+      } catch {
+        // Ignore storage failures and continue without persistence.
+      }
     };
 
     const attachTapHandler = (el: HTMLElement, handler: () => void) => {
@@ -191,7 +238,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         event.preventDefault();
         pendingTap = true;
         handler();
-        window.setTimeout(() => {
+        setTimeout(() => {
           pendingTap = false;
         }, 400);
       };
@@ -214,45 +261,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       };
     };
 
-    const attachSubmitTapHandler = (button: HTMLButtonElement, form: HTMLFormElement) => {
-      let pendingTap = false;
-
-      const requestSubmit = () => {
-        if (button.disabled || form.dataset.submitting === "true") return;
-        if (typeof form.requestSubmit === "function") {
-          form.requestSubmit();
-          return;
-        }
-        form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
-      };
-
-      const onTouchEnd = (event: TouchEvent) => {
-        event.preventDefault();
-        pendingTap = true;
-        requestSubmit();
-        window.setTimeout(() => {
-          pendingTap = false;
-        }, 400);
-      };
-
-      const onClick = (event: MouseEvent) => {
-        event.preventDefault();
-        if (pendingTap) {
-          pendingTap = false;
-          return;
-        }
-        requestSubmit();
-      };
-
-      button.addEventListener("touchend", onTouchEnd, { passive: false });
-      button.addEventListener("click", onClick);
-
-      return () => {
-        button.removeEventListener("touchend", onTouchEnd);
-        button.removeEventListener("click", onClick);
-      };
-    };
-
     if (hamburger && mobileNav) {
       const handleHamburgerTap = () => {
         if (popupOverlay?.classList.contains("active")) {
@@ -271,6 +279,11 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
     if (mobileNavClose) {
       cleanupFns.push(attachTapHandler(mobileNavClose, closeMobileNav));
+    }
+
+    if (popupOverlay) {
+      popupOverlay.hidden = !popupOverlay.classList.contains("active");
+      popupOverlay.setAttribute("aria-hidden", popupOverlay.classList.contains("active") ? "false" : "true");
     }
 
     const syncAuthLinks = () => {
@@ -570,7 +583,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     };
 
     const inlineLeadForm = root.querySelector<HTMLFormElement>("[data-inline-lead-form]");
-    const inlineSubmit = inlineLeadForm?.querySelector<HTMLButtonElement>(".submit-btn");
     if (inlineLeadForm) {
       const handleInlineSubmit = (event: SubmitEvent) => {
         void submitLead(event, inlineLeadForm);
@@ -578,21 +590,13 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       inlineLeadForm.addEventListener("submit", handleInlineSubmit);
       cleanupFns.push(() => inlineLeadForm.removeEventListener("submit", handleInlineSubmit));
     }
-    if (inlineLeadForm && inlineSubmit) {
-      cleanupFns.push(attachSubmitTapHandler(inlineSubmit, inlineLeadForm));
-    }
-
     const popupLeadForm = root.querySelector<HTMLFormElement>("[data-popup-lead-form]");
-    const popupSubmit = popupLeadForm?.querySelector<HTMLButtonElement>(".popup-submit");
     if (popupLeadForm) {
       const handlePopupSubmit = (event: SubmitEvent) => {
         void submitLead(event, popupLeadForm, true);
       };
       popupLeadForm.addEventListener("submit", handlePopupSubmit);
       cleanupFns.push(() => popupLeadForm.removeEventListener("submit", handlePopupSubmit));
-    }
-    if (popupLeadForm && popupSubmit) {
-      cleanupFns.push(attachSubmitTapHandler(popupSubmit, popupLeadForm));
     }
 
     const handleRootClick = (event: Event) => {
@@ -656,10 +660,10 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         }
 
         event.preventDefault();
-        openPopup(courseContext.interest || getClosestInterest(label));
         if (trigger.classList.contains("mobile-cta")) {
           closeMobileNav();
         }
+        openPopup(courseContext.interest || getClosestInterest(label));
         return;
       }
 
@@ -689,12 +693,10 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     cleanupFns.push(() => root.removeEventListener("click", handleRootClick));
 
     if (popupClose) {
-      popupClose.addEventListener("click", closePopup);
-      cleanupFns.push(() => popupClose.removeEventListener("click", closePopup));
+      cleanupFns.push(attachTapHandler(popupClose, closePopup));
     }
     if (popupSkip) {
-      popupSkip.addEventListener("click", closePopup);
-      cleanupFns.push(() => popupSkip.removeEventListener("click", closePopup));
+      cleanupFns.push(attachTapHandler(popupSkip, closePopup));
     }
     if (popupOverlay) {
       const handleOverlayClick = (event: Event) => {
@@ -713,17 +715,46 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     document.addEventListener("keydown", handleKeyDown);
     cleanupFns.push(() => document.removeEventListener("keydown", handleKeyDown));
 
-    const popupTimer = window.setTimeout(() => {
-      if (!mobileNav?.classList.contains("open")) {
-        openPopup();
+    const handleAutoPopupScroll = () => {
+      if (hasAutoPopupBeenShown || popupOverlay?.classList.contains("active") || mobileNav?.classList.contains("open")) {
+        return;
       }
-    }, 5000);
-    cleanupFns.push(() => window.clearTimeout(popupTimer));
+
+      const scrollTop = window.scrollY;
+      const viewportHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollableHeight = Math.max(documentHeight - viewportHeight, 0);
+
+      if (scrollableHeight === 0) {
+        return;
+      }
+
+      const scrolledRatio = scrollTop / scrollableHeight;
+      if (scrolledRatio < 0.5) {
+        return;
+      }
+
+      markAutoPopupShown();
+      openPopup();
+      window.removeEventListener("scroll", handleAutoPopupScroll);
+    };
+
+    if (!hasAutoPopupBeenShown) {
+      window.addEventListener("scroll", handleAutoPopupScroll, { passive: true });
+      cleanupFns.push(() => window.removeEventListener("scroll", handleAutoPopupScroll));
+    }
 
     return () => {
       cleanupFns.forEach((cleanup) => cleanup());
-      document.documentElement.style.overflowY = "auto";
-      document.body.style.overflowY = "auto";
+      if (popupHideTimer) {
+        clearTimeout(popupHideTimer);
+      }
+      document.documentElement.style.removeProperty("overflow-x");
+      document.body.style.removeProperty("overflow-x");
+      document.documentElement.style.setProperty("overflow-y", "auto", "important");
+      document.body.style.setProperty("overflow-y", "auto", "important");
+      document.documentElement.style.setProperty("overscroll-behavior", "auto");
+      document.body.style.setProperty("overscroll-behavior", "auto");
     };
   }, [isAuthenticated, user]);
 
