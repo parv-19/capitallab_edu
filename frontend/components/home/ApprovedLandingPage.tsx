@@ -3,10 +3,10 @@
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import api from "@/lib/axios";
-import { useAuth } from "@/contexts/AuthContext";
 import { companyInfo } from "@/lib/site-content";
 import type { Testimonial } from "@/types";
 import FloatingReviewWidget from "@/components/testimonials/FloatingReviewWidget";
+import LandingNavbar from "@/components/home/LandingNavbar";
 
 type MarketingTestimonial = Pick<Testimonial, "studentName" | "review" | "designation"> & {
   rating?: number;
@@ -128,7 +128,6 @@ interface ApprovedLandingPageProps {
 
 export default function ApprovedLandingPage({ styles, markup, testimonials = fallbackTestimonials }: ApprovedLandingPageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     const root = containerRef.current;
@@ -136,32 +135,11 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
     const cleanupFns: Array<() => void> = [];
     let popupHideTimer: ReturnType<typeof setTimeout> | null = null;
-    const isPhoneViewport = () => window.matchMedia("(max-width: 768px)").matches;
-    const hamburger = root.querySelector<HTMLElement>("#hamburger");
-    const mobileNav = root.querySelector<HTMLElement>("#mobileNav");
-    const mobileNavClose = root.querySelector<HTMLButtonElement>("#mobileNavClose");
     const popupOverlay = root.querySelector<HTMLElement>("#contactPopup");
     const popupClose = root.querySelector<HTMLElement>("#popupClose");
     const popupSkip = root.querySelector<HTMLElement>("#popupSkip");
     const popupSelect = popupOverlay?.querySelector<HTMLSelectElement>("select");
-    const authLinks = Array.from(root.querySelectorAll<HTMLAnchorElement>("[data-auth-link]"));
     let hasAutoPopupBeenShown = false;
-
-    const setViewportScrollLock = (locked: boolean) => {
-      document.documentElement.style.overflowX = "hidden";
-      document.body.style.overflowX = "hidden";
-      document.documentElement.style.setProperty("overflow-y", locked ? "hidden" : "auto", "important");
-      document.body.style.setProperty("overflow-y", locked ? "hidden" : "auto", "important");
-      document.documentElement.style.setProperty("overscroll-behavior", locked ? "none" : "auto");
-      document.body.style.setProperty("overscroll-behavior", locked ? "none" : "auto");
-    };
-
-    const syncBodyScrollLock = () => {
-      const shouldLock =
-        isPhoneViewport() &&
-        (mobileNav?.classList.contains("open") === true || popupOverlay?.classList.contains("active") === true);
-      setViewportScrollLock(shouldLock);
-    };
 
     const syncPopupVisibility = (isOpen: boolean) => {
       if (!popupOverlay) return;
@@ -186,14 +164,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       }, 350);
     };
 
-    const closeMobileNav = () => {
-      hamburger?.classList.remove("open");
-      mobileNav?.classList.remove("open");
-      hamburger?.setAttribute("aria-expanded", "false");
-      mobileNav?.setAttribute("aria-hidden", "true");
-      syncBodyScrollLock();
-    };
-
     const scrollToSection = (href: string) => {
       const el = root.querySelector(href);
       if (!el) return;
@@ -202,17 +172,15 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     };
 
     const openPopup = (interest = "General Enquiry") => {
-      if (!popupOverlay || mobileNav?.classList.contains("open")) return;
+      if (!popupOverlay) return;
       syncPopupVisibility(true);
       if (popupSelect) {
         popupSelect.value = interest;
       }
-      syncBodyScrollLock();
     };
 
     const closePopup = () => {
       syncPopupVisibility(false);
-      syncBodyScrollLock();
     };
 
     const markAutoPopupShown = () => {
@@ -249,41 +217,10 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       };
     };
 
-    if (hamburger && mobileNav) {
-      const handleHamburgerTap = () => {
-        if (popupOverlay?.classList.contains("active")) {
-          closePopup();
-        }
-        const willOpen = !mobileNav.classList.contains("open");
-        hamburger.classList.toggle("open", willOpen);
-        mobileNav.classList.toggle("open", willOpen);
-        hamburger.setAttribute("aria-expanded", willOpen ? "true" : "false");
-        mobileNav.setAttribute("aria-hidden", willOpen ? "false" : "true");
-        syncBodyScrollLock();
-      };
-
-      cleanupFns.push(attachTapHandler(hamburger, handleHamburgerTap));
-    }
-
-    if (mobileNavClose) {
-      cleanupFns.push(attachTapHandler(mobileNavClose, closeMobileNav));
-    }
-
     if (popupOverlay) {
       popupOverlay.hidden = !popupOverlay.classList.contains("active");
       popupOverlay.setAttribute("aria-hidden", popupOverlay.classList.contains("active") ? "false" : "true");
     }
-
-    const syncAuthLinks = () => {
-      const href = isAuthenticated ? user?.role === "admin" ? "/admin" : "/student" : "/login";
-      const label = isAuthenticated ? "Dashboard" : "Login";
-      authLinks.forEach((link) => {
-        link.href = href ?? "/login";
-        link.textContent = label;
-      });
-    };
-
-    syncAuthLinks();
 
     const aboutSection = root.querySelector("#about-us");
     if (aboutSection) {
@@ -499,10 +436,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         .forEach((content) => {
           content.style.maxHeight = `${content.scrollHeight}px`;
         });
-
-      if (!isPhoneViewport()) {
-        closeMobileNav();
-      }
     };
     window.addEventListener("resize", resizeAccordions);
     cleanupFns.push(() => window.removeEventListener("resize", resizeAccordions));
@@ -598,9 +531,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       if (!target) return;
 
       const accordionTrigger = target.closest<HTMLElement>(".program-accordion-trigger");
-      const trigger = target.closest<HTMLElement>(
-        ".nav-cta-trigger, .btn-outline, .program-cta-link, .nav-cta, .mobile-cta",
-      );
+      const trigger = target.closest<HTMLElement>(".nav-cta-trigger, .btn-outline, .program-cta-link");
       const scrollButton = target.closest<HTMLElement>("[data-scroll-target]");
       const anchor = target.closest<HTMLAnchorElement>("a[href^='#']");
 
@@ -626,9 +557,6 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         if (normalizedLabel === "enroll now") {
           event.preventDefault();
           window.location.href = `/leads?course=${encodeURIComponent(courseContext.leadCourse)}`;
-          if (trigger.classList.contains("mobile-cta")) {
-            closeMobileNav();
-          }
           return;
         }
 
@@ -641,16 +569,10 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         if (shouldOpenWhatsapp(label)) {
           event.preventDefault();
           window.open(buildWhatsappHref(courseContext.whatsappText), "_blank", "noopener,noreferrer");
-          if (trigger.classList.contains("mobile-cta")) {
-            closeMobileNav();
-          }
           return;
         }
 
         event.preventDefault();
-        if (trigger.classList.contains("mobile-cta")) {
-          closeMobileNav();
-        }
         openPopup(courseContext.interest || getClosestInterest(label));
         return;
       }
@@ -668,12 +590,7 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
         const href = anchor.getAttribute("href");
         if (!href || href === "#") return;
         event.preventDefault();
-        if (target.closest("#mobileNav")) {
-          closeMobileNav();
-          setTimeout(() => scrollToSection(href), 100);
-        } else {
-          scrollToSection(href);
-        }
+        scrollToSection(href);
       }
     };
 
@@ -697,14 +614,13 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         closePopup();
-        closeMobileNav();
       }
     };
     document.addEventListener("keydown", handleKeyDown);
     cleanupFns.push(() => document.removeEventListener("keydown", handleKeyDown));
 
     const handleAutoPopupScroll = () => {
-      if (hasAutoPopupBeenShown || popupOverlay?.classList.contains("active") || mobileNav?.classList.contains("open")) {
+      if (hasAutoPopupBeenShown || popupOverlay?.classList.contains("active")) {
         return;
       }
 
@@ -737,18 +653,13 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       if (popupHideTimer) {
         clearTimeout(popupHideTimer);
       }
-      document.documentElement.style.removeProperty("overflow-x");
-      document.body.style.removeProperty("overflow-x");
-      document.documentElement.style.setProperty("overflow-y", "auto", "important");
-      document.body.style.setProperty("overflow-y", "auto", "important");
-      document.documentElement.style.setProperty("overscroll-behavior", "auto");
-      document.body.style.setProperty("overscroll-behavior", "auto");
     };
-  }, [isAuthenticated, user]);
+  }, [testimonials]);
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: styles }} />
+      <LandingNavbar />
       <div ref={containerRef} dangerouslySetInnerHTML={{ __html: markup }} />
       <FloatingReviewWidget />
     </>

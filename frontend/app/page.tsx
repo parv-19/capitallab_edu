@@ -82,6 +82,8 @@ function transformLandingMarkup(markup: string, testimonials: MarketingTestimoni
     .replace(/src="LOGO\.PNG"/g, 'src="/LOGO.PNG"')
     .replace(/src="instructor_harsh\.jpg"/g, 'src="/instructur_harsh_new.jpeg"')
     .replace(/src="instructor_parth\.jpg"/g, 'src="/instructor_parth.jpg"')
+    .replace(/<nav class="nav">[\s\S]*?<\/nav>\s*/m, "")
+    .replace(/<!-- MOBILE NAV DRAWER -->[\s\S]*?<!-- HERO -->/m, "  <!-- HERO -->")
     .replace(
       /(<a href="#testimonials">Testimonials<\/a>\s*)(<a href="\/leads" class="nav-leads">Book Free Call<\/a>\s*)(<a href="#" class="nav-cta">Enroll Now<\/a>)/,
       '$1<a href="/login" class="nav-login" data-auth-link>Login</a>\n      $2',
