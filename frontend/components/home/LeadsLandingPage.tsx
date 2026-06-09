@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import api from "@/lib/axios";
 import type { Testimonial } from "@/types";
+import LeadsLandingNavbar from "@/components/home/LeadsLandingNavbar";
 
 const SHEET_URL =
   "https://script.google.com/macros/s/AKfycbxxpE4_LIKsXmY4BVsVcssVLUbCAW9DeQFRMEOqN-78czmnovsrNh8IR4E2KZFKLrdAAA/exec";
@@ -33,82 +34,6 @@ export default function LeadsLandingPage({ styles, markup, testimonials = [] }: 
     if (!root) return;
 
     const cleanupFns: Array<() => void> = [];
-    const homeBrandLinks = Array.from(
-      root.querySelectorAll<HTMLElement>(".home-brand-link, .nav-logo"),
-    );
-
-    homeBrandLinks.forEach((link) => {
-      const handleHomeRedirect = (event: Event) => {
-        event.preventDefault();
-        window.location.href = "/";
-      };
-
-      link.style.cursor = "pointer";
-      link.addEventListener("click", handleHomeRedirect);
-      cleanupFns.push(() => link.removeEventListener("click", handleHomeRedirect));
-    });
-
-    const menuButton = root.querySelector<HTMLButtonElement>("#leadsMenuBtn");
-    const mobileNav = root.querySelector<HTMLElement>("#leadsMobileNav");
-    const mobileNavClose = root.querySelector<HTMLButtonElement>("#leadsMobileNavClose");
-    const mobileNavLinks = Array.from(root.querySelectorAll<HTMLAnchorElement>("#leadsMobileNav a"));
-
-    const setScrollLock = (locked: boolean) => {
-      document.documentElement.style.overflowY = locked ? "hidden" : "auto";
-      document.body.style.overflowY = locked ? "hidden" : "auto";
-    };
-
-    const closeMobileNav = () => {
-      mobileNav?.classList.remove("open");
-      mobileNav?.setAttribute("aria-hidden", "true");
-      menuButton?.setAttribute("aria-expanded", "false");
-      setScrollLock(false);
-    };
-
-    const attachTapHandler = (el: HTMLElement, handler: () => void) => {
-      let pendingTap = false;
-
-      const onTouchEnd = (e: TouchEvent) => {
-        e.preventDefault();
-        pendingTap = true;
-        handler();
-        setTimeout(() => { pendingTap = false; }, 400);
-      };
-
-      const onClick = () => {
-        if (pendingTap) return;
-        handler();
-      };
-
-      el.addEventListener("touchend", onTouchEnd, { passive: false });
-      el.addEventListener("click", onClick);
-
-      return () => {
-        el.removeEventListener("touchend", onTouchEnd);
-        el.removeEventListener("click", onClick);
-      };
-    };
-
-    if (menuButton && mobileNav) {
-      const handleMenuClick = () => {
-        const willOpen = !mobileNav.classList.contains("open");
-        mobileNav.classList.toggle("open", willOpen);
-        mobileNav.setAttribute("aria-hidden", willOpen ? "false" : "true");
-        menuButton.setAttribute("aria-expanded", willOpen ? "true" : "false");
-        setScrollLock(willOpen);
-      };
-
-      cleanupFns.push(attachTapHandler(menuButton, handleMenuClick));
-    }
-
-    if (mobileNavClose) {
-      cleanupFns.push(attachTapHandler(mobileNavClose, closeMobileNav));
-    }
-
-    mobileNavLinks.forEach((link) => {
-      cleanupFns.push(attachTapHandler(link, closeMobileNav));
-    });
-
     const searchParams = new URLSearchParams(window.location.search);
     const requestedCourse = searchParams.get("course")?.trim();
     if (requestedCourse) {
@@ -357,13 +282,13 @@ export default function LeadsLandingPage({ styles, markup, testimonials = [] }: 
 
     return () => {
       cleanupFns.forEach((fn) => fn());
-      setScrollLock(false);
     };
   }, [testimonials]);
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: styles }} />
+      <LeadsLandingNavbar />
       <div ref={containerRef} dangerouslySetInnerHTML={{ __html: markup }} />
     </>
   );

@@ -19,6 +19,7 @@ function transformLeadsMarkup(markup: string) {
     .replace(/src="LOGO\.PNG"/gi, 'src="/LOGO.PNG"')
     .replace(/src="instructor_harsh\.jpg"/g, 'src="/instructur_harsh_new.jpeg"')
     .replace(/src="instructor_parth\.jpg"/g, 'src="/instructor_parth.jpg"')
+    .replace(/<nav>[\s\S]*?<\/nav>\s*/m, "")
     .replace(
       /<div class="nav-logo">\s*<img src="logo\.png" alt="Capital Lab Education" class="logo-img" onerror="this\.style\.display='none';document\.querySelector\('\.logo-mark'\)\.style\.display='flex'">\s*<div class="logo-mark" style="display:none">CL<\/div>\s*<span class="logo-text">Capital <span>Lab<\/span><\/span>\s*<\/div>/,
       `<a href="/" class="nav-logo home-brand-link">
@@ -38,33 +39,6 @@ function transformLeadsMarkup(markup: string) {
     .replace(
       /<span class="logo-text">Capital <span>Lab<\/span><\/span>/g,
       '<span class="logo-text"><span class="brand-main">capital</span><span class="brand-accent">lab</span></span>',
-    )
-    .replace(
-      '<a href="#contact-form" class="nav-cta nav-cta-mobile">Book free call</a>',
-      `<button class="leads-menu-btn" id="leadsMenuBtn" type="button" aria-label="Open menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-      <a href="#contact-form" class="nav-cta nav-cta-mobile">Book free call</a>`,
-    )
-    .replace(
-      '</nav>',
-      `<div class="leads-mobile-nav" id="leadsMobileNav" aria-hidden="true">
-        <div class="leads-mobile-nav__header">
-          <a href="/" class="nav-logo home-brand-link">
-            <img src="/LOGO.PNG" alt="Capital Lab Education" class="logo-img">
-            <div class="logo-mark" style="display:none">CL</div>
-            <span class="logo-text"><span class="brand-main">capital</span><span class="brand-accent">lab</span></span>
-          </a>
-          <button class="leads-mobile-nav__close" id="leadsMobileNavClose" type="button" aria-label="Close menu">&times;</button>
-        </div>
-        <div class="leads-mobile-nav__links">
-          <a href="#why">Why us</a>
-          <a href="#programs">Programs</a>
-          <a href="#instructor">Instructor</a>
-          <a href="#testimonials">Reviews</a>
-          <a href="#contact-form" class="nav-cta">Book free call</a>
-        </div>
-      </div></nav>`,
     )
     .replace(/onclick="submitForm\(\)"/g, 'data-leads-submit="true"');
 }
