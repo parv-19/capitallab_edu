@@ -40,6 +40,30 @@ function transformLeadsMarkup(markup: string) {
       /<span class="logo-text">Capital <span>Lab<\/span><\/span>/g,
       '<span class="logo-text"><span class="brand-main">capital</span><span class="brand-accent">lab</span></span>',
     )
+    .replace(
+      /<div class="form-row">\s*<div class="form-group">\s*<label>Your State \*<\/label>\s*<input type="text" id="fstate"[\s\S]*?<\/div>\s*<div class="form-group">\s*<label>Your City \*<\/label>\s*<input type="text" id="fcity"[\s\S]*?<\/div>\s*<\/div>/,
+      `<div class="form-row form-row-single">
+          <div class="form-group">
+            <label>Your City *</label>
+            <input type="text" id="fcity" placeholder="e.g. Ahmedabad" autocomplete="off">
+          </div>
+        </div>`,
+    )
+    .replace(
+      /<div class="form-row">\s*<div class="form-group">\s*<label>Interested in<\/label>\s*<select id="fprog">[\s\S]*?<\/select>\s*<\/div>\s*<div class="form-group">\s*<label>Your background<\/label>\s*<select id="fstream">[\s\S]*?<\/select>\s*<\/div>\s*<\/div>/,
+      `<div class="form-row form-row-single">
+          <div class="form-group">
+            <label>Your background</label>
+            <select id="fstream">
+              <option value="">Select</option>
+              <option>Commerce - 12th</option>
+              <option>Science - 12th</option>
+              <option>Arts - 12th</option>
+              <option>Graduate / Working</option>
+            </select>
+          </div>
+        </div>`,
+    )
     .replace(/onclick="submitForm\(\)"/g, 'data-leads-submit="true"');
 }
 
@@ -73,6 +97,7 @@ const getLeadsContent = cache(async () => {
 .testi-dots{display:flex;align-items:center;gap:8px}
 .testi-dot{width:8px;height:8px;border:none;border-radius:999px;background:rgba(255,255,255,.28);cursor:pointer}
 .testi-dot.active{background:var(--gold)}
+.form-row.form-row-single{grid-template-columns:1fr}
 @media (max-width: 900px){.logo-img{width:38px;height:38px}.logo-text{font-size:16px!important}}
 @media (max-width: 480px){.logo-img{width:34px;height:34px;border-radius:7px}.logo-text{font-size:15px!important}}
 @media (max-width: 900px){.leads-menu-btn{display:flex}.testi-grid.testi-carousel-track .testi-card{min-width:100%;flex:0 0 100%;display:flex!important}}

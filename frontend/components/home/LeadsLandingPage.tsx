@@ -214,9 +214,8 @@ export default function LeadsLandingPage({ styles, markup, testimonials = [] }: 
         const name = get("fname");
         const phone = get("fphone");
         const email = get("femail");
-        const state = get("fstate");
         const city = get("fcity");
-        const prog = get("fprog");
+        const prog = get("fprog") || requestedCourse || "";
         const bg = get("fstream");
         const avail = get("favail");
 
@@ -226,10 +225,6 @@ export default function LeadsLandingPage({ styles, markup, testimonials = [] }: 
         }
         if (!phone) {
           toast.error("Please enter your WhatsApp number.");
-          return;
-        }
-        if (!state) {
-          toast.error("Please enter your state.");
           return;
         }
         if (!city) {
@@ -248,7 +243,6 @@ export default function LeadsLandingPage({ styles, markup, testimonials = [] }: 
           name,
           phone,
           email,
-          state,
           city,
           program: prog,
           background: bg,
@@ -259,7 +253,7 @@ export default function LeadsLandingPage({ styles, markup, testimonials = [] }: 
           phone,
           email,
           courseInterest: prog || "General Enquiry",
-          message: `State: ${state}, City: ${city}, Background: ${bg || "-"}, Availability: ${avail}`,
+          message: `City: ${city}, Background: ${bg || "-"}, Availability: ${avail}`,
         };
 
         await Promise.allSettled([
