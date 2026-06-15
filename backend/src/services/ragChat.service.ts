@@ -19,6 +19,7 @@ import {
   STRICT_RAG_SYSTEM_PROMPT,
 } from "../config/rag";
 import { DocumentChunk } from "../models/DocumentChunk.model";
+import { DocumentPage } from "../models/DocumentPage.model";
 import { RagChatLog } from "../models/RagChatLog.model";
 import { RagUnansweredQuestion } from "../models/RagUnansweredQuestion.model";
 import { createEmbedding } from "./ragEmbedding.service";
@@ -312,8 +313,12 @@ const CFA_CMA_REWRITES: Array<{ pattern: RegExp; rewrite: string }> = [
   // ── Ethics / GIPS ────────────────────────────────────────────────────────
   { pattern: /\bgips\b|global investment performance standards/, rewrite: "Explain GIPS (Global Investment Performance Standards), their purpose, composite construction, and key requirements for CFA ethics." },
   { pattern: /\bcode of ethics\b|standards of practice/, rewrite: "Explain the CFA Institute Code of Ethics and Standards of Professional Conduct, key standards (I–VII), and their exam implications." },
+  { pattern: /\bethics.*profession\b|\bprofession.*ethics\b|\brole.*ethics\b|\bethics.*role\b|\bprofessional ethics\b|\bprofessional conduct\b|\bcode of conduct\b/, rewrite: "Explain the role of a code of ethics in a profession: ethical obligations of professionals, purpose of ethical standards, professional conduct, public trust, and why ethical behaviour is fundamental to professional practice." },
   { pattern: /\bmosaic theory\b/, rewrite: "Explain mosaic theory, how combining non-material non-public information with public information is permissible under CFA Standard II(A)." },
   { pattern: /\bmaterial non.public\b|mnpi/, rewrite: "Explain material non-public information (MNPI) under CFA Standard II(A), insider trading restrictions, and the firewall concept." },
+  // ── Corporate Governance / Board ─────────────────────────────────────────
+  { pattern: /\brisk governance\b|\bboard.*governance\b|\bgovernance.*board\b|\bboard.*risk\b|\broles?.*board\b|\bboard.*roles?\b|\bboard.*oversight\b|\bboard of directors\b/, rewrite: "Explain the key roles of the board of directors in risk governance: setting risk appetite, oversight of risk management, audit committee and risk committee responsibilities, fiduciary duties of directors, and corporate governance frameworks." },
+  { pattern: /\bcorporate governance\b/, rewrite: "Explain corporate governance: board structure and responsibilities, agency problem, shareholder vs stakeholder models, separation of ownership and control, audit committee, and governance best practices." },
   // ── General fallback for very short questions ────────────────────────────
 ];
 
@@ -419,7 +424,7 @@ function buildUserPrompt(question: string, chunks: RetrievedChunk[], history: Co
 
 function extractQuestionKeywords(question: string) {
   return question.toLowerCase().replace(/[^\w\s]/g, " ").split(/\s+/).map((w) => w.trim()).filter((w) => w.length > 2).filter(
-    (w) => !["what","which","when","where","why","how","from","with","that","this","into","about","your","their","there","have","does","show","explain","define","using","question","answer","simple","language","according","material","uploaded","documents","difference","between","role","process","management","framework","describe","candidate","able","should","main","features","please","could","would","tell","give","understand"].includes(w),
+    (w) => !["what","which","when","where","why","how","from","with","that","this","into","about","your","their","there","have","does","show","explain","define","using","question","answer","simple","language","according","material","uploaded","documents","difference","between","process","management","framework","describe","candidate","able","should","main","features","please","could","would","tell","give","understand"].includes(w),
   );
 }
 
@@ -534,7 +539,7 @@ function passesRelevanceGate(question: string, chunks: RetrievedChunk[]): boolea
   const strongChunkCount = supportEntries.filter((e) => e.support.keywordMatches >= 2 || e.support.total >= 4).length;
   if (keywords.length <= 1) return (bestSupport?.keywordMatches ?? 0) >= 1 || exactPhraseSupported;
   if (keywords.length === 2) return exactPhraseSupported || strongChunkCount >= 1;
-  return exactPhraseSupported || strongChunkCount >= 2;
+  return exactPhraseSupported || strongChunkCount >= 1;
 }
 
 function getScoreThresholdForQuestion(question: string, chunks: RetrievedChunk[]): number {
@@ -616,6 +621,70 @@ function dedupeRetrievedChunks(chunks: RetrievedChunk[]): RetrievedChunk[] {
 }
 
 // ─── Core retrieval using pgvector ────────────────────────────────────────────
+
+/**
+ * BM25 page-indexed retrieval — searches full pages (no chunking) via
+ * PostgreSQL ts_rank_cd. Returns RetrievedChunk-compatible objects so the
+ * same prompting / LLM path works for both strategies.
+ */
+async function retrieveByPageIndex(params: {
+  question: string;
+  rewrittenQueries: string[];
+  courseIds: string[];
+  subject?: string;
+  chapterName?: string;
+}): Promise<RetrievedChunk[]> {
+  // Build BM25 query: combine original question keywords + expanded rewrite keywords
+  const expandedRewrite = params.rewrittenQueries.find((q) => q !== params.question) ?? "";
+  const origKeywords = extractQuestionKeywords(params.question);
+  const rewriteKeywords = extractQuestionKeywords(expandedRewrite);
+  const allKeywords = [...new Set([...origKeywords, ...rewriteKeywords])];
+  const queryTerms = allKeywords.join(" ");
+  if (!queryTerms.trim()) return [];
+
+  const topPages = await DocumentPage.bm25Search({
+    queryTerms,
+    courseIds: params.courseIds,
+    limit: 5,
+    subject: params.subject,
+    chapterName: params.chapterName,
+  });
+  if (topPages.length === 0) return [];
+
+  // Also fetch immediately adjacent pages for context continuity
+  const adjacentPairs = topPages.slice(0, 3).flatMap((p) => [
+    { documentId: p.documentId, pageNumber: p.pageNumber - 1 },
+    { documentId: p.documentId, pageNumber: p.pageNumber + 1 },
+  ]).filter((pair) => pair.pageNumber > 0);
+
+  const adjacentPages = await DocumentPage.findAdjacent(adjacentPairs);
+
+  // Merge: top pages keep their BM25 score; adjacent pages get score 0
+  const seen = new Map<string, typeof topPages[0]>();
+  for (const p of topPages) seen.set(`${p.documentId}:${p.pageNumber}`, p);
+  for (const p of adjacentPages) {
+    const key = `${p.documentId}:${p.pageNumber}`;
+    if (!seen.has(key)) seen.set(key, { ...p, bm25Score: 0 });
+  }
+
+  return [...seen.values()]
+    .sort((a, b) => (b.bm25Score ?? 0) - (a.bm25Score ?? 0))
+    .slice(0, MAX_CONTEXT_RESULTS)
+    .map((p) => ({
+      _id: p.id,
+      documentId: p.documentId,
+      content: p.content,
+      score: p.bm25Score ?? 0,
+      pageNumber: p.pageNumber,
+      subject: p.subject ?? undefined,
+      chapterName: p.chapterName ?? undefined,
+      metadata: {
+        ...p.metadata,
+        pageNumber: p.pageNumber,
+        semanticType: "page",
+      },
+    }));
+}
 
 async function retrieveRelevantChunks(params: {
   question: string;
@@ -846,6 +915,46 @@ export async function answerSyllabusQuestion(params: { userId?: string; question
   const rewrittenQueries = buildRewrittenQueries(retrievalQuestion);
   if (DEBUG_RAG) console.log(`[RAG][rewrite] original="${question}" retrieval="${retrievalQuestion}" rewritten=${JSON.stringify(rewrittenQueries)}`);
 
+  // ── Strategy 1: BM25 page-indexed retrieval (vectorless, full pages) ──────
+  const pageResults = await retrieveByPageIndex({
+    question: retrievalQuestion,
+    rewrittenQueries,
+    courseIds: params.courseIds,
+    subject: params.subject,
+    chapterName: params.chapterName,
+  });
+
+  if (pageResults.length > 0) {
+    if (DEBUG_RAG) console.log(`[RAG][page] BM25 matched ${pageResults.length} page(s); top bm25=${pageResults.slice(0, 3).map((p) => `${p.score.toFixed(4)}@p${p.pageNumber}`).join(", ")}`);
+
+    const pageConfidence = Number((pageResults[0]?.score ?? 0).toFixed(4));
+    const pageSources = buildSources(pageResults);
+
+    // Pages carry full content — let the LLM reason without keyword/score gates
+    const rawAnswer = await runLlmMessages({
+      messages: [
+        { role: "system", content: buildSystemPrompt(question) },
+        { role: "user", content: buildUserPrompt(question, pageResults, conversationHistory) },
+      ],
+      maxTokens: 1400,
+      temperature: 0.2,
+    });
+
+    const normalizedPageAnswer = !rawAnswer || rawAnswer.includes("I don't know") ? RAG_NOT_FOUND_MESSAGE : sanitizeLlmAnswer(rawAnswer);
+    const pageAnswered = normalizedPageAnswer !== RAG_NOT_FOUND_MESSAGE && isAnswerGroundedForQuestion(question, normalizedPageAnswer, pageResults);
+    const safePageAnswer = pageAnswered ? normalizedPageAnswer : RAG_NOT_FOUND_MESSAGE;
+
+    if (pageAnswered) {
+      const suggestedQuestions = await generateSuggestedQuestions({ question, answer: safePageAnswer, chunks: pageResults, history: conversationHistory, answered: true });
+      await logChat({ userId: params.userId, question, answer: safePageAnswer, answered: true, subject: params.subject, courseId: params.courseIds[0], chapterName: params.chapterName, sources: pageSources, confidenceScore: pageConfidence });
+      return { answered: true, answer: safePageAnswer, sources: pageSources, confidenceScore: pageConfidence, suggestedQuestions };
+    }
+    // Page retrieval found pages but LLM couldn't ground an answer — fall through
+    // to chunk-based retrieval so we give the best possible response.
+    if (DEBUG_RAG) console.log(`[RAG][page] LLM not grounded from pages — falling through to chunk retrieval`);
+  }
+
+  // ── Strategy 2: Vector + keyword chunk-based retrieval ───────────────────
   const retrievedChunks = dedupeRetrievedChunks(
     await retrieveRelevantChunks({ question: retrievalQuestion, rewrittenQueries, courseIds: params.courseIds, subject: params.subject, chapterName: params.chapterName }),
   );
