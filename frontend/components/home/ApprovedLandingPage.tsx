@@ -258,6 +258,53 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
       cards[3]?.remove();
     }
 
+    root.querySelector(".team-section")?.remove();
+
+    const instructorSection = root.querySelector<HTMLElement>("#instructor");
+    if (instructorSection) {
+      const instructorCard = instructorSection.querySelector<HTMLElement>(".instructor-card");
+      const instructorContent = instructorCard?.querySelector<HTMLElement>(":scope > div:last-child");
+
+      if (instructorContent) {
+        instructorContent.innerHTML = `
+          <div class="instructor-name">Harsh Trivedi</div>
+          <div class="instructor-title">Founder &amp; Lead Instructor | Capital Lab Education</div>
+          <p class="instructor-bio" style="font-weight: 600; color: rgba(255,255,255,0.9); margin-bottom: 18px;">
+            Great finance professionals are built through exposure, judgment, and application—not memorization.
+          </p>
+          <p class="instructor-bio">
+            With over a decade of hands-on experience across valuation, investment analysis, real estate financial modeling, credit analysis, and financial decision-making, Harsh brings institutional-level industry experience directly into the classroom.
+          </p>
+          <p class="instructor-bio">
+            Having worked extensively on live transactions, investment evaluations, financial models, and analytical problem-solving, his teaching philosophy is rooted in one principle: teach finance the way professionals actually use it.
+          </p>
+          <p class="instructor-bio">
+            Sessions go beyond textbooks and exam preparation—focusing on structured thinking, commercial understanding, analytical rigor, and practical execution. Students learn not just how to solve questions, but how to think like analysts and make informed decisions under real-world conditions.
+          </p>
+          <p class="instructor-bio" style="margin-bottom: 10px;">
+            At Capital Lab Education, the objective is simple:
+          </p>
+          <p class="instructor-bio" style="font-weight: 600; color: rgba(255,255,255,0.92); margin-bottom: 28px;">
+            Bridge the gap between academic knowledge and professional excellence.
+          </p>
+          <div style="font-size: 13px; color: var(--gold); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;">Areas of Expertise</div>
+          <div class="expertise-grid" style="margin-bottom: 26px;">
+            <div class="exp-item"><div class="exp-dot"></div>Equity Valuation</div>
+            <div class="exp-item"><div class="exp-dot"></div>Real Estate Financial Modeling</div>
+            <div class="exp-item"><div class="exp-dot"></div>Credit Analysis</div>
+            <div class="exp-item"><div class="exp-dot"></div>Investment Analysis</div>
+            <div class="exp-item"><div class="exp-dot"></div>Financial Analysis</div>
+            <div class="exp-item"><div class="exp-dot"></div>Portfolio Management</div>
+            <div class="exp-item"><div class="exp-dot"></div>Applied Corporate Finance</div>
+          </div>
+          <div style="font-size: 13px; color: var(--gold); font-weight: 600; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;">Learning Philosophy</div>
+          <p class="instructor-bio" style="margin-bottom: 0; font-weight: 600; color: rgba(255,255,255,0.9);">
+            Learn with context. Apply with confidence. Build a career—not just clear an exam.
+          </p>
+        `;
+      }
+    }
+
     const cfaCard = root.querySelector(".programs-grid .program-card:last-child");
     const cfaHighlights = cfaCard?.querySelectorAll(".program-highlights li");
     if (cfaHighlights?.[1]) {
