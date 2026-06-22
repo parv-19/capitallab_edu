@@ -8,6 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const routes = [
     "",
     "/about",
+    "/capital-lab-finance-workshop",
     "/courses",
     "/testimonials",
     "/leads",
