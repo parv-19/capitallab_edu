@@ -1164,15 +1164,19 @@ body.modal-locked {
         width: 100%;
     }
     .inquiry-tab {
-        left: -5px;
-        padding: 8px 14px;
+        top: auto;
+        bottom: 80px;
+        left: 12px;
+        transform: none;
+        border-radius: 50px;
+        padding: 10px 16px;
         font-size: 13px;
         letter-spacing: 0;
         gap: 6px;
     }
     .inquiry-tab:hover,
     .inquiry-tab:focus-visible {
-        transform: translateY(-50%) translateX(4px) rotate(-90deg);
+        transform: none;
     }
 }
 
