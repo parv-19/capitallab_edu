@@ -76,7 +76,7 @@ function replaceWorkshopPaths(source: string) {
 }
 
 const getWorkshopContent = cache(async () => {
-  const workshopDir = path.resolve(process.cwd(), "..", "capital-lab-workshop");
+  const workshopDir = path.resolve(process.cwd(), "workshop-source");
   const [styleSource, headerSource, indexSource, footerSource, modalSource] = await Promise.all([
     readFile(path.join(workshopDir, "style.css"), "utf-8"),
     readFile(path.join(workshopDir, "header.php"), "utf-8"),
@@ -91,6 +91,9 @@ ${styleSource.replace(/url\("assets\/reference-hero-bg\.avif"\)/g, 'url("/worksh
 .form-alert.is-error{display:block;color:#842029;background:#f8d7da;border:1px solid #f1aeb5;}
 .form-alert.is-success{display:block;color:#0f5132;background:#eaf6ee;border:1px solid #b8dfc7;}
 a.btn[aria-disabled="true"]{pointer-events:none;opacity:.6;}
+.site-footer{padding-bottom:138px;}
+@media (max-width: 920px){.site-footer{padding-bottom:150px;}}
+@media (max-width: 640px){.site-footer{padding-bottom:170px;}}
 `;
 
   const mainMatch = indexSource.match(/<main id="main-content">[\s\S]*<\/main>/);

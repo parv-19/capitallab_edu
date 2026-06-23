@@ -1,0 +1,101 @@
+<div class="modal-form-card">
+    <div class="lead-panel-head modal-head">
+        <div>
+            <span class="form-kicker">Quick Inquiry</span>
+            <h2 id="modalTitle">Start your finance journey</h2>
+        </div>
+        <img src="assets/capital-lab-logo.png" alt="" aria-hidden="true">
+    </div>
+    <form class="lead-form" action="mail-send.php" id="inquiry-forms" method="post" data-lead-form>
+        <input type="hidden" name="form_name" value="Capital Lab Finance Workshop Modal">
+
+        <!-- Honeypot Field -->
+        <div class="hp-field wide" aria-hidden="true">
+            <label>Website
+      <input type="text" name="website" tabindex="-1" autocomplete="off">
+    </label>
+        </div>
+
+        <div class="form-grid">
+
+            <label>Full Name
+      <input 
+        type="text" 
+        name="name" 
+        placeholder="Your name" 
+        autocomplete="name" 
+        minlength="2" 
+        maxlength="80" 
+        required>
+    </label>
+
+            <label>Phone Number
+      <input 
+        type="tel" 
+        name="number" 
+        placeholder="+91" 
+        autocomplete="tel" 
+        minlength="10" 
+        maxlength="15" 
+        required>
+    </label>
+
+            <label>Email Address
+      <input 
+        type="email" 
+        name="email" 
+        placeholder="you@example.com" 
+        autocomplete="email" 
+        maxlength="120" 
+        required>
+    </label>
+
+            <label>Preferred Mode
+      <select name="subject" required>
+        <option value="">Choose one</option>
+        <option value="Live Online">Live Online</option>
+        <option value="Offline Ahmedabad">Offline Ahmedabad</option>
+      </select>
+    </label>
+
+            <label class="wide">I am currently a
+      <select name="message" required>
+        <option value="">Select your stage</option>
+        <option value="Commerce Student">Commerce Student</option>
+        <option value="CFA / US CMA Aspirant">CFA / US CMA Aspirant</option>
+        <option value="MBA Finance Student">MBA Finance Student</option>
+        <option value="Young Professional">Young Professional</option>
+        <option value="Finance Enthusiast">Finance Enthusiast</option>
+      </select>
+    </label>
+
+            <label class="consent-line wide">
+      <input type="checkbox" name="consent" required>
+      <span>I agree to be contacted about this workshop.</span>
+    </label>
+
+            <label class="captcha-line wide">Security Check
+  <div class="captcha-inline">
+    <input 
+      name="captcha" 
+      id="captcha" 
+      placeholder="Captcha Code *" 
+      class="form-control" 
+      type="text" 
+      autocomplete="off" 
+      required>
+
+    <img src="captcha.php" class="capside" alt="Captcha">
+  </div>
+</label>
+
+        </div>
+
+        <button class="btn btn-primary full-width" type="submit" name="submit" value="Submit Now!">
+    Reserve My Seat
+  </button>
+
+        <p class="form-note">Limited seats. Workshop details will be shared after registration.</p>
+        <div class="form-alert" role="status" aria-live="polite"></div>
+    </form>
+</div>
