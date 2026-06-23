@@ -45,6 +45,9 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true },
   },
+  other: {
+    "facebook-domain-verification": "5v2snyeu665xztofez4i20mcwfhwkg",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
