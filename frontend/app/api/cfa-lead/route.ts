@@ -1,0 +1,58 @@
+import { NextRequest, NextResponse } from "next/server";
+import {
+  sendCfaLeadEmail,
+  forwardCfaLeadToSheet,
+  type CfaLeadData,
+} from "@/lib/server/cfaLeadNotify";
+
+/**
+ * POST /api/cfa-lead
+ *
+ * Dedicated endpoint for the lp-cfa landing page forms.
+ * Sends a notification email + forwards to the Google Sheet.
+ * Nothing is saved to the database.
+ *
+ * The response is held until the email + sheet forward have both settled,
+ * so the caller's loading state accurately reflects whether they're done
+ * (rather than resolving as soon as the request is queued).
+ */
+export async function POST(request: NextRequest) {
+  const body = await request.json().catch(() => null);
+
+  if (!body || !body.name || !body.phone) {
+    return NextResponse.json(
+      { message: "Missing required fields" },
+      { status: 400 },
+    );
+  }
+
+  const data: CfaLeadData = {
+    formName: String(body.formName || "cfa-landing"),
+    name: String(body.name),
+    phone: String(body.phone),
+    email: String(body.email || ""),
+    courseInterest: String(body.courseInterest || ""),
+    preferredTime: String(body.preferredTime || ""),
+    gad_source: body.gad_source,
+    gad_campaignid: body.gad_campaignid,
+    gbraid: body.gbraid,
+    gclid: body.gclid,
+  };
+
+  const [emailResult, sheetResult] = await Promise.allSettled([
+    sendCfaLeadEmail(data),
+    forwardCfaLeadToSheet(data),
+  ]);
+
+  if (emailResult.status === "rejected") {
+    console.error("[cfa-lead] Email failed:", emailResult.reason);
+  }
+  if (sheetResult.status === "rejected") {
+    console.error("[cfa-lead] Sheet failed:", sheetResult.reason);
+  }
+
+  return NextResponse.json({
+    emailSent: emailResult.status === "fulfilled",
+    sheetSynced: sheetResult.status === "fulfilled",
+  });
+}
