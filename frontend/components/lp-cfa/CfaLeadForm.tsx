@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  CheckCircle,
   ChevronDown,
   Loader2,
   Mail,
@@ -14,18 +13,17 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import api from "@/lib/axios";
 import { captureAdTrackingParams, getAdTrackingParams } from "@/lib/adTracking";
 import { generateCaptchaCode, drawCaptcha } from "@/lib/captcha";
 import { markLeadSubmitted } from "@/lib/leadThankYou";
 import { companyInfo } from "@/lib/site-content";
 import {
-  leadFormSchema,
+  cfaLeadFormSchema,
   sanitizeEmail,
   sanitizeName,
   sanitizePhone,
-  validateLeadFormField,
-  type LeadFormField,
+  validateCfaLeadFormField,
+  type CfaLeadFormField,
 } from "@/lib/leadFormValidation";
 
 const cardFoldShapes = [
@@ -58,7 +56,7 @@ function CfaCardRings() {
   );
 }
 
-interface LeadFormProps {
+interface CfaLeadFormProps {
   mode: "modal" | "inline";
   isOpen?: boolean;
   onClose?: () => void;
@@ -67,13 +65,8 @@ interface LeadFormProps {
   /** Optional rich JSX override for the title — used in modal left panel and inline heading. */
   titleNode?: React.ReactNode;
   subtitle?: string;
-  theme?: "brand" | "cfa";
-  /** Identifies which form on the site this is, for the sheet log + notification email. */
-  formName?: "banner-form" | "inquery-form" | "contact-form";
-  /** When true, also posts the lead to the frontend's own /api/lead-notify route
-   * (SMTP email + Google Sheet log) after the backend save succeeds. Opt-in so
-   * only the lp-cfa forms trigger it — everything else is unaffected. */
-  notifyOnSubmit?: boolean;
+  /** Identifies which form on the lp-cfa page this is, for the sheet log + notification email. */
+  formName: "banner-form" | "inquery-form" | "contact-form";
 }
 
 const courseOptions = [
@@ -89,47 +82,24 @@ const timeOptions = [
 ];
 
 const themeClasses = {
-  brand: {
-    heading: "font-bold text-brand-navy",
-    field:
-      "rounded-lg bg-white focus:ring-brand-navy/30 focus:border-brand-navy",
-    submit: "rounded-lg bg-brand-gold text-white hover:bg-amber-600",
-    bg: "bg-white",
-    card: "rounded-2xl p-6 shadow-soft",
-    title: "text-xl mb-1",
-    subtitle: "text-sm mb-5",
-    subtitleColor: "text-gray-500",
-    label: "text-xs mb-1.5",
-    labelColor: "text-gray-600",
-    input: "px-4 py-2.5 text-sm",
-    submitPad: "py-3 text-base",
-    formGap: "space-y-4",
-    modalPanelBg: "bg-brand-navy",
-    modalHeading: "font-bold text-white",
-    modalSubtitleColor: "text-white/70",
-    modalAccent: "text-brand-gold",
-    modalAccentBg: "bg-brand-gold/15",
-  },
-  cfa: {
-    heading: "font-jakarta font-semibold text-white",
-    field: "rounded-sm bg-white focus:ring-cfa-gold/30 focus:border-cfa-gold",
-    submit: "rounded-sm !bg-cfa-gold !text-cfa-navy hover:!bg-cfa-goldLight",
-    bg: "bg-cfa-navy",
-    card: "rounded-2xl p-5 lg:p-8 shadow-2xl border-t-4 border-cfa-gold",
-    title: "text-2xl mb-2",
-    subtitle: "text-base mb-5",
-    subtitleColor: "text-white/70",
-    label: "text-sm mb-1.5",
-    labelColor: "text-white/80",
-    input: "px-4 py-2.5 text-sm",
-    submitPad: "py-3.5 text-base",
-    formGap: "space-y-4",
-    modalPanelBg: "bg-cfa-navy",
-    modalHeading: "font-jakarta font-semibold text-white",
-    modalSubtitleColor: "text-white/70",
-    modalAccent: "text-cfa-gold",
-    modalAccentBg: "bg-cfa-gold/15",
-  },
+  heading: "font-jakarta font-semibold text-white",
+  field: "rounded-sm bg-white focus:ring-cfa-gold/30 focus:border-cfa-gold",
+  submit: "rounded-sm !bg-cfa-gold !text-cfa-navy hover:!bg-cfa-goldLight",
+  bg: "bg-cfa-navy",
+  card: "rounded-2xl p-5 lg:p-8 shadow-2xl border-t-4 border-cfa-gold",
+  title: "text-2xl mb-2",
+  subtitle: "text-base mb-5",
+  subtitleColor: "text-white/70",
+  label: "text-sm mb-1.5",
+  labelColor: "text-white/80",
+  input: "px-4 py-2.5 text-sm",
+  submitPad: "py-3.5 text-base",
+  formGap: "space-y-4",
+  modalPanelBg: "bg-cfa-navy",
+  modalHeading: "font-jakarta font-semibold text-white",
+  modalSubtitleColor: "text-white/70",
+  modalAccent: "text-cfa-gold",
+  modalAccentBg: "bg-cfa-gold/15",
 };
 
 const modalContactPoints = [
@@ -157,11 +127,10 @@ const emptyForm = {
   name: "",
   phone: "",
   email: "",
-  message: "",
   captcha: "",
 };
 
-export default function LeadForm({
+export default function CfaLeadForm({
   mode,
   isOpen,
   onClose,
@@ -169,16 +138,13 @@ export default function LeadForm({
   title = "Talk to an Advisor",
   titleNode,
   subtitle = "Share your details and our team will guide you to the right program.",
-  theme = "brand",
-  formName = "contact-form",
-  notifyOnSubmit = false,
-}: LeadFormProps) {
+  formName,
+}: CfaLeadFormProps) {
   const router = useRouter();
-  const showMessageField = theme !== "cfa";
   const t =
     mode === "modal"
       ? {
-          ...themeClasses[theme],
+          ...themeClasses,
           labelColor: "text-gray-700",
           subtitleColor: "text-gray-500",
           label: "text-sm mb-2",
@@ -186,17 +152,16 @@ export default function LeadForm({
           submitPad: "py-4 text-lg",
           formGap: "space-y-6",
         }
-      : themeClasses[theme];
+      : themeClasses;
   const [form, setForm] = useState({
     ...emptyForm,
     courseInterest: defaultCourse ?? courseOptions[0],
     preferredTime: timeOptions[0],
   });
   const [errors, setErrors] = useState<
-    Partial<Record<LeadFormField | "captcha", string>>
+    Partial<Record<CfaLeadFormField | "captcha", string>>
   >({});
   const [loading, setLoading] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
 
   const [captchaCode, setCaptchaCode] = useState("");
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -251,8 +216,8 @@ export default function LeadForm({
     [setFieldError],
   );
 
-  const validateAndSetError = (field: LeadFormField, value: string) => {
-    setFieldError(field, validateLeadFormField(field, value));
+  const validateAndSetError = (field: CfaLeadFormField, value: string) => {
+    setFieldError(field, validateCfaLeadFormField(field, value));
   };
 
   const validateCaptchaOnBlur = () => {
@@ -296,37 +261,26 @@ export default function LeadForm({
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-    validateAndSetError(name as LeadFormField, value);
-  };
-
-  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
-    setForm((prev) => ({ ...prev, message: value }));
-    if (errors.message) validateAndSetError("message", value);
+    validateAndSetError(name as CfaLeadFormField, value);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const result = leadFormSchema.safeParse({
+    const result = cfaLeadFormSchema.safeParse({
       name: form.name,
       phone: form.phone,
       email: form.email,
       courseInterest: form.courseInterest,
       preferredTime: form.preferredTime,
-      message: form.message,
     });
 
-    const nextErrors: Partial<Record<LeadFormField | "captcha", string>> = {};
+    const nextErrors: Partial<Record<CfaLeadFormField | "captcha", string>> = {};
     if (!result.success) {
       for (const issue of result.error.issues) {
-        const field = issue.path[0] as LeadFormField;
+        const field = issue.path[0] as CfaLeadFormField;
         if (!nextErrors[field]) nextErrors[field] = issue.message;
       }
-    }
-
-    if (showMessageField && !form.message.trim()) {
-      nextErrors.message = "Message is required";
     }
 
     const captchaValid = form.captcha.trim().toUpperCase() === captchaCode;
@@ -348,38 +302,29 @@ export default function LeadForm({
       const { captcha: _captcha, ...payload } = form;
       const adTracking = getAdTrackingParams();
 
-      if (notifyOnSubmit) {
-        // lp-cfa forms: post to the dedicated Next.js route (same-origin, no CORS).
-        // Email + sheet only — no DB save.
-        const res = await fetch("/api/cfa-lead", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            formName,
-            name: payload.name,
-            phone: payload.phone,
-            email: payload.email,
-            courseInterest: payload.courseInterest,
-            preferredTime: payload.preferredTime,
-            message: payload.message,
-            ...adTracking,
-          }),
-        });
+      // lp-cfa forms: post to the dedicated Next.js route (same-origin, no CORS).
+      // Email + sheet only — no DB save.
+      const res = await fetch("/api/cfa-lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          formName,
+          name: payload.name,
+          phone: payload.phone,
+          email: payload.email,
+          courseInterest: payload.courseInterest,
+          preferredTime: payload.preferredTime,
+          ...adTracking,
+        }),
+      });
 
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err?.message ?? "Submission failed");
-        }
-
-        markLeadSubmitted();
-        router.push("/lp-cfa/thank-you");
-        return;
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.message ?? "Submission failed");
       }
 
-      // All other forms: save to the Express backend as before.
-      await api.post("/leads", { ...payload, formName, ...adTracking });
-      setSubmitted(true);
-      toast.success("We'll reach out to you shortly!");
+      markLeadSubmitted();
+      router.push("/lp-cfa/thank-you");
     } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
@@ -389,30 +334,7 @@ export default function LeadForm({
 
   const fieldErrorClass = "mt-1.5 text-xs font-medium text-red-500";
 
-  const formContent = submitted ? (
-    <div className="flex flex-col items-center justify-center gap-4 py-8 text-center">
-      <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
-        <CheckCircle className="w-8 h-8 text-green-600" />
-      </div>
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">
-          Enquiry Received!
-        </h3>
-        <p className="text-gray-500 text-sm max-w-xs">
-          Our team will contact you on <strong>{form.phone}</strong> within 24
-          hours.
-        </p>
-      </div>
-      {mode === "modal" && onClose && (
-        <button
-          onClick={onClose}
-          className="mt-2 px-6 py-2 bg-brand-navy text-white rounded-lg text-sm font-medium hover:bg-brand-navyDark transition-colors"
-        >
-          Close
-        </button>
-      )}
-    </div>
-  ) : (
+  const formContent = (
     <form onSubmit={handleSubmit} noValidate className={t.formGap}>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
@@ -527,29 +449,6 @@ export default function LeadForm({
         <label
           className={`block font-semibold uppercase tracking-wide ${t.labelColor} ${t.label}`}
         >
-          Message <span className="text-red-500">*</span>
-        </label>
-        <textarea
-          name="message"
-          value={form.message}
-          onChange={handleMessageChange}
-          onBlur={() => {
-            const value = form.message.trim();
-            setForm((prev) => ({ ...prev, message: value }));
-            validateAndSetError("message", value);
-          }}
-          rows={3}
-          placeholder="Your message or questions..."
-          aria-invalid={Boolean(errors.message)}
-          className={`w-full border border-gray-200 focus:outline-none focus:ring-2 resize-none transition-colors ${t.field} ${t.input}`}
-        />
-        {errors.message && <p className={fieldErrorClass}>{errors.message}</p>}
-      </div>
-
-      <div>
-        <label
-          className={`block font-semibold uppercase tracking-wide ${t.labelColor} ${t.label}`}
-        >
           Verify You&apos;re Human <span className="text-red-500">*</span>
         </label>
         <div className="flex flex-wrap items-center gap-3">
@@ -601,7 +500,7 @@ export default function LeadForm({
   if (mode === "inline") {
     return (
       <div className={`relative overflow-hidden ${t.bg} ${t.card}`}>
-        {theme === "cfa" && <CfaCardRings />}
+        <CfaCardRings />
         <div className="relative z-10">
           <h3 className={`${t.title} ${t.heading}`}>{titleNode ?? title}</h3>
           <p className={`${t.subtitleColor} ${t.subtitle}`}>{subtitle}</p>

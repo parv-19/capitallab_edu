@@ -43,10 +43,11 @@ export const companyInfo = {
     "Have questions about which program suits you? Our team is happy to guide you through the options and help you pick the right path.",
   tagline:
     "Empowering finance professionals with globally recognized certifications.",
-  location: "Ahmedabad, Gujarat, India",
+  location: "201, Grace Business Park, Opp. Sagar Sangeeta 1, Nr. Saral Heights, Kargil Petrol Pump Road, Sola, Ahmedabad - 380060",
+  mapUrl: "https://maps.app.goo.gl/AxJ5WBfUasPNfb9a6",
   phoneDisplay: "+91 63552 58396",
   phoneHref: "tel:+916355258396",
-  email: "info@capitallabeduation.com",
+  email: "info@capitallabedu.com",
   officeHours: "Monday - Sunday, 10:00 AM - 7:30 PM",
   whatsappHref: "https://wa.me/916355258396",
 };
@@ -225,6 +226,19 @@ export const testimonials: (Testimonial & { courseName: string })[] = [
     status: "approved",
     courseId: "course-cfa",
     courseName: "CFA Candidate - Capital Lab Education",
+    createdAt: new Date().toISOString(),
+  },
+  {
+    _id: "testimonial-4",
+    studentId: "",
+    studentName: "Chhaya Shukla",
+    rating: 5,
+    review:
+      "Understanding finance took a downturn for me, but having learnt the concepts from basics by Harsh Sir brought huge confidence.",
+    featured: true,
+    status: "approved",
+    courseId: "course-cfa",
+    courseName: "CFA Level 1 Student - Capital Lab Education",
     createdAt: new Date().toISOString(),
   },
 ];
