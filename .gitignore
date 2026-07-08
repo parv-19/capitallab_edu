@@ -4,6 +4,8 @@ dist
 .claude
 .env
 .env.local
+.env.locale
+.env*.local
 coverage
 uploads
 npm-debug.log*
@@ -15,3 +17,4 @@ pnpm-lock.yaml
 package-lock.json
 frontend/.next
 backend/dist
+*.tsbuildinfo
