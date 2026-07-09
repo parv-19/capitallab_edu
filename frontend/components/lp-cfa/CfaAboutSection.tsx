@@ -145,7 +145,7 @@ export default function CfaAboutSection() {
 
           <div className="relative h-full min-h-[320px] overflow-hidden rounded-2xl shadow-2xl">
             <Image
-              src="/lp-cfa/about-image.jpg"
+              src="/lp-cfa/about-image.png"
               alt="Capital Lab Education finance coaching"
               fill
               className="object-cover"
