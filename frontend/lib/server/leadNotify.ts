@@ -7,6 +7,8 @@ export interface LeadNotifyData {
   email?: string;
   subject?: string;
   message?: string;
+  courseInterest?: string;
+  preferredTime?: string;
   gad_source?: string;
   gad_campaignid?: string;
   gbraid?: string;
@@ -32,9 +34,17 @@ const transporter = nodemailer.createTransport({
 export async function sendLeadEmail(data: LeadNotifyData) {
   const to = process.env.LEAD_TO?.trim();
 
-  if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS || !to) {
-    console.warn("[lead-notify] SMTP is not configured; skipping notification email.");
-    return;
+  const missingConfig = [
+    !process.env.SMTP_HOST ? "SMTP_HOST" : null,
+    !process.env.SMTP_USER ? "SMTP_USER" : null,
+    !process.env.SMTP_PASS ? "SMTP_PASS" : null,
+    !to ? "LEAD_TO" : null,
+  ].filter(Boolean);
+
+  if (missingConfig.length > 0) {
+    throw new Error(
+      `[lead-notify] Missing SMTP configuration: ${missingConfig.join(", ")}`,
+    );
   }
 
   const fromAddress = process.env.MAIL_FROM_ADDRESS?.trim() || process.env.SMTP_USER;
@@ -47,6 +57,8 @@ export async function sendLeadEmail(data: LeadNotifyData) {
     ["Name", data.name],
     ["Phone", data.phone],
     ["Email", data.email || "-"],
+    ["Course Interest", data.courseInterest || "-"],
+    ["Preferred Time", data.preferredTime || "-"],
     ["Subject", data.subject || "-"],
     ["Message", data.message || "-"],
     ["Submitted At", new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })],
@@ -90,6 +102,8 @@ export async function forwardLeadToSheet(data: LeadNotifyData) {
     email: data.email ?? "",
     message: data.message ?? "",
     number: data.phone,
+    course: data.courseInterest ?? "",
+    preferred_time: data.preferredTime ?? "",
     subject: data.subject ?? "",
     gad_source: data.gad_source ?? "",
     gad_campaignid: data.gad_campaignid ?? "",

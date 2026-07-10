@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import api from "@/lib/axios";
+import { notifyLeadSubmission } from "@/lib/leadNotification";
 import { companyInfo } from "@/lib/site-content";
 import type { Testimonial } from "@/types";
 import FloatingReviewWidget from "@/components/testimonials/FloatingReviewWidget";
@@ -530,6 +531,18 @@ export default function ApprovedLandingPage({ styles, markup, testimonials = fal
 
       try {
         await api.post("/leads", payload);
+        await notifyLeadSubmission({
+          formName: closeAfterSubmit ? "approved-landing-popup" : "approved-landing-inline",
+          name: payload.name,
+          phone: payload.phone,
+          email: payload.email,
+          courseInterest: payload.courseInterest,
+          preferredTime: payload.preferredTime,
+          message: payload.message,
+          skipSheet: true,
+        }).catch((error) => {
+          console.error("[lead-notify] Approved landing notification failed", error);
+        });
         toast.success("Thank you! We'll reach out to you shortly.");
         inputs.forEach((field) => {
           if (field.tagName === "SELECT") {

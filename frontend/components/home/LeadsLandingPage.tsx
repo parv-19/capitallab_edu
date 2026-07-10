@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import api from "@/lib/axios";
+import { notifyLeadSubmission } from "@/lib/leadNotification";
 import type { Testimonial } from "@/types";
 import LeadsLandingNavbar from "@/components/home/LeadsLandingNavbar";
 
@@ -253,6 +254,7 @@ export default function LeadsLandingPage({ styles, markup, testimonials = [] }: 
           phone,
           email,
           courseInterest: prog || "General Enquiry",
+          preferredTime: avail,
           message: `City: ${city}, Background: ${bg || "-"}, Availability: ${avail}`,
         };
 
@@ -264,6 +266,19 @@ export default function LeadsLandingPage({ styles, markup, testimonials = [] }: 
             body: JSON.stringify(sheetPayload),
           }),
           api.post("/leads", backendPayload).catch(() => null),
+          notifyLeadSubmission({
+            formName: "leads-landing",
+            name,
+            phone,
+            email,
+            courseInterest: prog || "General Enquiry",
+            preferredTime: avail,
+            message: backendPayload.message,
+            skipSheet: true,
+          }).catch((error) => {
+            console.error("[lead-notify] Leads landing notification failed", error);
+            return null;
+          }),
         ]);
 
         router.push("/thank-you");

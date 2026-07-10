@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import api from "@/lib/axios";
+import { notifyLeadSubmission } from "@/lib/leadNotification";
 
 const PAYMENT_URL = "https://payments.cashfree.com/forms/finance-foundation-workshop";
 
@@ -257,14 +258,29 @@ export default function FinanceWorkshopPage({ markup, styles }: FinanceWorkshopP
       showFormAlert(form, "Saving your details and redirecting...", "success");
 
       try {
-        await api.post("/leads", {
-          name,
-          email,
-          phone,
-          courseInterest: formName || "Capital Lab Finance Workshop",
-          preferredTime: mode,
-          message: stage,
-        });
+        await Promise.allSettled([
+          api.post("/leads", {
+            name,
+            email,
+            phone,
+            courseInterest: formName || "Capital Lab Finance Workshop",
+            preferredTime: mode,
+            message: stage,
+          }),
+          notifyLeadSubmission({
+            formName: formName || "capital-lab-finance-workshop",
+            name,
+            phone,
+            email,
+            courseInterest: formName || "Capital Lab Finance Workshop",
+            preferredTime: mode,
+            message: stage,
+            skipSheet: true,
+          }).catch((error) => {
+            console.error("[lead-notify] Workshop notification failed", error);
+            return null;
+          }),
+        ]);
       } catch {
         // Keep the conversion path unblocked even if the lead API has a temporary failure.
       } finally {

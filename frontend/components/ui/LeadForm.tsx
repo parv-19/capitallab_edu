@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import api from "@/lib/axios";
 import { captureAdTrackingParams, getAdTrackingParams } from "@/lib/adTracking";
 import { generateCaptchaCode, drawCaptcha } from "@/lib/captcha";
+import { notifyLeadSubmission } from "@/lib/leadNotification";
 import { markLeadSubmitted } from "@/lib/leadThankYou";
 import { companyInfo } from "@/lib/site-content";
 import {
@@ -378,6 +379,22 @@ export default function LeadForm({
 
       // All other forms: save to the Express backend as before.
       await api.post("/leads", { ...payload, formName, ...adTracking });
+      await notifyLeadSubmission({
+        formName,
+        name: payload.name,
+        phone: payload.phone,
+        email: payload.email,
+        courseInterest: payload.courseInterest,
+        preferredTime: payload.preferredTime,
+        message: payload.message,
+        gad_source: adTracking.gad_source,
+        gad_campaignid: adTracking.gad_campaignid,
+        gbraid: adTracking.gbraid,
+        gclid: adTracking.gclid,
+        skipSheet: true,
+      }).catch((error) => {
+        console.error("[lead-notify] Course lead notification failed", error);
+      });
       setSubmitted(true);
       toast.success("We'll reach out to you shortly!");
     } catch {
