@@ -58,7 +58,7 @@ export default function CfaHeroBanner() {
         <div className="lg:hidden">
           <div className="relative h-screen w-full overflow-hidden">
             <Image
-              src="/lp-cfa/hero-banner.jpg"
+              src="/lp-cfa/hero-banner.png"
               alt=""
               aria-hidden
               fill
@@ -82,7 +82,7 @@ export default function CfaHeroBanner() {
         {/* Desktop layout: full-bleed background image, text + form side by side */}
         <div className="hidden lg:contents">
           <Image
-            src="/lp-cfa/hero-banner.jpg"
+            src="/lp-cfa/hero-banner.png"
             alt=""
             aria-hidden
             fill

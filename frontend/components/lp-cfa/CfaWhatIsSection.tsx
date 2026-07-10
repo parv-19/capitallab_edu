@@ -96,7 +96,7 @@ export default function CfaWhatIsSection() {
         >
           <div className="absolute inset-0 overflow-hidden rounded-3xl">
             <motion.img
-              src="/lp-cfa/whatiscfa-image.jpg"
+              src="/lp-cfa/whatiscfa-image.png"
               alt="Financial market candlestick chart analysis"
               className="absolute inset-0 h-full w-full scale-x-[-1] object-cover"
               initial={{ scale: 1.08 }}

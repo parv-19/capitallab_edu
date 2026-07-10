@@ -27,7 +27,7 @@ const features: Feature[] = [
     title: "Structured 9-Month Roadmap",
     description:
       "A clear month-by-month path from fundamentals to full syllabus coverage, so you always know exactly what comes next.",
-    image: "/lp-cfa/why-roadmap.jpg",
+    image: "/lp-cfa/why-roadmap.png",
   },
   {
     icon: UserCheck,
@@ -41,28 +41,28 @@ const features: Feature[] = [
     title: "LMS Support",
     description:
       "Recorded lectures, quizzes, and progress tracking so you can revise anytime, anywhere, at your own pace.",
-    image: "/lp-cfa/why-lms.jpg",
+    image: "/lp-cfa/why-lms.png",
   },
   {
     icon: Users2,
     title: "Offline Classroom",
     description:
       "In-person sessions that enable real peer learning and immediate doubt resolution, not isolated study.",
-    image: "/lp-cfa/why-classroom.jpg",
+    image: "/lp-cfa/why-classroom.png",
   },
   {
     icon: ClipboardCheck,
     title: "Full Mock Tests",
     description:
       "Complete mock exams that build confidence and simulate real exam-day conditions before the big day.",
-    image: "/lp-cfa/why-mocktests.jpg",
+    image: "/lp-cfa/why-mocktests.png",
   },
   {
     icon: Award,
     title: "Career Support",
     description:
       "Excel training, interview preparation, and placement guidance to help you actually launch your career.",
-    image: "/lp-cfa/why-career.jpg",
+    image: "/lp-cfa/why-career.png",
   },
 ];
 
