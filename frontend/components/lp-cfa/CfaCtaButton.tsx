@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { useCfaLeadModal } from "@/contexts/CfaLeadModalContext";
 
-const MotionLink = motion(Link);
+const MotionLink = motion.create(Link);
 
 export type CfaCtaVariant = "solid" | "outline" | "ghost";
 export type CfaCtaSize = "sm" | "md" | "lg";

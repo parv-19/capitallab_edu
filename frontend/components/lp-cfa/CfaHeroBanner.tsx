@@ -62,7 +62,7 @@ export default function CfaHeroBanner() {
               alt=""
               aria-hidden
               fill
-              priority
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
             <div className="absolute inset-0 bg-cfa-navy/70" />
@@ -81,14 +81,17 @@ export default function CfaHeroBanner() {
 
         {/* Desktop layout: full-bleed background image, text + form side by side */}
         <div className="hidden lg:contents">
-          <Image
-            src="/lp-cfa/hero-banner.png"
-            alt=""
-            aria-hidden
-            fill
-            priority
-            className="object-cover"
-          />
+          <div className="absolute inset-0">
+            <Image
+              src="/lp-cfa/hero-banner.png"
+              alt=""
+              aria-hidden
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover"
+            />
+          </div>
           <div className="absolute inset-0 bg-cfa-navy/85" />
 
           <div className="container relative z-10 grid gap-y-14 lg:grid-cols-2 lg:items-center lg:gap-x-16">

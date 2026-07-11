@@ -50,6 +50,7 @@ export default function CfaFooter() {
                 alt="Capital Lab Education"
                 width={200}
                 height={200}
+                priority
                 className="h-36 w-auto rounded-sm bg-white p-1.5"
               />
             </div>

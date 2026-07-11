@@ -51,6 +51,7 @@ export default function CfaThankYouClient() {
         alt={companyInfo.name}
         width={200}
         height={200}
+        priority
         className="h-16 w-auto rounded-sm bg-white p-1.5 shadow-soft"
       />
 
@@ -62,8 +63,8 @@ export default function CfaThankYouClient() {
         Thank You!
       </h1>
       <p className="mt-3 max-w-md text-base text-gray-600 sm:text-lg">
-        Your enquiry has been received. Our mentor will call you back within
-        24 hours.
+        Your enquiry has been received. Our mentor will call you back within 24
+        hours.
       </p>
 
       <div className="mt-8 flex w-full max-w-md flex-col gap-4 sm:w-auto sm:flex-row">

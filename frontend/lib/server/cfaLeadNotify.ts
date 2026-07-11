@@ -112,16 +112,17 @@ const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: smtpPort,
   secure: smtpPort === 465,
-  pool: true,
-  maxConnections: 3,
-  maxMessages: 100,
+  requireTLS: smtpPort !== 465,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
-  connectionTimeout: 6_000,
-  greetingTimeout: 6_000,
-  socketTimeout: 8_000,
+  tls: {
+    rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== "false",
+  },
+  connectionTimeout: 10_000,
+  greetingTimeout: 10_000,
+  socketTimeout: 15_000,
 });
 
 export async function sendCfaLeadEmail(data: CfaLeadData): Promise<void> {

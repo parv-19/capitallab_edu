@@ -308,20 +308,24 @@ export default function CfaTestimonialsSection() {
               className="relative aspect-video lg:aspect-auto lg:flex-1 lg:min-h-0"
             >
               <AnimatePresence mode="wait">
-                <motion.video
+                <motion.div
                   key={activeId}
-                  ref={videoRef}
-                  src={active.video}
-                  className="h-full w-full object-cover"
-                  playsInline
-                  preload="metadata"
-                  onTimeUpdate={handleTimeUpdate}
-                  onEnded={() => setIsPlaying(false)}
+                  className="h-full w-full"
                   initial={{ opacity: 0, scale: 1.04 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.97 }}
                   transition={{ duration: 0.45, ease: "easeOut" }}
-                />
+                >
+                  <video
+                    ref={videoRef}
+                    src={active.video}
+                    className="h-full w-full object-cover"
+                    playsInline
+                    preload="metadata"
+                    onTimeUpdate={handleTimeUpdate}
+                    onEnded={() => setIsPlaying(false)}
+                  />
+                </motion.div>
               </AnimatePresence>
 
               {/* ── Paused overlay ── */}

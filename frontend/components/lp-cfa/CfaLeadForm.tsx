@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronDown,
@@ -559,9 +560,12 @@ export default function CfaLeadForm({
               <div
                 className={`flex shrink-0 flex-col items-center gap-7 px-6 py-12 text-center lg:w-[40%] lg:justify-center lg:px-10 ${t.modalPanelBg}`}
               >
-                <img
+                <Image
                   src="/api/site-assets/logo"
                   alt={companyInfo.name}
+                  width={200}
+                  height={200}
+                  priority
                   className="h-24 w-auto rounded-sm bg-white p-1.5 sm:h-28"
                 />
                 <div>
