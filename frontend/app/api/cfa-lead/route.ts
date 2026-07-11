@@ -56,8 +56,19 @@ export async function POST(request: NextRequest) {
   if (emailError) console.error("[cfa-lead] Email failed:", emailError);
   if (sheetError) console.error("[cfa-lead] Sheet failed:", sheetError);
 
+  if (emailResult.status === "rejected") {
+    return NextResponse.json(
+      {
+        message: "Notification email failed",
+        emailSent: false,
+        sheetSynced: sheetResult.status === "fulfilled",
+      },
+      { status: 502 },
+    );
+  }
+
   return NextResponse.json({
-    emailSent: emailResult.status === "fulfilled",
+    emailSent: true,
     sheetSynced: sheetResult.status === "fulfilled",
     ...(process.env.NODE_ENV !== "production" && {
       emailError,

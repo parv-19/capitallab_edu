@@ -6,6 +6,8 @@ dist
 .env.local
 .env.locale
 .env*.local
+env.download
+vercel-live-import.env
 coverage
 uploads
 npm-debug.log*

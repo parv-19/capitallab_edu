@@ -18,26 +18,42 @@ export async function POST(request: NextRequest) {
     email: body.email,
     subject: body.subject,
     message: body.message,
+    courseInterest: body.courseInterest,
+    preferredTime: body.preferredTime,
     gad_source: body.gad_source,
     gad_campaignid: body.gad_campaignid,
     gbraid: body.gbraid,
     gclid: body.gclid,
   };
+  const skipSheet = body.skipSheet === true;
 
   const [emailResult, sheetResult] = await Promise.allSettled([
     sendLeadEmail(data),
-    forwardLeadToSheet(data),
+    skipSheet ? Promise.resolve() : forwardLeadToSheet(data),
   ]);
 
   if (emailResult.status === "rejected") {
     console.error("[lead-notify] Email failed", emailResult.reason);
   }
-  if (sheetResult.status === "rejected") {
+  if (!skipSheet && sheetResult.status === "rejected") {
     console.error("[lead-notify] Sheet forward failed", sheetResult.reason);
   }
 
+  if (emailResult.status === "rejected") {
+    return NextResponse.json(
+      {
+        message: "Notification email failed",
+        emailSent: false,
+        sheetSynced: !skipSheet && sheetResult.status === "fulfilled",
+        sheetSkipped: skipSheet,
+      },
+      { status: 502 },
+    );
+  }
+
   return NextResponse.json({
-    emailSent: emailResult.status === "fulfilled",
-    sheetSynced: sheetResult.status === "fulfilled",
+    emailSent: true,
+    sheetSynced: !skipSheet && sheetResult.status === "fulfilled",
+    sheetSkipped: skipSheet,
   });
 }

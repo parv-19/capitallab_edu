@@ -7,7 +7,6 @@ export interface CfaLeadData {
   email: string;
   courseInterest: string;
   preferredTime: string;
-  // ad-tracking (optional)
   gad_source?: string;
   gad_campaignid?: string;
   gbraid?: string;
@@ -29,14 +28,13 @@ function buildHtml(data: CfaLeadData): string {
       timeStyle: "medium",
     }) + " IST";
 
-  // Every form field, with Form Name first as requested
   const rows: Array<[string, string]> = [
     ["Form Name", data.formName],
     ["Full Name", data.name],
     ["Phone", data.phone],
-    ["Email", data.email || "—"],
-    ["Course Interest", data.courseInterest || "—"],
-    ["Preferred Time", data.preferredTime || "—"],
+    ["Email", data.email || "-"],
+    ["Course Interest", data.courseInterest || "-"],
+    ["Preferred Time", data.preferredTime || "-"],
     ["Submitted At", submittedAt],
   ];
 
@@ -73,8 +71,6 @@ function buildHtml(data: CfaLeadData): string {
     <tr>
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
-
-          <!-- Header -->
           <tr>
             <td style="background:#1a2744;padding:24px 32px;text-align:center;">
               <p style="margin:0;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#c9a84c;font-weight:700;">
@@ -85,21 +81,16 @@ function buildHtml(data: CfaLeadData): string {
               </h1>
             </td>
           </tr>
-
-          <!-- Body -->
           <tr>
             <td style="padding:28px 32px;">
               <p style="margin:0 0 20px;font-size:14px;color:#4b5563;">
                 A new enquiry was submitted via the Capital Lab CFA landing page. All details are below.
               </p>
-
               <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:13px;">
                 ${rowsHtml}
               </table>
             </td>
           </tr>
-
-          <!-- Footer -->
           <tr>
             <td style="background:#f5f7fa;padding:16px 32px;border-top:1px solid #e5e7eb;text-align:center;">
               <p style="margin:0;font-size:11px;color:#9ca3af;">
@@ -107,7 +98,6 @@ function buildHtml(data: CfaLeadData): string {
               </p>
             </td>
           </tr>
-
         </table>
       </td>
     </tr>
@@ -116,7 +106,6 @@ function buildHtml(data: CfaLeadData): string {
 </html>`;
 }
 
-// ── Nodemailer transporter (connection pooling enabled) ───────────────────────
 const smtpPort = Number(process.env.SMTP_PORT ?? 587);
 
 const transporter = nodemailer.createTransport({
@@ -138,15 +127,17 @@ const transporter = nodemailer.createTransport({
 
 export async function sendCfaLeadEmail(data: CfaLeadData): Promise<void> {
   const to = process.env.LEAD_TO?.trim();
+  const missingConfig = [
+    !process.env.SMTP_HOST ? "SMTP_HOST" : null,
+    !process.env.SMTP_USER ? "SMTP_USER" : null,
+    !process.env.SMTP_PASS ? "SMTP_PASS" : null,
+    !to ? "LEAD_TO" : null,
+  ].filter(Boolean);
 
-  if (
-    !process.env.SMTP_HOST ||
-    !process.env.SMTP_USER ||
-    !process.env.SMTP_PASS ||
-    !to
-  ) {
-    console.warn("[cfa-lead] SMTP not configured — skipping email.");
-    return;
+  if (missingConfig.length > 0) {
+    throw new Error(
+      `[cfa-lead] Missing SMTP configuration: ${missingConfig.join(", ")}`,
+    );
   }
 
   const fromAddress =
@@ -164,7 +155,6 @@ export async function sendCfaLeadEmail(data: CfaLeadData): Promise<void> {
   });
 }
 
-// ── Google Sheet forward (form-urlencoded, same as leadNotify) ─────────────────
 export async function forwardCfaLeadToSheet(data: CfaLeadData): Promise<void> {
   const webhookUrl = process.env.SHEET_WEBHOOK_URL?.trim();
   if (!webhookUrl) return;
@@ -194,7 +184,7 @@ export async function forwardCfaLeadToSheet(data: CfaLeadData): Promise<void> {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: params.toString(),
-    signal: AbortSignal.timeout(8_000), // don't wait more than 8s for GAS
+    signal: AbortSignal.timeout(8_000),
   });
 
   if (!response.ok) {
