@@ -80,11 +80,12 @@ export default function CfaNavbar() {
   }, [menuOpen]);
 
   return (
-    <header
-      className={`fixed left-0 right-0 top-0 z-50 border-b border-cfa-gold/25 bg-cfa-navy transition-shadow duration-300 ${
-        scrolled ? "shadow-lg shadow-black/20" : ""
-      }`}
-    >
+    <header>
+      <div
+        className={`fixed left-0 right-0 top-0 z-50 border-b border-cfa-gold/25 bg-cfa-navy transition-shadow duration-300 ${
+          scrolled ? "shadow-lg shadow-black/20" : ""
+        }`}
+      >
       <div className="container flex h-24 items-center justify-between">
         <Link href="/lp-cfa" className="flex items-center gap-3">
           <Image
@@ -184,6 +185,7 @@ export default function CfaNavbar() {
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
     </header>
   );
 }

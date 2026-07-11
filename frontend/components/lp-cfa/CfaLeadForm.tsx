@@ -565,6 +565,7 @@ export default function CfaLeadForm({
                   alt={companyInfo.name}
                   width={200}
                   height={200}
+                  priority
                   className="h-24 w-auto rounded-sm bg-white p-1.5 sm:h-28"
                 />
                 <div>

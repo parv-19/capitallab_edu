@@ -148,6 +148,7 @@ export default function CfaAboutSection() {
               src="/lp-cfa/about-image.png"
               alt="Capital Lab Education finance coaching"
               fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
               className="object-cover"
             />
           </div>
