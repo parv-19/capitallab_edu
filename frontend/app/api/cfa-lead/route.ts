@@ -44,15 +44,24 @@ export async function POST(request: NextRequest) {
     forwardCfaLeadToSheet(data),
   ]);
 
-  if (emailResult.status === "rejected") {
-    console.error("[cfa-lead] Email failed:", emailResult.reason);
-  }
-  if (sheetResult.status === "rejected") {
-    console.error("[cfa-lead] Sheet failed:", sheetResult.reason);
-  }
+  const emailError =
+    emailResult.status === "rejected"
+      ? String(emailResult.reason?.message ?? emailResult.reason)
+      : null;
+  const sheetError =
+    sheetResult.status === "rejected"
+      ? String(sheetResult.reason?.message ?? sheetResult.reason)
+      : null;
+
+  if (emailError) console.error("[cfa-lead] Email failed:", emailError);
+  if (sheetError) console.error("[cfa-lead] Sheet failed:", sheetError);
 
   return NextResponse.json({
     emailSent: emailResult.status === "fulfilled",
     sheetSynced: sheetResult.status === "fulfilled",
+    ...(process.env.NODE_ENV !== "production" && {
+      emailError,
+      sheetError,
+    }),
   });
 }
