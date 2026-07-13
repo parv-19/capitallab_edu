@@ -22,19 +22,15 @@ function escapeHtml(value: string) {
     .replace(/>/g, "&gt;");
 }
 
-const port = Number(process.env.SMTP_PORT ?? 2525);
+const port = Number(process.env.SMTP_PORT ?? 587);
 
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port,
-  secure: false,
-  requireTLS: true,
+  secure: port === 465,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
-  },
-  tls: {
-    rejectUnauthorized: process.env.SMTP_TLS_REJECT_UNAUTHORIZED !== "false",
   },
 });
 
