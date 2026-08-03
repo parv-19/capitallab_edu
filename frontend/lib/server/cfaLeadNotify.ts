@@ -46,16 +46,17 @@ function buildHtml(data: CfaLeadData): string {
           padding: 10px 14px;
           border: 1px solid #dde2ec;
           font-weight: 700;
-          white-space: nowrap;
           color: ${i === 0 ? "#c9a84c" : "#374151"};
           font-size: 13px;
-          width: 160px;
+          width: 38%;
+          word-break: break-word;
         ">${esc(label)}</td>
         <td style="
           padding: 10px 14px;
           border: 1px solid #dde2ec;
           color: ${i === 0 ? "#ffffff" : "#111827"};
           font-size: 13px;
+          width: 62%;
           word-break: break-word;
         ">${esc(value)}</td>
       </tr>`,
@@ -65,14 +66,25 @@ function buildHtml(data: CfaLeadData): string {
   return `
 <!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /></head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    @media only screen and (max-width: 600px) {
+      .email-outer-pad { padding: 12px 6px !important; }
+      .email-header-pad { padding: 16px 14px !important; }
+      .email-content-pad { padding: 16px 12px !important; }
+      .email-footer-pad { padding: 12px 12px !important; }
+    }
+  </style>
+</head>
 <body style="margin:0;padding:0;background:#f0f2f5;font-family:Arial,Helvetica,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f2f5;padding:32px 16px;">
+  <table width="100%" cellpadding="0" cellspacing="0" class="email-outer-pad" style="background:#f0f2f5;padding:32px 16px;">
     <tr>
       <td align="center">
         <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
           <tr>
-            <td style="background:#1a2744;padding:24px 32px;text-align:center;">
+            <td class="email-header-pad" style="background:#1a2744;padding:24px 32px;text-align:center;">
               <p style="margin:0;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#c9a84c;font-weight:700;">
                 Capital Lab Education
               </p>
@@ -82,7 +94,7 @@ function buildHtml(data: CfaLeadData): string {
             </td>
           </tr>
           <tr>
-            <td style="padding:28px 32px;">
+            <td class="email-content-pad" style="padding:28px 32px;">
               <p style="margin:0 0 20px;font-size:14px;color:#4b5563;">
                 A new enquiry was submitted via the Capital Lab CFA landing page. All details are below.
               </p>
@@ -92,7 +104,7 @@ function buildHtml(data: CfaLeadData): string {
             </td>
           </tr>
           <tr>
-            <td style="background:#f5f7fa;padding:16px 32px;border-top:1px solid #e5e7eb;text-align:center;">
+            <td class="email-footer-pad" style="background:#f5f7fa;padding:16px 32px;border-top:1px solid #e5e7eb;text-align:center;">
               <p style="margin:0;font-size:11px;color:#9ca3af;">
                 This email was sent automatically by the Capital Lab website. Do not reply.
               </p>

@@ -16,7 +16,10 @@ export interface LeadNotifyData {
 }
 
 function escapeHtml(value: string) {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 const port = Number(process.env.SMTP_PORT ?? 587);
@@ -47,7 +50,8 @@ export async function sendLeadEmail(data: LeadNotifyData) {
     );
   }
 
-  const fromAddress = process.env.MAIL_FROM_ADDRESS?.trim() || process.env.SMTP_USER;
+  const fromAddress =
+    process.env.MAIL_FROM_ADDRESS?.trim() || process.env.SMTP_USER;
   const fromName = process.env.MAIL_FROM_NAME?.trim() || "Website Enquiry";
   const subject = process.env.MAIL_SUBJECT?.trim() || "New Enquiry";
   const bcc = process.env.LEAD_BCC?.trim() || undefined;
@@ -61,7 +65,10 @@ export async function sendLeadEmail(data: LeadNotifyData) {
     ["Preferred Time", data.preferredTime || "-"],
     ["Subject", data.subject || "-"],
     ["Message", data.message || "-"],
-    ["Submitted At", new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })],
+    [
+      "Submitted At",
+      new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }),
+    ],
   ];
 
   const html = `
@@ -126,7 +133,11 @@ export async function forwardLeadToSheet(data: LeadNotifyData) {
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => "");
-      console.error("[lead-notify] Sheet webhook failed", response.status, errorText);
+      console.error(
+        "[lead-notify] Sheet webhook failed",
+        response.status,
+        errorText,
+      );
     }
   } catch (error) {
     console.error("[lead-notify] Sheet webhook failed", error);
